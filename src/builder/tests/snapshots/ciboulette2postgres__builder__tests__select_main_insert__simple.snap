@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/select_main_insert.rs
+expression: res
+
+---
+(
+    "SELECT \"public\".\"mysimpletable\".\"my_id\" AS \"id\", ROW_NUMBER() OVER () as \"rn\" FROM\"public\".\"mysimpletable\"",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)

@@ -23,14 +23,37 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     param_ident.push(n);
                     param_value.push(v);
                 }
-                self.write_list(param_ident, true, Self::insert_ident)?;
+                self.write_list(
+                    param_ident.into_iter().map(|x| (x, None)),
+                    &table,
+                    true,
+                    Self::insert_ident,
+                )?;
                 self.buf.write(b" VALUES ")?;
-                self.write_list(param_value, true, Self::insert_params)?;
+                self.write_list(param_value, &table, true, Self::insert_params)?;
             }
         };
         if returning {
             self.buf.write(b" RETURNING *")?;
         }
+        Ok(())
+    }
+    pub fn gen_rel_values(
+        &mut self,
+        ids: Vec<value::Ciboulette2SqlValue<'a>>,
+        type_: &str,
+    ) -> Result<(), Ciboulette2SqlError> {
+        self.write_list(
+            ids,
+            &CibouletteTableSettings::default(),
+            true,
+            |ref mut se, curr, t| {
+                se.insert_params(curr, t)?;
+                se.buf.write(b"::")?;
+                se.buf.write(type_.as_bytes())?;
+                Ok(())
+            },
+        )?;
         Ok(())
     }
 }

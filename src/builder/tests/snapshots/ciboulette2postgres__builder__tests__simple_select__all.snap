@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/simple_select.rs
+expression: res
+
+---
+(
+    "SELECT * FROM \"public\".\"cte_main_insert\"",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)

@@ -4,7 +4,7 @@ expression: res
 
 ---
 (
-    "INSERT INTO \"public\".\"mysimpletable\" (\"first-name\", \"last-name\") VALUES ($0, $1)",
+    "INSERT INTO \"public\".\"mysimpletable\" (\"public\".\"mysimpletable\".\"first-name\", \"public\".\"mysimpletable\".\"last-name\") VALUES ($0, $1)",
     Ciboulette2SqlArguments {
         inner: [
             Text(

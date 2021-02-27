@@ -4,10 +4,10 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::new();
     let table = CibouletteTableSettings::new(
-        "id".to_string(),
-        "uuid".to_string(),
-        "public".to_string(),
-        "mysimpletable".to_string(),
+        Cow::Borrowed("id"),
+        Cow::Borrowed("uuid"),
+        Some(Cow::Borrowed("public")),
+        Cow::Borrowed("mysimpletable"),
     );
     let params: Vec<(&str, Ciboulette2SqlValue<'_>)> = vec![
         (
@@ -29,10 +29,10 @@ fn simple() {
 fn no_returning() {
     let mut builder = Ciboulette2PostgresBuilder::new();
     let table = CibouletteTableSettings::new(
-        "id".to_string(),
-        "uuid".to_string(),
-        "public".to_string(),
-        "mysimpletable".to_string(),
+        Cow::Borrowed("id"),
+        Cow::Borrowed("uuid"),
+        Some(Cow::Borrowed("public")),
+        Cow::Borrowed("mysimpletable"),
     );
     let params: Vec<(&str, Ciboulette2SqlValue<'_>)> = vec![
         (
@@ -54,10 +54,10 @@ fn no_returning() {
 fn no_params() {
     let mut builder = Ciboulette2PostgresBuilder::new();
     let table = CibouletteTableSettings::new(
-        "id".to_string(),
-        "uuid".to_string(),
-        "public".to_string(),
-        "mysimpletable".to_string(),
+        Cow::Borrowed("id"),
+        Cow::Borrowed("uuid"),
+        Some(Cow::Borrowed("public")),
+        Cow::Borrowed("mysimpletable"),
     );
     builder.gen_insert_normal(&table, vec![], true).unwrap();
     let res = builder.build().unwrap();

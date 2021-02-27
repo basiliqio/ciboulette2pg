@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/simple_select.rs
+expression: res
+
+---
+(
+    "SELECT \"public\".\"cte_main_insert\".\"first-name\" AS \"fn\", \"public\".\"cte_main_insert\".\"last-name\" AS \"ln\" FROM \"public\".\"cte_main_insert\"",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)

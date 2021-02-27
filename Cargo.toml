@@ -17,9 +17,10 @@ sqlx = { version = "0.5", features = [ "postgres", "runtime-tokio-rustls", "json
 buf_redux = { version = "0.8", features = [ "slice-deque" ] }
 getset = "0.1"
 numtoa = "0.2.3"
+lazy_static = "1.4"
 
 [dev-dependencies]
-ciboulette_test_helper = { path = "../ciboulette/ciboulette_test_helper" }
+ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git", package = "ciboulette_test_helper" }
 url = "2.2.0"
 tokio = { version = "1", features = ["full"] }
 insta = "1.7"

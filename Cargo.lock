@@ -166,15 +166,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "ciboulette"
+version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#97b0baa34b2e8589b10fecb6cc4d29c32084193f"
+dependencies = [
+ "getset",
+ "lazy_static",
+ "messy_json",
+ "petgraph",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "thiserror",
+ "url",
+]
+
+[[package]]
 name = "ciboulette2postgres"
 version = "0.1.0"
 dependencies = [
  "bigdecimal",
  "buf_redux",
- "ciboulette",
+ "ciboulette 0.1.0",
  "ciboulette_test_helper",
  "getset",
  "insta",
+ "lazy_static",
  "messy_json",
  "numtoa",
  "petgraph",
@@ -188,8 +205,9 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#97b0baa34b2e8589b10fecb6cc4d29c32084193f"
 dependencies = [
- "ciboulette",
+ "ciboulette 0.1.0 (git+https://gitlab.com/basiliq/ciboulette.git)",
  "messy_json",
 ]
 

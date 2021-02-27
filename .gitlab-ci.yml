@@ -18,10 +18,10 @@ build_and_test_rust:
     - cargo build --all-targets
     - cargo test
   after_script:
-    - for file in $(find target/debug/deps -executable \( -name "$(basename ciboulette)-*" -o -name "mod-*" \) );
+    - for file in $(find target/debug/deps -executable \( -name "$(basename $NAME)-*" -o -name "mod-*" \) );
       do
         echo "Running $file";
         mkdir -p "target/cov/$(basename $file)";
-        kcov "target/cov/$(basename $file)" --exclude-pattern="/.cargo,/usr/lib,$PWD/src/tests,$PWD/src/body/tests,$PWD/src/query/tests,$PWD/src/path/tests,$PWD/tests,$PWD/ciboulette_test_helper" $file;
+        kcov "target/cov/$(basename $file)" --exclude-pattern="/.cargo,/usr/lib,$PWD/src/tests,$PWD/src/builder/tests" $file;
       done
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN -s target/cov

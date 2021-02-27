@@ -1,10 +1,10 @@
 ---
 source: src/builder/tests/insert_normal.rs
-expression: "(query, params)"
+expression: res
 
 ---
 (
-    "INSERT INTO \"public\".\"mysimpletable\" (\"first-name\", \"last-name\") VALUES ($0, $1) RETURNING *",
+    "INSERT INTO \"public\".\"mysimpletable\" (\"public\".\"mysimpletable\".\"first-name\", \"public\".\"mysimpletable\".\"last-name\") VALUES ($0, $1) RETURNING *",
     Ciboulette2SqlArguments {
         inner: [
             Text(
