@@ -28,7 +28,10 @@ const BODY: &'static str = r#"
   }
 }
 "#;
-use quaint::{prelude::*, visitor::{Postgres, Visitor}};
+use quaint::{
+    prelude::*,
+    visitor::{Postgres, Visitor},
+};
 #[tokio::main]
 async fn main() {
     let req_url = Url::parse("http://localhost:8080/peoples").unwrap();
@@ -45,22 +48,23 @@ async fn main() {
     //         .unwrap();
     println!(
         "Main : {:#?}",
-        ciboulette2sql::creation::main::gen_query_insert_main(&store, &req)
-            .unwrap()
+        ciboulette2sql::creation::main::gen_query_insert_main(&store, &req).unwrap()
     );
 
-	println!(
+    println!(
         "Rel : {:#?}",
-        ciboulette2sql::creation::relationships::gen_query_insert_relationships(&store, &req, "MAIN_ID")
-            .unwrap()
+        ciboulette2sql::creation::relationships::gen_query_insert_relationships(
+            &store, &req, "MAIN_ID"
+        )
+        .unwrap()
     );
 
-	let conditions = "world"
-    .equals("meow")
-    .and("age".less_than(10))
-    .and("paw".equals("warm"));
+    let conditions = "world"
+        .equals("meow")
+        .and("age".less_than(10))
+        .and("paw".equals("warm"));
 
-let query = Select::from_table("naukio").so_that(conditions);
-let (sql_str, params) = Postgres::build(query).unwrap();
-println!("{}", sql_str);
+    let query = Select::from_table("naukio").so_that(conditions);
+    let (sql_str, params) = Postgres::build(query).unwrap();
+    println!("{}", sql_str);
 }

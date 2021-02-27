@@ -1,12 +1,13 @@
 use super::*;
-use quaint::ast::Value as QuaintValue;
 use serde_json::value::RawValue;
 use sqlx::types::chrono::{DateTime, NaiveDate, NaiveTime, Utc};
 use sqlx::types::BigDecimal;
 use sqlx::types::Uuid;
 use sqlx::Arguments;
 use sqlx::Type;
+use std::convert::TryFrom;
 
+#[derive(Clone, Debug)]
 pub enum Ciboulette2SqlValue<'a> {
     Integer(Option<i64>),
     Float(Option<f32>),
@@ -26,28 +27,35 @@ pub enum Ciboulette2SqlValue<'a> {
     Time(Option<NaiveTime>),
 }
 
-impl<'a> From<QuaintValue<'a>> for Ciboulette2SqlValue<'a> {
-    fn from(val: QuaintValue<'a>) -> Self {
-        match val {
-            QuaintValue::Integer(x) => Ciboulette2SqlValue::Integer(x),
-            QuaintValue::Float(x) => Ciboulette2SqlValue::Float(x),
-            QuaintValue::Double(x) => Ciboulette2SqlValue::Double(x),
-            QuaintValue::Text(x) => Ciboulette2SqlValue::Text(x),
-            QuaintValue::Enum(x) => Ciboulette2SqlValue::Enum(x),
-            QuaintValue::Bytes(x) => Ciboulette2SqlValue::Bytes(x),
-            QuaintValue::Boolean(x) => Ciboulette2SqlValue::Boolean(x),
-            QuaintValue::Char(x) => Ciboulette2SqlValue::Char(x),
-            QuaintValue::Array(x) => Ciboulette2SqlValue::Array(
-                x.map(|x| x.into_iter().map(Ciboulette2SqlValue::from).collect()),
-            ),
-            QuaintValue::Numeric(x) => Ciboulette2SqlValue::Numeric(x),
-            QuaintValue::Json(x) => Ciboulette2SqlValue::Json(x),
-            QuaintValue::Xml(x) => Ciboulette2SqlValue::Xml(x),
-            QuaintValue::Uuid(x) => Ciboulette2SqlValue::Uuid(x),
-            QuaintValue::DateTime(x) => Ciboulette2SqlValue::DateTime(x),
-            QuaintValue::Date(x) => Ciboulette2SqlValue::Date(x),
-            QuaintValue::Time(x) => Ciboulette2SqlValue::Time(x),
-        }
+impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
+    type Error = Ciboulette2SqlError;
+
+    fn try_from(val: &MessyJsonValue<'a>) -> Result<Ciboulette2SqlValue<'a>, Ciboulette2SqlError> {
+        Ok(match val {
+            MessyJsonValue::Bool(val) => Ciboulette2SqlValue::Boolean(Some(*val)),
+            MessyJsonValue::Null(schema) => match schema {
+                MessyJson::Bool(_) => Ciboulette2SqlValue::Boolean(None),
+                MessyJson::Number(_) => Ciboulette2SqlValue::Numeric(None),
+                MessyJson::String(_) => Ciboulette2SqlValue::Text(None),
+                MessyJson::Array(_) => Ciboulette2SqlValue::Array(None),
+                MessyJson::Obj(_) => unimplemented!(),
+            },
+            MessyJsonValue::Number(val) => Ciboulette2SqlValue::Numeric(Some(
+                bigdecimal::FromPrimitive::from_u128(*val)
+                    .ok_or_else(|| Ciboulette2SqlError::BigDecimal(*val))?,
+            )),
+            MessyJsonValue::String(val) => Ciboulette2SqlValue::Text(Some(val.clone())),
+            MessyJsonValue::Array(arr) => {
+                let mut arr_res: Vec<Ciboulette2SqlValue<'_>> = Vec::with_capacity(arr.len());
+                for el in arr.iter() {
+                    arr_res.push(Ciboulette2SqlValue::try_from(el)?)
+                }
+                Ciboulette2SqlValue::Array(Some(arr_res))
+            }
+            MessyJsonValue::Obj(_obj) => {
+                unimplemented!()
+            }
+        })
     }
 }
 
@@ -167,9 +175,9 @@ impl<'a> sqlx::Type<sqlx::Postgres> for Ciboulette2SqlValue<'a> {
 impl<'a, 'q> sqlx::IntoArguments<'q, sqlx::Postgres> for Ciboulette2SqlArguments<'a> {
     fn into_arguments(self) -> <sqlx::Postgres as sqlx::database::HasArguments<'q>>::Arguments {
         let mut res = sqlx::postgres::PgArguments::default();
-        res.reserve(self.0.len(), std::mem::size_of::<Ciboulette2SqlValue>());
+        res.reserve(self.len(), std::mem::size_of::<Ciboulette2SqlValue>());
 
-        for el in self.0.into_iter() {
+        for el in self.take().into_iter() {
             res.add(Ciboulette2SqlValue::from(el));
         }
         res

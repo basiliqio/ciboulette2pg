@@ -27,21 +27,3 @@ pub fn extract_sparse<'a>(
         }
     }
 }
-
-pub fn json_wrap_with_id_and_type<'a>(req: String, mut params: Vec<quaint::Value<'a>>, type_: &'a str) -> (String, Vec<quaint::Value<'a>>)
-{
-	params.push(quaint::Value::Text(Some(Cow::Borrowed(type_))));
-	(format!(
-		"WITH q AS ({}) SELECT id::text, ? type::text, ROW_TO_JSON(q) AS v FROM q",
-		req,
-	), params)
-}
-
-// pub fn extract_type<'a>(
-//     store: &'a CibouletteStore,
-//     identifier: &CibouletteResourceIdentifierCreator<'a>,
-// ) -> Result<(petgraph::graph::NodeIndex<u16>, &'a CibouletteResourceType), CibouletteError> {
-//     store
-//         .get_type_with_index(identifier.type_().as_ref())
-//         .ok_or_else(|| CibouletteError::UnknownType(identifier.type_().clone().into_owned()))
-// }

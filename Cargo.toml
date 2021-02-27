@@ -8,13 +8,14 @@ edition = "2018"
 
 [dependencies]
 ciboulette = { path = "../ciboulette" }
-quaint = { git = "https://github.com/GrandChaman/quaint.git", branch = "feat/reuse_arguments", features = ["postgresql", "uuid", "chrono", "serde-support", "bigdecimal", "json"] }
 thiserror = "1"
 messy_json = { git = "https://gitlab.com/basiliq/messy_json.git"}
 serde_json = { version = "1.0", default-features = false, features = ["raw_value"] }
 bigdecimal = "0.2"
 petgraph = { version = "0.5.1", default-features = false }
 sqlx = { version = "0.5", features = [ "postgres", "runtime-tokio-rustls", "json", "macros", "uuid", "chrono", "bigdecimal" ] }
+buf_redux = { version = "0.8", features = [ "slice-deque" ] }
+getset = "0.1"
 
 [dev-dependencies]
 ciboulette_test_helper = { path = "../ciboulette/ciboulette_test_helper" }
