@@ -14,4 +14,12 @@ pub enum Ciboulette2SqlError {
     CibouletteError(#[from] ciboulette::CibouletteError),
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+    #[error(transparent)]
+    BufReaderInto(
+        #[from] buf_redux::IntoInnerError<buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>>,
+    ),
+    #[error(transparent)]
+    Utf8(#[from] std::string::FromUtf8Error),
 }

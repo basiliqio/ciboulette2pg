@@ -1,0 +1,22 @@
+---
+source: src/builder/tests/insert_normal.rs
+expression: res
+
+---
+(
+    "INSERT INTO \"public\".\"mysimpletable\" (\"first-name\", \"last-name\") VALUES ($0, $1)",
+    Ciboulette2SqlArguments {
+        inner: [
+            Text(
+                Some(
+                    "hello",
+                ),
+            ),
+            Text(
+                Some(
+                    "world",
+                ),
+            ),
+        ],
+    },
+)

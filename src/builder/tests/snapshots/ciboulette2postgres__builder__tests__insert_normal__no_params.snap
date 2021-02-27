@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/insert_normal.rs
+expression: res
+
+---
+(
+    "INSERT INTO \"public\".\"mysimpletable\" DEFAULT VALUES RETURNING *",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)

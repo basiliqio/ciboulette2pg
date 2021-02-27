@@ -13,11 +13,13 @@ messy_json = { git = "https://gitlab.com/basiliq/messy_json.git"}
 serde_json = { version = "1.0", default-features = false, features = ["raw_value"] }
 bigdecimal = "0.2"
 petgraph = { version = "0.5.1", default-features = false }
-sqlx = { version = "0.5", features = [ "postgres", "runtime-tokio-rustls", "json", "macros", "uuid", "chrono", "bigdecimal" ] }
+sqlx = { version = "0.5", features = [ "postgres", "runtime-tokio-rustls", "json", "uuid", "chrono", "bigdecimal" ] }
 buf_redux = { version = "0.8", features = [ "slice-deque" ] }
 getset = "0.1"
+numtoa = "0.2.3"
 
 [dev-dependencies]
 ciboulette_test_helper = { path = "../ciboulette/ciboulette_test_helper" }
 url = "2.2.0"
 tokio = { version = "1", features = ["full"] }
+insta = "1.7"
