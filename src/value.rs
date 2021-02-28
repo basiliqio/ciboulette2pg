@@ -33,7 +33,7 @@ impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
     fn try_from(val: &MessyJsonValue<'a>) -> Result<Ciboulette2SqlValue<'a>, Ciboulette2SqlError> {
         Ok(match val {
             MessyJsonValue::Bool(val) => Ciboulette2SqlValue::Boolean(Some(*val)),
-            MessyJsonValue::Null(schema) => match schema {
+            MessyJsonValue::Null(schema) => match schema.as_ref() {
                 MessyJson::Bool(_) => Ciboulette2SqlValue::Boolean(None),
                 MessyJson::Number(_) => Ciboulette2SqlValue::Numeric(None),
                 MessyJson::String(_) => Ciboulette2SqlValue::Text(None),

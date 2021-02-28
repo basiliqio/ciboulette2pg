@@ -20,7 +20,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn insert_ident(
         &mut self,
-        (ident, alias): (&str, Option<&str>),
+        (ident, alias): &(&str, Option<&str>),
         table: &CibouletteTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(table)?;

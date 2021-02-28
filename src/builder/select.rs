@@ -6,7 +6,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &CibouletteTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write(b"SELECT ")?;
-        self.insert_ident((table.id_name(), Some("id")), table)?;
+        self.insert_ident(&(table.id_name(), Some("id")), table)?;
+        self.buf.write(b", ROW_NUMBER() OVER () as \"rn\" FROM")?;
+        self.write_table_info(table)?;
+        Ok(())
+    }
+
+    pub(crate) fn gen_select_cte_final(
+        &mut self,
+        table: &CibouletteTableSettings,
+        type_: &str,
+    ) -> Result<(), Ciboulette2SqlError> {
+        self.buf.write(b"SELECT ")?;
+        self.insert_ident(&(table.id_name(), Some("id")), table)?;
         self.buf.write(b", ROW_NUMBER() OVER () as \"rn\" FROM")?;
         self.write_table_info(table)?;
         Ok(())
@@ -21,7 +33,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         if selected_columns.is_empty() {
             self.buf.write(b"*")?;
         } else {
-            self.write_list(selected_columns, &table, false, Self::insert_ident)?;
+            self.write_list(&selected_columns, &table, false, Self::insert_ident)?;
         }
         self.buf.write(b" FROM ")?;
         self.write_table_info(table)?;
