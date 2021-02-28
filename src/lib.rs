@@ -13,7 +13,7 @@ pub use value::Ciboulette2SqlValue;
 
 use builder::Ciboulette2SqlArguments;
 use getset::Getters;
-use messy_json::{MessyJson, MessyJsonObjectValue, MessyJsonValue};
+use messy_json::{MessyJson, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue};
 use std::collections::BTreeMap;
 
 const POSTGRES_QUOTE: &[u8] = b"\"";

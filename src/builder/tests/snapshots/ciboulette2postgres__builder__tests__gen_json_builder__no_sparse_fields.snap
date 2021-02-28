@@ -1,0 +1,37 @@
+---
+source: src/builder/tests/gen_json_builder.rs
+expression: res
+
+---
+(
+    "JSON_BUILD_OBJECT($0, \"public\".\"peoples\".\"age\", $1, \"public\".\"peoples\".\"first-name\", $2, \"public\".\"peoples\".\"gender\", $3, \"public\".\"peoples\".\"last-name\", $4, \"public\".\"peoples\".\"twitter\") ",
+    Ciboulette2SqlArguments {
+        inner: [
+            Text(
+                Some(
+                    "age",
+                ),
+            ),
+            Text(
+                Some(
+                    "first-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "gender",
+                ),
+            ),
+            Text(
+                Some(
+                    "last-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "twitter",
+                ),
+            ),
+        ],
+    },
+)

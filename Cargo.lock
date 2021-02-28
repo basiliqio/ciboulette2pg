@@ -153,22 +153,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
-dependencies = [
- "getset",
- "lazy_static",
- "messy_json",
- "petgraph",
- "serde",
- "serde_json",
- "serde_urlencoded",
- "thiserror",
- "url",
-]
-
-[[package]]
-name = "ciboulette"
-version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#f3de55f17f1b71033be814f5b2d4bb9bc29e29cb"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#11dc218e7365a8cbb6f15c98e792ce204a3bbd1d"
 dependencies = [
  "getset",
  "lazy_static",
@@ -187,7 +172,7 @@ version = "0.1.0"
 dependencies = [
  "bigdecimal",
  "buf_redux",
- "ciboulette 0.1.0",
+ "ciboulette",
  "ciboulette_test_helper",
  "getset",
  "insta",
@@ -205,9 +190,9 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#f3de55f17f1b71033be814f5b2d4bb9bc29e29cb"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#11dc218e7365a8cbb6f15c98e792ce204a3bbd1d"
 dependencies = [
- "ciboulette 0.1.0 (git+https://gitlab.com/basiliq/ciboulette.git)",
+ "ciboulette",
  "messy_json",
 ]
 
@@ -1174,9 +1159,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "sqlformat"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74c70f0235b9925cbb106c52af1a28b5ea4885a8b851e328b8562e257a389c2d"
+checksum = "6d86e3c77ff882a828346ba401a7ef4b8e440df804491c6064fe8295765de71c"
 dependencies = [
  "lazy_static",
  "maplit",

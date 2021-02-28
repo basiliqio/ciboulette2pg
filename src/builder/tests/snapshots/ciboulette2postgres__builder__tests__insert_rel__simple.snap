@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/insert_rel.rs
+expression: res
+
+---
+(
+    "INSERT INTO \"public\".\"people_article\" (\"public\".\"people_article\".\"author_id\", \"public\".\"people_article\".\"article_id\") SELECT \"public\".\"cte_main_insert\".\"id\" AS \"author_id\", \"public\".\"cte_rel_data\".\"id\" AS \"article_id\" FROM \"public\".\"cte_main_insert\", \"public\".\"cte_rel_data\" RETURNING *",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)
