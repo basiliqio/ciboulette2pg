@@ -1,0 +1,42 @@
+---
+source: src/builder/tests/cte_final.rs
+expression: res
+
+---
+(
+    "SELECT \"public\".\"peoples\".\"id\" AS \"id\", $0::TEXT AS \"type\", JSON_BUILD_OBJECT($1, \"public\".\"peoples\".\"age\", $2, \"public\".\"peoples\".\"first-name\", $3, \"public\".\"peoples\".\"gender\", $4, \"public\".\"peoples\".\"last-name\", $5, \"public\".\"peoples\".\"twitter\")  AS \"data\" FROM \"public\".\"peoples\" ",
+    Ciboulette2SqlArguments {
+        inner: [
+            Text(
+                Some(
+                    "peoples",
+                ),
+            ),
+            Text(
+                Some(
+                    "age",
+                ),
+            ),
+            Text(
+                Some(
+                    "first-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "gender",
+                ),
+            ),
+            Text(
+                Some(
+                    "last-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "twitter",
+                ),
+            ),
+        ],
+    },
+)

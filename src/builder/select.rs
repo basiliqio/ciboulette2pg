@@ -16,13 +16,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(crate) fn gen_select_cte_final(
         &mut self,
-        table: &CibouletteTableSettings,
-        type_: &str,
+        table: &'a CibouletteTableSettings,
+        type_: &'a CibouletteResourceType<'a>,
+        query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write(b"SELECT ")?;
         self.insert_ident(&(table.id_name(), Some("id")), table)?;
-        self.buf.write(b", ROW_NUMBER() OVER () as \"rn\" FROM")?;
+        self.buf.write(b", ")?;
+        self.insert_params(
+            Ciboulette2SqlValue::Text(Some(Cow::Borrowed(table.name()))),
+            table,
+        )?;
+        self.buf.write(b"::TEXT AS \"type\", ")?;
+        self.gen_json_builder(table, type_, query)?;
+        self.buf.write(b" AS \"data\" FROM ")?;
         self.write_table_info(table)?;
+        self.buf.write(b" ")?;
         Ok(())
     }
 
