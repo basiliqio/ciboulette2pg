@@ -75,10 +75,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write(b", ")?;
         self.insert_ident(&("id", Some(rel_key)), rel_table)?;
         self.buf.write(b" FROM ")?;
-        self.write_table_info(rel_table)?;
-        self.buf.write(b" JOIN ")?;
         self.write_table_info(main_table)?;
-        self.buf.write(b" USING (rn) RETURNING *")?;
+        self.buf.write(b", ")?;
+        self.write_table_info(rel_table)?;
+        self.buf.write(b" RETURNING *")?;
         Ok(())
     }
 }
