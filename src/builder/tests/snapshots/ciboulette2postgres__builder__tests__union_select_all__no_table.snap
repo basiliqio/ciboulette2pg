@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/union_select_all.rs
+expression: res
+
+---
+(
+    "",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)

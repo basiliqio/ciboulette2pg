@@ -124,4 +124,24 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         };
         Ok(())
     }
+
+	pub(crate) fn gen_union_select_all<'b, I>(
+        &mut self,
+        tables: I,
+    ) -> Result<(), Ciboulette2SqlError>
+	where
+		I: Iterator<Item = &'b CibouletteTableSettings<'b>>
+	{
+		let mut iter = tables.peekable();
+        while let Some(table) = iter.next()
+		{
+			self.buf.write(b"SELECT * FROM ")?;
+			self.write_table_info(table)?;
+			if iter.peek().is_some()
+			{
+				self.buf.write(b" UNION ALL ")?;
+			}
+		}
+        Ok(())
+    }
 }

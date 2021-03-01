@@ -11,6 +11,7 @@ mod insert_normal;
 mod insert_rel;
 mod select_main_insert;
 mod simple_select;
+mod union_select_all;
 
 fn gen_req_create_people<'a>(
     store: &'a CibouletteStore<'a>,

@@ -81,4 +81,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write(b" RETURNING *")?;
         Ok(())
     }
+
+	// pub fn gen_insert(
+	// 	&mut self,
+
+	// )
 }
