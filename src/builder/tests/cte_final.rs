@@ -2,8 +2,8 @@ use super::*;
 
 #[test]
 fn simple() {
-    let mut builder = Ciboulette2PostgresBuilder::new();
-    let dest_table = CibouletteTableSettings::new(
+    let mut builder = Ciboulette2PostgresBuilder::default();
+    let dest_table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),
@@ -26,8 +26,8 @@ fn simple() {
 
 #[test]
 fn sparse() {
-    let mut builder = Ciboulette2PostgresBuilder::new();
-    let dest_table = CibouletteTableSettings::new(
+    let mut builder = Ciboulette2PostgresBuilder::default();
+    let dest_table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),
@@ -50,8 +50,8 @@ fn sparse() {
 
 #[test]
 fn empty_sparse() {
-    let mut builder = Ciboulette2PostgresBuilder::new();
-    let dest_table = CibouletteTableSettings::new(
+    let mut builder = Ciboulette2PostgresBuilder::default();
+    let dest_table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),

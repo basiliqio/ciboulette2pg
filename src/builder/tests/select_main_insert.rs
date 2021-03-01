@@ -2,8 +2,8 @@ use super::*;
 
 #[test]
 fn simple() {
-    let mut builder = Ciboulette2PostgresBuilder::new();
-    let table = CibouletteTableSettings::new(
+    let mut builder = Ciboulette2PostgresBuilder::default();
+    let table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("my_id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),

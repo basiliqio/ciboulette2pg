@@ -2,21 +2,21 @@ use super::*;
 
 #[test]
 fn simple() {
-    let mut builder = Ciboulette2PostgresBuilder::new();
-    let dest_table = CibouletteTableSettings::new(
+    let mut builder = Ciboulette2PostgresBuilder::default();
+    let dest_table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),
         Cow::Borrowed("people_article"),
     );
 
-    let main_table = CibouletteTableSettings::new(
+    let main_table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),
         Cow::Borrowed("cte_main_insert"),
     );
-    let rel_table = CibouletteTableSettings::new(
+    let rel_table = Ciboulette2PostgresTableSettings::new(
         Cow::Borrowed("id"),
         Cow::Borrowed("uuid"),
         Some(Cow::Borrowed("public")),

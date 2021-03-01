@@ -5,7 +5,7 @@ const EMPTY_LIST: [Cow<'static, str>; 0] = [];
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_select_cte_with_counter(
         &mut self,
-        table: &CibouletteTableSettings,
+        table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write(b"SELECT ")?;
         self.insert_ident(&(table.id_name(), Some("id")), table)?;
@@ -16,7 +16,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(crate) fn gen_select_cte_final(
         &mut self,
-        table: &'a CibouletteTableSettings,
+        table: &Ciboulette2PostgresTableSettings<'a>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -24,7 +24,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.insert_ident(&(table.id_name(), Some("id")), table)?;
         self.buf.write(b", ")?;
         self.insert_params(
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed(table.name()))),
+            Ciboulette2SqlValue::Text(Some(Cow::Borrowed(type_.name().as_ref()))), // TODO do better
             table,
         )?;
         self.buf.write(b"::TEXT AS \"type\", ")?;
@@ -37,7 +37,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(crate) fn gen_select(
         &mut self,
-        table: &CibouletteTableSettings,
+        table: &Ciboulette2PostgresTableSettings,
         selected_columns: Vec<(&str, Option<&str>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write(b"SELECT ")?;
@@ -53,7 +53,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(crate) fn gen_json_builder_routine<'b, I>(
         &mut self,
-        table: &CibouletteTableSettings<'a>,
+        table: &Ciboulette2PostgresTableSettings<'_>,
         obj: &'a MessyJsonObject<'a>,
         obj_name: &'b str,
         mut fields: std::iter::Peekable<I>,
@@ -94,7 +94,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(crate) fn gen_json_builder(
         &mut self,
-        table: &CibouletteTableSettings<'a>,
+        table: &Ciboulette2PostgresTableSettings<'_>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -125,23 +125,21 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-	pub(crate) fn gen_union_select_all<'b, I>(
+    pub(crate) fn gen_union_select_all<'b, I>(
         &mut self,
         tables: I,
     ) -> Result<(), Ciboulette2SqlError>
-	where
-		I: Iterator<Item = &'b CibouletteTableSettings<'b>>
-	{
-		let mut iter = tables.peekable();
-        while let Some(table) = iter.next()
-		{
-			self.buf.write(b"SELECT * FROM ")?;
-			self.write_table_info(table)?;
-			if iter.peek().is_some()
-			{
-				self.buf.write(b" UNION ALL ")?;
-			}
-		}
+    where
+        I: IntoIterator<Item = &'b Ciboulette2PostgresTableSettings<'b>>,
+    {
+        let mut iter = tables.into_iter().peekable();
+        while let Some(table) = iter.next() {
+            self.buf.write(b"SELECT * FROM ")?;
+            self.write_table_info(table)?;
+            if iter.peek().is_some() {
+                self.buf.write(b" UNION ALL ")?;
+            }
+        }
         Ok(())
     }
 }

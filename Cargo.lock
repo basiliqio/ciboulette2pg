@@ -153,7 +153,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#11dc218e7365a8cbb6f15c98e792ce204a3bbd1d"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#f872ca4054699ba5222d1a1b060eab9c58f4b032"
 dependencies = [
  "getset",
  "lazy_static",
@@ -190,7 +190,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#11dc218e7365a8cbb6f15c98e792ce204a3bbd1d"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#f872ca4054699ba5222d1a1b060eab9c58f4b032"
 dependencies = [
  "ciboulette",
  "messy_json",

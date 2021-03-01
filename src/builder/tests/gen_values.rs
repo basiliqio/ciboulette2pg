@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn simple() {
-    let mut builder = Ciboulette2PostgresBuilder::new();
+    let mut builder = Ciboulette2PostgresBuilder::default();
     builder
         .gen_rel_values(
             vec![
@@ -19,4 +19,15 @@ fn simple() {
     let res = builder.build().unwrap();
 
     insta::assert_debug_snapshot!(res);
+}
+
+#[test]
+fn empty() {
+    let mut builder = Ciboulette2PostgresBuilder::default();
+    let err = builder.gen_rel_values(vec![], "mysimpletable").unwrap_err();
+
+    assert_eq!(
+        matches!(err, Ciboulette2SqlError::EmptyRelValue(x) if x == "mysimpletable"),
+        true
+    );
 }

@@ -49,4 +49,17 @@ impl<'a> std::ops::DerefMut for Ciboulette2SqlArguments<'a> {
 pub struct Ciboulette2PostgresBuilder<'a> {
     buf: Ciboulette2PostgresBuf,
     params: Ciboulette2SqlArguments<'a>,
+    nb_cte: usize,
+}
+
+impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
+    fn default() -> Self {
+        Ciboulette2PostgresBuilder {
+            buf: Ciboulette2PostgresBuf::new_ringbuf(std::io::Cursor::new(Vec::with_capacity(
+                4096,
+            ))),
+            params: Ciboulette2SqlArguments::with_capacity(128),
+            nb_cte: 0,
+        }
+    }
 }

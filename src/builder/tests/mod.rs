@@ -7,11 +7,38 @@ use ciboulette_test_helper::*;
 mod cte_final;
 mod gen_json_builder;
 mod gen_values;
+mod insert;
 mod insert_normal;
 mod insert_rel;
 mod select_main_insert;
 mod simple_select;
 mod union_select_all;
+
+fn gen_table_store<'a>() -> Ciboulette2PostgresTableStore<'a> {
+    vec![
+        Ciboulette2PostgresTableSettings::new(
+            Cow::Borrowed("id"),
+            Cow::Borrowed("uuid"),
+            Some(Cow::Borrowed("public")),
+            Cow::Borrowed("people-article"),
+        ),
+        Ciboulette2PostgresTableSettings::new(
+            Cow::Borrowed("id"),
+            Cow::Borrowed("uuid"),
+            Some(Cow::Borrowed("public")),
+            Cow::Borrowed("articles"),
+        ),
+        Ciboulette2PostgresTableSettings::new(
+            Cow::Borrowed("id"),
+            Cow::Borrowed("uuid"),
+            Some(Cow::Borrowed("public")),
+            Cow::Borrowed("peoples"),
+        ),
+    ]
+    .into_iter()
+    .map(|x| (x.name().to_string(), x))
+    .collect()
+}
 
 fn gen_req_create_people<'a>(
     store: &'a CibouletteStore<'a>,

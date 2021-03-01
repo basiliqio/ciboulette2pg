@@ -10,6 +10,10 @@ pub enum Ciboulette2SqlError {
     MissingRelationship(String, String),
     #[error("The relationship for type `{0}` should have been singular")]
     RequiredSingleRelationship(String),
+    #[error("The table `{0}` is unknown")]
+    UnknownTable(String),
+    #[error("A relationship value was empty for type `{0}`")]
+    EmptyRelValue(String),
     #[error(transparent)]
     CibouletteError(#[from] ciboulette::CibouletteError),
     #[error(transparent)]

@@ -2,14 +2,6 @@ use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
-    pub fn new() -> Self {
-        Ciboulette2PostgresBuilder {
-            buf: Ciboulette2PostgresBuf::new_ringbuf(std::io::Cursor::new(Vec::new())),
-            params: Ciboulette2SqlArguments::with_capacity(128),
-        }
-    }
-
-    #[inline]
     pub fn build(self) -> Result<(String, Ciboulette2SqlArguments<'a>), Ciboulette2SqlError> {
         Ok((
             String::from_utf8(self.buf.into_inner()?.into_inner())?,
@@ -21,7 +13,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn insert_ident(
         &mut self,
         (ident, alias): &(&str, Option<&str>),
-        table: &CibouletteTableSettings,
+        table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(table)?;
         self.buf.write(b".")?;
@@ -44,7 +36,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn insert_params(
         &mut self,
         param: Ciboulette2SqlValue<'a>,
-        _table: &CibouletteTableSettings,
+        _table: &Ciboulette2PostgresTableSettings<'_>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut buffer = [0u8; 20];
         let old_len = self.params.len();
@@ -58,7 +50,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn write_table_info(
         &mut self,
-        table: &CibouletteTableSettings,
+        table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write(POSTGRES_QUOTE)?;
         match table.schema() {
@@ -68,7 +60,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             }
             None => (),
         };
-        self.buf.write(table.name.as_bytes())?;
+        self.buf.write(table.name().as_bytes())?;
         self.buf.write(POSTGRES_QUOTE)?;
         Ok(())
     }
@@ -76,7 +68,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn write_list<I, F>(
         &mut self,
         arr: I,
-        table: &CibouletteTableSettings,
+        table: &Ciboulette2PostgresTableSettings,
         wrap_in_parenthesis: bool,
         f: F,
     ) -> Result<(), Ciboulette2SqlError>
@@ -85,7 +77,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         F: for<'r> Fn(
             &'r mut Ciboulette2PostgresBuilder<'a>,
             I::Item,
-            &CibouletteTableSettings,
+            &Ciboulette2PostgresTableSettings,
         ) -> Result<(), Ciboulette2SqlError>,
     {
         let mut iter = arr.into_iter().peekable();
