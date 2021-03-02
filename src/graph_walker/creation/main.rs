@@ -1,6 +1,13 @@
 use super::*;
 use std::convert::TryFrom;
 
+#[derive(Clone, Debug, Default, Getters)]
+#[getset(get = "pub")]
+pub struct Ciboulette2PostgresMainInsert<'a> {
+    pub insert_values: Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
+    pub single_relationships: Vec<&'a str>,
+}
+
 fn check_single_relationships<'a>(
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
     from_type_: &'a CibouletteResourceType,
@@ -57,14 +64,15 @@ pub fn fill_attributes<'a>(
 pub fn gen_query_insert<'a>(
     store: &'a CibouletteStore,
     req: &'a CibouletteCreateRequest<'a>,
-) -> Result<Vec<(&'a str, Ciboulette2SqlValue<'a>)>, Ciboulette2SqlError> {
-    let mut res: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
+) -> Result<Ciboulette2PostgresMainInsert<'a>, Ciboulette2SqlError> {
+    let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
+    let mut res_rel: Vec<&'a str> = Vec::with_capacity(128);
     let main_type = req.path().main_type();
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
 
-    fill_attributes(&mut res, &req.data().attributes())?;
+    fill_attributes(&mut res_val, &req.data().attributes())?;
     let mut walker = store
         .graph()
         .neighbors_directed(*main_type_index, petgraph::Direction::Outgoing)
@@ -84,9 +92,13 @@ pub fn gen_query_insert<'a>(
                 alias,
                 opt,
             )? {
-                res.push(v); // Insert the relationship
+                res_val.push(v); // Insert the relationship values
+                res_rel.push(alias.as_str());
             }
         }
     }
-    Ok(res)
+    Ok(Ciboulette2PostgresMainInsert {
+        insert_values: res_val,
+        single_relationships: res_rel,
+    })
 }

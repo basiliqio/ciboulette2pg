@@ -16,23 +16,23 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(table)?;
-        self.buf.write(b".")?;
-        self.buf.write(POSTGRES_QUOTE)?;
-        self.buf.write(ident.as_bytes())?;
-        self.buf.write(POSTGRES_QUOTE)?;
+        self.buf.write_all(b".")?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
+        self.buf.write_all(ident.as_bytes())?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
         match cast {
             Some(cast) => {
-                self.buf.write(b"::")?;
-                self.buf.write(cast.as_bytes())?;
+                self.buf.write_all(b"::")?;
+                self.buf.write_all(cast.as_bytes())?;
             }
             None => (),
         };
         match alias {
             Some(alias) => {
-                self.buf.write(b" AS ")?;
-                self.buf.write(POSTGRES_QUOTE)?;
-                self.buf.write(alias.as_bytes())?;
-                self.buf.write(POSTGRES_QUOTE)?;
+                self.buf.write_all(b" AS ")?;
+                self.buf.write_all(POSTGRES_QUOTE)?;
+                self.buf.write_all(alias.as_bytes())?;
+                self.buf.write_all(POSTGRES_QUOTE)?;
             }
             None => (),
         };
@@ -49,8 +49,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let old_len = self.params.len();
 
         self.params.push(param);
-        self.buf.write(b"$")?;
-        self.buf.write(old_len.numtoa(10, &mut buffer))?;
+        self.buf.write_all(b"$")?;
+        self.buf.write_all(old_len.numtoa(10, &mut buffer))?;
         Ok(())
     }
 
@@ -59,16 +59,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.buf.write(POSTGRES_QUOTE)?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
         match table.schema() {
             Some(x) => {
-                self.buf.write(x.as_bytes())?;
-                self.buf.write(b"\".\"")?;
+                self.buf.write_all(x.as_bytes())?;
+                self.buf.write_all(b"\".\"")?;
             }
             None => (),
         };
-        self.buf.write(table.name().as_bytes())?;
-        self.buf.write(POSTGRES_QUOTE)?;
+        self.buf.write_all(table.name().as_bytes())?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
         Ok(())
     }
 
@@ -88,22 +88,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         ) -> Result<(), Ciboulette2SqlError>,
     {
         let mut iter = arr.into_iter().peekable();
-        if wrap_in_parenthesis == true {
-            self.buf.write(b"(")?;
+        if wrap_in_parenthesis {
+            self.buf.write_all(b"(")?;
         }
-        loop {
-            let curr = match iter.next() {
-                Some(x) => x,
-                None => break,
-            };
+        while let Some(curr) = iter.next() {
             f(self, curr, &table)?;
 
             if iter.peek().is_some() {
-                self.buf.write(b", ")?;
+                self.buf.write_all(b", ")?;
             }
         }
-        if wrap_in_parenthesis == true {
-            self.buf.write(b")")?;
+        if wrap_in_parenthesis {
+            self.buf.write_all(b")")?;
         }
         Ok(())
     }

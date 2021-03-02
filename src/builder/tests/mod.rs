@@ -10,8 +10,7 @@ mod gen_values;
 mod insert;
 mod insert_normal;
 mod insert_rel;
-mod select_main_insert;
-mod simple_select;
+mod single_rel_cte;
 mod union_select_all;
 
 fn gen_table_store<'a>() -> Ciboulette2PostgresTableStore<'a> {
@@ -33,6 +32,12 @@ fn gen_table_store<'a>() -> Ciboulette2PostgresTableStore<'a> {
             Cow::Borrowed("uuid"),
             Some(Cow::Borrowed("public")),
             Cow::Borrowed("peoples"),
+        ),
+        Ciboulette2PostgresTableSettings::new(
+            Cow::Borrowed("id"),
+            Cow::Borrowed("uuid"),
+            Some(Cow::Borrowed("public")),
+            Cow::Borrowed("favorite_color"),
         ),
     ]
     .into_iter()
@@ -64,6 +69,5 @@ fn gen_req_create_people<'a>(
 
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&store).unwrap();
-    let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
-    ciboulette_request
+    CibouletteCreateRequest::try_from(request).unwrap()
 }

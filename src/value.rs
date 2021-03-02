@@ -178,7 +178,7 @@ impl<'a, 'q> sqlx::IntoArguments<'q, sqlx::Postgres> for Ciboulette2SqlArguments
         res.reserve(self.len(), std::mem::size_of::<Ciboulette2SqlValue>());
 
         for el in self.take().into_iter() {
-            res.add(Ciboulette2SqlValue::from(el));
+            res.add(el);
         }
         res
     }

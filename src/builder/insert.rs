@@ -1,4 +1,6 @@
 use super::*;
+use crate::graph_walker::creation::main::Ciboulette2PostgresMainInsert;
+use crate::graph_walker::creation::relationships::Ciboulette2PostgresRelationshipsInsert;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_insert_normal(
@@ -8,15 +10,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         // INSERT INTO
-        self.buf.write(b"INSERT INTO ")?;
+        self.buf.write_all(b"INSERT INTO ")?;
         // INSERT INTO "schema"."mytable"
         self.write_table_info(table)?;
         // INSERT INTO "schema"."mytable"
-        self.buf.write(b" ")?;
+        self.buf.write_all(b" ")?;
         match params.len() {
             0 => {
                 // INSERT INTO "schema"."mytable" DEFAULT VALUES
-                self.buf.write(b"DEFAULT VALUES")?;
+                self.buf.write_all(b"DEFAULT VALUES")?;
             }
             _ => {
                 let mut param_ident: Vec<(&str, Option<&str>, Option<&str>)> =
@@ -31,14 +33,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 // INSERT INTO "schema"."mytable" (..params..)
                 self.write_list(&param_ident, &table, true, Self::insert_ident)?;
                 // INSERT INTO "schema"."mytable" (..params..) VALUES
-                self.buf.write(b" VALUES ")?;
+                self.buf.write_all(b" VALUES ")?;
                 // INSERT INTO "schema"."mytable" (..params..) VALUES (..values..)
                 self.write_list(param_value, &table, true, Self::insert_params)?;
             }
         };
         if returning {
             // INSERT INTO "schema"."mytable" (..params..) VALUES (..values..) RETURNING *
-            self.buf.write(b" RETURNING *")?;
+            self.buf.write_all(b" RETURNING *")?;
         }
         Ok(())
     }
@@ -58,11 +60,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &Ciboulette2PostgresTableSettings::default(),
             false,
             |ref mut se, curr, t| {
-                se.buf.write(b"(")?;
+                se.buf.write_all(b"(")?;
                 se.insert_params(curr, t)?;
-                se.buf.write(b"::")?;
-                se.buf.write(type_.as_bytes())?;
-                se.buf.write(b")")?;
+                se.buf.write_all(b"::")?;
+                se.buf.write_all(type_.as_bytes())?;
+                se.buf.write_all(b")")?;
                 Ok(())
             },
         )?;
@@ -78,11 +80,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         rel_table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         // INSERT INTO
-        self.buf.write(b"INSERT INTO ")?;
+        self.buf.write_all(b"INSERT INTO ")?;
         // INSERT INTO "schema"."mytable"
         self.write_table_info(dest_table)?;
         // INSERT INTO "schema"."mytable"
-        self.buf.write(b" ")?;
+        self.buf.write_all(b" ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key")
         self.write_list(
             [(main_key, None, None), (rel_key, None, None)].iter(),
@@ -91,31 +93,31 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             Self::insert_ident,
         )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT
-        self.buf.write(b" SELECT ")?;
+        self.buf.write_all(b" SELECT ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key"
         self.insert_ident(&("id", Some(main_key), None), main_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key",
-        self.buf.write(b", ")?;
+        self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key"
         self.insert_ident(&("id", Some(rel_key), None), rel_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM
-        self.buf.write(b" FROM ")?;
+        self.buf.write_all(b" FROM ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table"
         self.write_table_info(main_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table",
-        self.buf.write(b", ")?;
+        self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table"
         self.write_table_info(rel_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING
-        self.buf.write(b" RETURNING ")?;
+        self.buf.write_all(b" RETURNING ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id"
         self.insert_ident(&(dest_table.id_name(), None, None), dest_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id",
-        self.buf.write(b", ")?;
+        self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key"
         self.insert_ident(&(main_key, None, None), dest_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key",
-        self.buf.write(b", ")?;
+        self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key", "schema"."mytable"."rel_key",
         self.insert_ident(&(rel_key, None, None), dest_table)?;
         Ok(())
@@ -127,16 +129,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteCreateRequest<'a>,
         table_list: &mut Vec<Ciboulette2PostgresTableSettings<'a>>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
-        rels: Vec<(
-            &'a CibouletteResourceType<'a>,
-            &'a CibouletteRelationshipBucket<'a>,
-            Vec<Ciboulette2SqlValue<'a>>,
-        )>,
+        rels: Vec<Ciboulette2PostgresRelationshipsInsert<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
-        let mut rel_iter = rels.into_iter().peekable();
+        let rel_iter = rels.into_iter().peekable();
 
-        while let Some((rel_type, bucket, rel_ids)) = rel_iter.next() {
-            self.buf.write(b", ")?;
+        for Ciboulette2PostgresRelationshipsInsert {
+            type_: rel_type,
+            bucket,
+            values: rel_ids,
+        } in rel_iter
+        {
+            self.buf.write_all(b", ")?;
             let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
             let rel_cte_id =
                 rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_id", rel_table.name())));
@@ -149,15 +152,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             // "cte_rel_myrel_id"
             self.write_table_info(&rel_cte_id)?;
             // "cte_rel_myrel_id" AS (VALUES
-            self.buf.write(b" AS (VALUES ")?;
+            self.buf.write_all(b" AS (VALUES ")?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)
             self.gen_rel_values(rel_ids, rel_table.id_type())?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)),
-            self.buf.write(b"), ")?;
+            self.buf.write_all(b"), ")?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert"
             self.write_table_info(&rel_cte_insert)?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (
-            self.buf.write(b" AS (")?;
+            self.buf.write_all(b" AS (")?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt)
             self.gen_rel_insert(
                 &rel_table,
@@ -166,21 +169,21 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &main_cte_data,
                 &rel_cte_id,
             )?;
-            self.buf.write(b"), ")?;
+            self.buf.write_all(b"), ")?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt), "cte_rel_myrel_data"
             self.write_table_info(&rel_cte_rel_data)?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt), "cte_rel_myrel_rel_data" AS (
-            self.buf.write(b" AS (")?;
+            self.buf.write_all(b" AS (")?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt), "cte_rel_myrel_rel_data" AS (select_stmt)
             self.gen_select_cte_final(&rel_cte_insert, &bucket.resource(), &request.query())?;
-            self.buf.write(b"), ")?;
+            self.buf.write_all(b"), ")?;
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt), "cte_rel_myrel_rel_data" AS (select_stmt), "cte_rel_myrel_data" AS (select_stmt)
             self.write_table_info(&rel_cte_data)?;
-            self.buf.write(b" AS (")?;
+            self.buf.write_all(b" AS (")?;
             self.gen_select_cte_final(&rel_table, &rel_type, &request.query())?;
-            self.buf.write(b" IN (SELECT \"id\" FROM ")?;
+            self.buf.write_all(b" IN (SELECT \"id\" FROM ")?;
             self.write_table_info(&rel_cte_id)?;
-            self.buf.write(b")")?;
+            self.buf.write_all(b")")?;
             table_list.push(rel_cte_rel_data);
             table_list.push(rel_cte_data);
         }
@@ -202,28 +205,49 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())));
         table_list.push(main_cte_data.clone());
         // WITH
-        se.buf.write(b"WITH \n")?;
+        se.buf.write_all(b"WITH \n")?;
         // WITH "cte_main_insert"
         se.write_table_info(&main_cte_insert)?;
         // WITH "cte_main_insert" AS (
-        se.buf.write(b" AS (")?;
+        se.buf.write_all(b" AS (")?;
+        let Ciboulette2PostgresMainInsert {
+            insert_values: main_inserts_values,
+            single_relationships: main_single_relationships,
+        } = crate::graph_walker::creation::main::gen_query_insert(&ciboulette_store, &request)?;
         // WITH "cte_main_insert" AS (insert_stmt)
-        se.gen_insert_normal(
-            &main_table,
-            crate::graph_walker::creation::main::gen_query_insert(&ciboulette_store, &request)?,
-            true,
-        )?;
-        se.buf.write(b"), ")?;
+        se.gen_insert_normal(&main_table, main_inserts_values, true)?;
+        se.buf.write_all(b"), ")?;
         // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data"
         se.write_table_info(&main_cte_data)?;
-        se.buf.write(b" AS (")?;
+        se.buf.write_all(b" AS (")?;
         se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query())?;
         // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt)
-        se.buf.write(b")")?;
+        se.buf.write_all(b")")?;
         let rels = crate::graph_walker::creation::relationships::gen_query_insert(
             &ciboulette_store,
             &request,
         )?;
+
+        let main_single_relationships_iter = main_single_relationships.into_iter();
+        for key in main_single_relationships_iter {
+            se.buf.write_all(b", ")?;
+            let rel_table = ciboulette_table_store.get(key)?;
+            let rel_table_cte =
+                rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())));
+            let rel_type = main_type.get_relationship(&ciboulette_store, key)?;
+            se.write_table_info(&rel_table_cte)?;
+            se.buf.write_all(b" AS (")?;
+            se.gen_select_cte_single_rel(
+                &rel_table,
+                &rel_type,
+                &request.query(),
+                &main_cte_insert,
+                key,
+            )?;
+            se.buf.write_all(b")")?;
+            table_list.push(rel_table_cte);
+        }
+
         // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt),
         // * handle every (one-to-many) relationships *
         se.gen_insert_rel_routine(
@@ -233,7 +257,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_cte_data,
             rels,
         )?;
-        se.buf.write(b" ")?;
+        se.buf.write_all(b" ")?;
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(&table_list)?;
         Ok(se)

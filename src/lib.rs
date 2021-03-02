@@ -1,9 +1,8 @@
+#![warn(clippy::all)]
 mod builder;
 mod errors;
 pub mod graph_walker;
-mod request_type;
 mod table_store;
-mod utils;
 mod value;
 
 pub use builder::Ciboulette2PostgresBuilder;
@@ -19,4 +18,3 @@ use messy_json::{MessyJson, MessyJsonObject, MessyJsonObjectValue, MessyJsonValu
 use std::collections::BTreeMap;
 
 const POSTGRES_QUOTE: &[u8] = b"\"";
-const POSTGRES_SPACE: &[u8] = b" ";
