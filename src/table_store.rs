@@ -57,6 +57,15 @@ impl<'a> Ciboulette2PostgresTableSettings<'a> {
         }
     }
 
+    pub fn to_cte(&'a self, name: Cow<'a, str>) -> Self {
+        Ciboulette2PostgresTableSettings {
+            id_name: Cow::Borrowed(self.id_name.as_ref()),
+            id_type: Cow::Borrowed(self.id_type.as_ref()),
+            schema: None,
+            name,
+        }
+    }
+
     pub fn new_cte(id_name: Cow<'a, str>, id_type: Cow<'a, str>, name: Cow<'a, str>) -> Self {
         Ciboulette2PostgresTableSettings {
             id_name,
