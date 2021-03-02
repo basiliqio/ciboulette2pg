@@ -4,7 +4,7 @@ expression: res
 
 ---
 (
-    "WITH \n\"cte_peoples_insert\" AS (INSERT INTO \"public\".\"peoples\" (\"public\".\"peoples\".\"first-name\", \"public\".\"peoples\".\"last-name\") VALUES ($0, $1) RETURNING *), \"cte_peoples_data\" AS (SELECT \"cte_peoples_insert\".\"id\" AS \"id\", $2::TEXT AS \"type\", JSON_BUILD_OBJECT($3, \"cte_peoples_insert\".\"age\", $4, \"cte_peoples_insert\".\"first-name\", $5, \"cte_peoples_insert\".\"gender\", $6, \"cte_peoples_insert\".\"last-name\", $7, \"cte_peoples_insert\".\"twitter\")  AS \"data\" FROM \"cte_peoples_insert\" ) SELECT * FROM \"cte_peoples_data\"",
+    "WITH \n\"cte_peoples_insert\" AS (INSERT INTO \"public\".\"peoples\" (\"public\".\"peoples\".\"first-name\", \"public\".\"peoples\".\"last-name\") VALUES ($0, $1) RETURNING *), \"cte_peoples_data\" AS (SELECT \"cte_peoples_insert\".\"id\" AS \"id\", $2::TEXT AS \"type\", JSON_BUILD_OBJECT($3, \"cte_peoples_insert\".\"age\", $4, \"cte_peoples_insert\".\"first-name\", $5, \"cte_peoples_insert\".\"gender\", $6, \"cte_peoples_insert\".\"last-name\", $7, \"cte_peoples_insert\".\"twitter\")  AS \"data\" FROM \"cte_peoples_insert\") SELECT * FROM \"cte_peoples_data\"",
     Ciboulette2SqlArguments {
         inner: [
             Text(

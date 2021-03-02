@@ -4,7 +4,7 @@ expression: res
 
 ---
 (
-    "SELECT \"public\".\"peoples\".\"id\" AS \"id\", $0::TEXT AS \"type\", NULL  AS \"data\" FROM \"public\".\"peoples\" ",
+    "SELECT \"public\".\"peoples\".\"id\" AS \"id\", $0::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"peoples\"",
     Ciboulette2SqlArguments {
         inner: [
             Text(

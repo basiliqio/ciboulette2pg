@@ -7,11 +7,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
+        // INSERT INTO
         self.buf.write(b"INSERT INTO ")?;
+        // INSERT INTO "schema"."mytable"
         self.write_table_info(table)?;
+        // INSERT INTO "schema"."mytable"
         self.buf.write(b" ")?;
         match params.len() {
             0 => {
+                // INSERT INTO "schema"."mytable" DEFAULT VALUES
                 self.buf.write(b"DEFAULT VALUES")?;
             }
             _ => {
@@ -23,12 +27,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     param_ident.push((n, None));
                     param_value.push(v);
                 }
+                // INSERT INTO "schema"."mytable" (..params..)
                 self.write_list(&param_ident, &table, true, Self::insert_ident)?;
+                // INSERT INTO "schema"."mytable" (..params..) VALUES
                 self.buf.write(b" VALUES ")?;
+                // INSERT INTO "schema"."mytable" (..params..) VALUES (..values..)
                 self.write_list(param_value, &table, true, Self::insert_params)?;
             }
         };
         if returning {
+            // INSERT INTO "schema"."mytable" (..params..) VALUES (..values..) RETURNING *
             self.buf.write(b" RETURNING *")?;
         }
         Ok(())
@@ -39,9 +47,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         ids: Vec<value::Ciboulette2SqlValue<'a>>,
         type_: &str,
     ) -> Result<(), Ciboulette2SqlError> {
+        // It's a logic error to have an empty id vector here
         if ids.is_empty() {
             return Err(Ciboulette2SqlError::EmptyRelValue(type_.to_string()));
         }
+        // ($x::type), ($x::type), ($x::type)
         self.write_list(
             ids,
             &Ciboulette2PostgresTableSettings::default(),
@@ -66,36 +76,47 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_table: &Ciboulette2PostgresTableSettings,
         rel_table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
+        // INSERT INTO
         self.buf.write(b"INSERT INTO ")?;
+        // INSERT INTO "schema"."mytable"
         self.write_table_info(dest_table)?;
+        // INSERT INTO "schema"."mytable"
         self.buf.write(b" ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key")
         self.write_list(
             [(main_key, None), (rel_key, None)].iter(),
             &dest_table,
             true,
             Self::insert_ident,
         )?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT
         self.buf.write(b" SELECT ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key"
         self.insert_ident(&("id", Some(main_key)), main_table)?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key",
         self.buf.write(b", ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key"
         self.insert_ident(&("id", Some(rel_key)), rel_table)?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM
         self.buf.write(b" FROM ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table"
         self.write_table_info(main_table)?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table",
         self.buf.write(b", ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table"
         self.write_table_info(rel_table)?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING
         self.buf.write(b" RETURNING ")?;
-        self.write_table_info(dest_table)?;
-        self.buf.write(b".\"")?;
-        self.buf.write(dest_table.id_name().as_bytes())?;
-        self.buf.write(b"\", ")?;
-        self.write_table_info(dest_table)?;
-        self.buf.write(b".\"")?;
-        self.buf.write(main_key.as_bytes())?;
-        self.buf.write(b"\", ")?;
-        self.write_table_info(dest_table)?;
-        self.buf.write(b".\"")?;
-        self.buf.write(rel_key.as_bytes())?;
-        self.buf.write(b"\"")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id"
+        self.insert_ident(&(dest_table.id_name(), None), dest_table)?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id",
+        self.buf.write(b", ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key"
+        self.insert_ident(&(main_key, None), dest_table)?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key",
+        self.buf.write(b", ")?;
+        // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key", "schema"."mytable"."rel_key",
+        self.insert_ident(&(rel_key, None), dest_table)?;
         Ok(())
     }
 
@@ -183,7 +204,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             se.write_table_info(&rel_cte_data)?;
             se.buf.write(b" AS (")?;
             se.gen_select_cte_final(&rel_table, &rel_type, &request.query())?;
-            se.buf.write(b"IN (SELECT \"id\" FROM ")?;
+            se.buf.write(b" IN (SELECT \"id\" FROM ")?;
             se.write_table_info(&rel_cte_id)?;
             se.buf.write(b")")?;
             table_list.push(rel_cte_rel_data);

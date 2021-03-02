@@ -4,7 +4,7 @@ expression: res
 
 ---
 (
-    "SELECT \"public\".\"peoples\".\"id\" AS \"id\", $0::TEXT AS \"type\", JSON_BUILD_OBJECT($1, \"public\".\"peoples\".\"age\", $2, \"public\".\"peoples\".\"first-name\", $3, \"public\".\"peoples\".\"gender\", $4, \"public\".\"peoples\".\"last-name\", $5, \"public\".\"peoples\".\"twitter\")  AS \"data\" FROM \"public\".\"peoples\" ",
+    "SELECT \"public\".\"peoples\".\"id\" AS \"id\", $0::TEXT AS \"type\", JSON_BUILD_OBJECT($1, \"public\".\"peoples\".\"age\", $2, \"public\".\"peoples\".\"first-name\", $3, \"public\".\"peoples\".\"gender\", $4, \"public\".\"peoples\".\"last-name\", $5, \"public\".\"peoples\".\"twitter\")  AS \"data\" FROM \"public\".\"peoples\"",
     Ciboulette2SqlArguments {
         inner: [
             Text(
