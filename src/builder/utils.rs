@@ -12,7 +12,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn insert_ident(
         &mut self,
-        (ident, alias): &(&str, Option<&str>),
+        (ident, alias, cast): &(&str, Option<&str>, Option<&str>),
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(table)?;
@@ -20,6 +20,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write(POSTGRES_QUOTE)?;
         self.buf.write(ident.as_bytes())?;
         self.buf.write(POSTGRES_QUOTE)?;
+        match cast {
+            Some(cast) => {
+                self.buf.write(b"::")?;
+                self.buf.write(cast.as_bytes())?;
+            }
+            None => (),
+        };
         match alias {
             Some(alias) => {
                 self.buf.write(b" AS ")?;

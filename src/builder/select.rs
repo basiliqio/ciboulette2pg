@@ -10,7 +10,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // SELECT
         self.buf.write(b"SELECT ")?;
         // SELECT "schema"."mytable"."id"
-        self.insert_ident(&(table.id_name(), Some("id")), table)?;
+        self.insert_ident(&(table.id_name(), Some("id"), Some("TEXT")), table)?;
         // SELECT "schema"."mytable"."id", ROW_NUMBER() OVER () as \"rn\" FROM
         self.buf.write(b", ROW_NUMBER() OVER () as \"rn\" FROM")?;
         // SELECT "schema"."mytable"."id", ROW_NUMBER() OVER () as \"rn\" FROM "schema"."the_other_table"
@@ -27,7 +27,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // SELECT
         self.buf.write(b"SELECT ")?;
         // SELECT "schema"."mytable"."id"
-        self.insert_ident(&(table.id_name(), Some("id")), table)?;
+        self.insert_ident(&(table.id_name(), Some("id"), Some("TEXT")), table)?;
         // SELECT "schema"."mytable"."id",
         self.buf.write(b", ")?;
         // SELECT "schema"."mytable"."id", $0
@@ -49,7 +49,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_select(
         &mut self,
         table: &Ciboulette2PostgresTableSettings,
-        selected_columns: Vec<(&str, Option<&str>)>,
+        selected_columns: Vec<(&str, Option<&str>, Option<&str>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         // SELECT
         self.buf.write(b"SELECT ")?;
@@ -98,7 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 _ => {
                     self.insert_params(Ciboulette2SqlValue::Text(Some(Cow::Borrowed(el))), &table)?;
                     self.buf.write(b", ")?;
-                    self.insert_ident(&(el, None), &table)?;
+                    self.insert_ident(&(el, None, None), &table)?;
                 }
             }
             if fields.peek().is_some() {
