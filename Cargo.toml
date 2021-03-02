@@ -24,3 +24,8 @@ ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git", pa
 url = "2.2.0"
 tokio = { version = "1", features = ["full"] }
 insta = "1.7"
+
+[dev-dependencies.cargo-husky]
+version = "1"
+default-features = false # Disable features which are enabled by default
+features = ["precommit-hook", "run-cargo-check", "run-cargo-fmt"]

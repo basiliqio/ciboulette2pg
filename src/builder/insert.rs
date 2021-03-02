@@ -84,15 +84,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write(b", ")?;
         self.write_table_info(rel_table)?;
         self.buf.write(b" RETURNING ")?;
-		self.write_table_info(dest_table)?;
+        self.write_table_info(dest_table)?;
         self.buf.write(b".\"")?;
         self.buf.write(dest_table.id_name().as_bytes())?;
-		self.buf.write(b"\", ")?;
+        self.buf.write(b"\", ")?;
         self.write_table_info(dest_table)?;
         self.buf.write(b".\"")?;
         self.buf.write(main_key.as_bytes())?;
         self.buf.write(b"\", ")?;
-		self.write_table_info(dest_table)?;
+        self.write_table_info(dest_table)?;
         self.buf.write(b".\"")?;
         self.buf.write(rel_key.as_bytes())?;
         self.buf.write(b"\"")?;
@@ -152,7 +152,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 Cow::from(rel_table.id_type().as_ref()),
                 Cow::from(format!("cte_rel_{}_insert", rel_table.name())),
             );
-			let rel_cte_rel_data = Ciboulette2PostgresTableSettings::new_cte(
+            let rel_cte_rel_data = Ciboulette2PostgresTableSettings::new_cte(
                 Cow::from(rel_table.id_name().as_ref()),
                 Cow::from(rel_table.id_type().as_ref()),
                 Cow::from(format!("cte_rel_{}_rel_data", rel_table.name())),
@@ -176,7 +176,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_cte_id,
             )?;
             se.buf.write(b"), ")?;
-			se.write_table_info(&rel_cte_rel_data)?;
+            se.write_table_info(&rel_cte_rel_data)?;
             se.buf.write(b" AS (")?;
             se.gen_select_cte_final(&rel_cte_insert, &bucket.resource(), &request.query())?;
             se.buf.write(b"), ")?;
@@ -184,7 +184,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             se.buf.write(b" AS (")?;
             se.gen_select_cte_final(&rel_table, &rel_type, &request.query())?;
             se.buf.write(b"IN (SELECT \"id\" FROM ")?;
-			se.write_table_info(&rel_cte_id)?;
+            se.write_table_info(&rel_cte_id)?;
             se.buf.write(b")")?;
             table_list.push(rel_cte_rel_data);
             table_list.push(rel_cte_data);
