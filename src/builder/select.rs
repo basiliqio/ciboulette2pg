@@ -1,4 +1,5 @@
 use super::*;
+use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
 
 const EMPTY_LIST: [Cow<'static, str>; 0] = [];
 
@@ -173,6 +174,91 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 // SELECT * FROM "schema"."mytable" UNION ALL ...
                 self.buf.write_all(b" UNION ALL ")?;
             }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn gen_select_rel_routine(
+        &mut self,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
+        request: &'a CibouletteCreateRequest<'a>,
+        table_list: &mut Vec<Ciboulette2PostgresTableSettings<'a>>,
+        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        rels: Vec<Ciboulette2PostgresRelationships<'a>>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        let rel_iter = rels.into_iter().peekable();
+        for Ciboulette2PostgresRelationships {
+            type_: rel_type,
+            bucket,
+            values: _rel_ids,
+        } in rel_iter
+        {
+            self.buf.write_all(b", ")?;
+            let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
+            let rel_rel_table = ciboulette_table_store.get(bucket.resource().name().as_str())?;
+            let rel_cte_rel_data =
+                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
+            let rel_cte_data =
+                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())))?;
+            // "cte_rel_myrel_rel_data"
+            self.write_table_info(&rel_cte_rel_data)?;
+            // "cte_rel_myrel_rel_data" AS (
+            self.buf.write_all(b" AS (")?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt
+            self.gen_select_cte_final(
+                &rel_rel_table,
+                &bucket.resource(),
+                &request.query(),
+                request.query().include().contains(&bucket.resource()),
+            )?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE
+            self.buf.write_all(b" WHERE ")?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to"
+            self.insert_ident(
+                &(
+                    Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
+                    None,
+                    None,
+                ),
+                &rel_rel_table,
+            )?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" =
+            self.buf.write_all(b" = ")?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"
+            self.insert_ident(
+                &(main_cte_data.id_name().clone(), None, None),
+                &main_cte_data,
+            )?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"),
+            self.buf.write_all(b"), ")?;
+            self.write_table_info(&rel_cte_data)?;
+            self.buf.write_all(b" AS (")?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt)
+            self.gen_select_cte_final(
+                &rel_table,
+                &rel_type,
+                &request.query(),
+                request.query().include().contains(&rel_type),
+            )?;
+            self.buf.write_all(b" WHERE ")?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
+            self.insert_ident(&(rel_table.id_name().clone(), None, None), &rel_table)?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
+            self.buf.write_all(b" IN (SELECT ")?;
+            self.insert_ident(
+                &(
+                    Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
+                    None,
+                    None,
+                ),
+                &rel_cte_rel_data,
+            )?;
+            self.buf.write_all(b" FROM ")?;
+            self.write_table_info(&rel_cte_rel_data)?;
+            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM "cte_rel_myrel_id")
+            self.buf.write_all(b")")?;
+            table_list.push(rel_cte_data);
+            table_list.push(rel_cte_rel_data);
         }
         Ok(())
     }

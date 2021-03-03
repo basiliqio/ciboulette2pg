@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresMainInsert<'a> {
+pub struct Ciboulette2PostgresMain<'a> {
     pub insert_values: Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
     pub single_relationships: Vec<&'a str>,
 }
@@ -67,7 +67,7 @@ pub fn fill_attributes<'a>(
 pub fn gen_query_insert<'a>(
     store: &'a CibouletteStore,
     req: &'a CibouletteCreateRequest<'a>,
-) -> Result<Ciboulette2PostgresMainInsert<'a>, Ciboulette2SqlError> {
+) -> Result<Ciboulette2PostgresMain<'a>, Ciboulette2SqlError> {
     let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
     let mut res_rel: Vec<&'a str> = Vec::with_capacity(128);
     let main_type = req.path().main_type();
@@ -100,7 +100,7 @@ pub fn gen_query_insert<'a>(
             }
         }
     }
-    Ok(Ciboulette2PostgresMainInsert {
+    Ok(Ciboulette2PostgresMain {
         insert_values: res_val,
         single_relationships: res_rel,
     })

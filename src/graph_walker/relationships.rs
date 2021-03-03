@@ -9,14 +9,14 @@ use super::*;
 
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresRelationshipsInsert<'a> {
+pub struct Ciboulette2PostgresRelationships<'a> {
     pub type_: &'a CibouletteResourceType<'a>,
     pub bucket: &'a CibouletteRelationshipBucket<'a>,
     pub values: Option<Vec<Ciboulette2SqlValue<'a>>>,
 }
 
 fn extract_relationships<'a>(
-    buf: &mut Vec<Ciboulette2PostgresRelationshipsInsert<'a>>,
+    buf: &mut Vec<Ciboulette2PostgresRelationships<'a>>,
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
     type_: &'a CibouletteResourceType<'a>,
     type_to_alias: &'a str,
@@ -27,7 +27,7 @@ fn extract_relationships<'a>(
         .and_then(|x| x.data().as_ref())
     {
         Some(CibouletteResourceIdentifierSelector::One(rel_id)) => {
-            buf.push(Ciboulette2PostgresRelationshipsInsert {
+            buf.push(Ciboulette2PostgresRelationships {
                 type_,
                 bucket: opt,
                 values: Some(vec![Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
@@ -36,7 +36,7 @@ fn extract_relationships<'a>(
             });
         }
         Some(CibouletteResourceIdentifierSelector::Many(rels_id)) => {
-            buf.push(Ciboulette2PostgresRelationshipsInsert {
+            buf.push(Ciboulette2PostgresRelationships {
                 type_,
                 bucket: opt,
                 values: Some(
@@ -47,7 +47,7 @@ fn extract_relationships<'a>(
                 ),
             });
         }
-        None => buf.push(Ciboulette2PostgresRelationshipsInsert {
+        None => buf.push(Ciboulette2PostgresRelationships {
             type_,
             bucket: opt,
             values: None,
@@ -58,8 +58,8 @@ fn extract_relationships<'a>(
 pub fn gen_query_insert<'a>(
     store: &'a CibouletteStore<'a>,
     req: &'a CibouletteCreateRequest<'a>,
-) -> Result<Vec<Ciboulette2PostgresRelationshipsInsert<'a>>, Ciboulette2SqlError> {
-    let mut res: Vec<Ciboulette2PostgresRelationshipsInsert<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
+) -> Result<Vec<Ciboulette2PostgresRelationships<'a>>, Ciboulette2SqlError> {
+    let mut res: Vec<Ciboulette2PostgresRelationships<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
 
     let main_type = req.path().main_type();
     let main_type_index = store

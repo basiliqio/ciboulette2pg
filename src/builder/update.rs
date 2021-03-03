@@ -1,6 +1,6 @@
 use super::*;
-use crate::graph_walker::creation::main::Ciboulette2PostgresMainInsert;
-use crate::graph_walker::creation::relationships::Ciboulette2PostgresRelationshipsInsert;
+use crate::graph_walker::creation::main::Ciboulette2PostgresMain;
+use crate::graph_walker::creation::relationships::Ciboulette2PostgresRelationships;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_rel_select(
@@ -80,7 +80,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.write_table_info(&main_cte_update)?;
         // WITH "cte_main_insert" AS (
         se.buf.write_all(b" AS (")?;
-        let Ciboulette2PostgresMainInsert {
+        let Ciboulette2PostgresMain {
             insert_values: main_inserts_values,
             single_relationships: main_single_relationships,
         } = crate::graph_walker::creation::main::gen_query_insert(&ciboulette_store, &request)?;
