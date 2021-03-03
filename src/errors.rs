@@ -16,6 +16,8 @@ pub enum Ciboulette2SqlError {
     EmptyRelValue(String),
     #[error("A null char was found in a indentifier `${0}`")]
     NullCharIdent(String),
+    #[error("Updating one-to-many relationships along with the main object is disallowed`")]
+    UpdateManyRelationships,
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
     #[error(transparent)]

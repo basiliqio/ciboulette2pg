@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/gen_json_builder.rs
+expression: res
+
+---
+(
+    "NULL::json ",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)

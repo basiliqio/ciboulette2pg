@@ -1,0 +1,82 @@
+---
+source: src/builder/tests/insert.rs
+expression: res
+
+---
+(
+    "WITH \n\"cte_peoples_insert\" AS (INSERT INTO \"public\".\"peoples\" (\"public\".\"peoples\".\"first-name\", \"public\".\"peoples\".\"last-name\") VALUES ($0, $1) RETURNING *), \"cte_peoples_data\" AS (SELECT \"cte_peoples_insert\".\"id\"::TEXT AS \"id\", $2::TEXT AS \"type\", JSON_BUILD_OBJECT($3, \"cte_peoples_insert\".\"age\", $4, \"cte_peoples_insert\".\"first-name\", $5, \"cte_peoples_insert\".\"gender\", $6, \"cte_peoples_insert\".\"last-name\", $7, \"cte_peoples_insert\".\"twitter\")  AS \"data\" FROM \"cte_peoples_insert\"), \"cte_rel_articles_id\" AS (VALUES ($8::uuid), ($9::uuid)), \"cte_rel_articles_insert\" AS (INSERT INTO \"public\".\"people-article\" (\"public\".\"people-article\".\"article_id\", \"public\".\"people-article\".\"people_id\") SELECT \"cte_peoples_data\".\"id\" AS \"article_id\", \"cte_rel_articles_id\".\"id\" AS \"people_id\" FROM \"cte_peoples_data\", \"cte_rel_articles_id\" RETURNING \"public\".\"people-article\".\"id\", \"public\".\"people-article\".\"article_id\", \"public\".\"people-article\".\"people_id\"), \"cte_rel_articles_rel_data\" AS (SELECT \"public\".\"people-article\".\"id\"::TEXT AS \"id\", $10::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"people-article\" WHERE \"public\".\"people-article\".\"people_id\" = \"cte_peoples_data\".\"id\"), \"cte_rel_articles_data\" AS (SELECT \"public\".\"articles\".\"id\"::TEXT AS \"id\", $11::TEXT AS \"type\", JSON_BUILD_OBJECT($12, \"public\".\"articles\".\"body\", $13, \"public\".\"articles\".\"title\")  AS \"data\" FROM \"public\".\"articles\" WHERE \"public\".\"articles\".\"id\" IN (SELECT \"cte_rel_articles_rel_data\".\"article_id\" FROM \"cte_rel_articles_rel_data\") SELECT * FROM \"cte_peoples_data\" UNION ALL SELECT * FROM \"cte_rel_articles_data\" UNION ALL SELECT * FROM \"cte_rel_articles_rel_data\"",
+    Ciboulette2SqlArguments {
+        inner: [
+            Text(
+                Some(
+                    "Hello",
+                ),
+            ),
+            Text(
+                Some(
+                    "World",
+                ),
+            ),
+            Text(
+                Some(
+                    "peoples",
+                ),
+            ),
+            Text(
+                Some(
+                    "age",
+                ),
+            ),
+            Text(
+                Some(
+                    "first-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "gender",
+                ),
+            ),
+            Text(
+                Some(
+                    "last-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "twitter",
+                ),
+            ),
+            Text(
+                Some(
+                    "8759b021-0932-40cb-8386-e1a83da1c73e",
+                ),
+            ),
+            Text(
+                Some(
+                    "5043c5ef-debd-4b60-b905-7dab2a7338bc",
+                ),
+            ),
+            Text(
+                Some(
+                    "people-article",
+                ),
+            ),
+            Text(
+                Some(
+                    "articles",
+                ),
+            ),
+            Text(
+                Some(
+                    "body",
+                ),
+            ),
+            Text(
+                Some(
+                    "title",
+                ),
+            ),
+        ],
+    },
+)

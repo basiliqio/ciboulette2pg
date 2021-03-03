@@ -4,17 +4,12 @@ expression: res
 
 ---
 (
-    "SELECT \"public\".\"favorite_color\".\"id\"::TEXT AS \"id\", $0::TEXT AS \"type\", JSON_BUILD_OBJECT($1, \"public\".\"favorite_color\".\"color\")  AS \"data\" FROM \"public\".\"favorite_color\" WHERE \"public\".\"favorite_color\".\"id\" IN (SELECT \"public\".\"cte_peoples\".\"favorite_color\" FROM \"public\".\"cte_peoples\")",
+    "SELECT \"public\".\"favorite_color\".\"id\"::TEXT AS \"id\", $0::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"favorite_color\" WHERE \"public\".\"favorite_color\".\"id\" IN (SELECT \"public\".\"cte_peoples\".\"favorite_color\" FROM \"public\".\"cte_peoples\")",
     Ciboulette2SqlArguments {
         inner: [
             Text(
                 Some(
                     "favorite_color",
-                ),
-            ),
-            Text(
-                Some(
-                    "color",
                 ),
             ),
         ],

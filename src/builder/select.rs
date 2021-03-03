@@ -8,6 +8,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTableSettings<'a>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
+        include: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         // SELECT
         self.buf.write_all(b"SELECT ")?;
@@ -30,7 +31,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type",
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..)
-        self.gen_json_builder(table, type_, query)?;
+        self.gen_json_builder(table, type_, query, include)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM
         self.buf.write_all(b" AS \"data\" FROM ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."other_table"
@@ -47,7 +48,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         field_id: &Ciboulette2PostgresSafeIdent<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable"
-        self.gen_select_cte_final(&table, &type_, &query)?;
+        self.gen_select_cte_final(&table, &type_, &query, query.include().contains(&type_))?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE
         self.buf.write_all(b" WHERE ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id"
@@ -115,9 +116,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTableSettings<'_>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
+        include: bool,
     ) -> Result<(), Ciboulette2SqlError> {
-        match query.sparse().get(type_) {
-            Some(fields) => {
+        match (query.sparse().get(type_), include) {
+            (Some(fields), true) => {
                 // If there is no sparse field, nothing will be returned
                 self.gen_json_builder_routine(
                     table,
@@ -126,7 +128,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     fields.iter().map(Cow::as_ref).peekable(),
                 )?;
             }
-            None => {
+            (None, true) => {
                 // If the sparse parameter is omitted, everything is returned
                 self.gen_json_builder_routine(
                     table,
@@ -138,6 +140,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         .keys()
                         .map(|x| x.as_str())
                         .peekable(),
+                )?;
+            }
+            (_, false) => {
+                // If the type is not include, return NULL::json
+                self.gen_json_builder_routine(
+                    table,
+                    type_.schema(),
+                    type_.name(),
+                    vec![].into_iter().peekable(),
                 )?;
             }
         };

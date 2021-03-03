@@ -12,7 +12,7 @@ use super::*;
 pub struct Ciboulette2PostgresRelationshipsInsert<'a> {
     pub type_: &'a CibouletteResourceType<'a>,
     pub bucket: &'a CibouletteRelationshipBucket<'a>,
-    pub values: Vec<Ciboulette2SqlValue<'a>>,
+    pub values: Option<Vec<Ciboulette2SqlValue<'a>>>,
 }
 
 fn extract_relationships<'a>(
@@ -30,20 +30,28 @@ fn extract_relationships<'a>(
             buf.push(Ciboulette2PostgresRelationshipsInsert {
                 type_,
                 bucket: opt,
-                values: vec![Ciboulette2SqlValue::Text(Some(Cow::Borrowed(rel_id.id())))],
+                values: Some(vec![Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
+                    rel_id.id(),
+                )))]),
             });
         }
         Some(CibouletteResourceIdentifierSelector::Many(rels_id)) => {
             buf.push(Ciboulette2PostgresRelationshipsInsert {
                 type_,
                 bucket: opt,
-                values: rels_id
-                    .iter()
-                    .map(|x| Ciboulette2SqlValue::Text(Some(Cow::Borrowed(x.id()))))
-                    .collect(),
+                values: Some(
+                    rels_id
+                        .iter()
+                        .map(|x| Ciboulette2SqlValue::Text(Some(Cow::Borrowed(x.id()))))
+                        .collect(),
+                ),
             });
         }
-        None => (),
+        None => buf.push(Ciboulette2PostgresRelationshipsInsert {
+            type_,
+            bucket: opt,
+            values: None,
+        }),
     }
 }
 
