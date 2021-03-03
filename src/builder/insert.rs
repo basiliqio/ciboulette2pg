@@ -21,13 +21,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.buf.write_all(b"DEFAULT VALUES")?;
             }
             _ => {
-                let mut param_ident: Vec<(&str, Option<&str>, Option<&str>)> =
-                    Vec::with_capacity(params.len());
+                let mut param_ident: Vec<(
+                    Ciboulette2PostgresSafeIdent,
+                    Option<Ciboulette2PostgresSafeIdent>,
+                    Option<Ciboulette2PostgresSafeIdent>,
+                )> = Vec::with_capacity(params.len());
                 let mut param_value: Vec<Ciboulette2SqlValue<'_>> =
                     Vec::with_capacity(params.len());
 
                 for (n, v) in params.into_iter() {
-                    param_ident.push((n, None, None));
+                    param_ident.push((Ciboulette2PostgresSafeIdent::try_from(n)?, None, None));
                     param_value.push(v);
                 }
                 // INSERT INTO "schema"."mytable" (..params..)
@@ -74,8 +77,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_rel_insert(
         &mut self,
         dest_table: &Ciboulette2PostgresTableSettings,
-        main_key: &str,
-        rel_key: &str,
+        main_key: &Ciboulette2PostgresSafeIdent,
+        rel_key: &Ciboulette2PostgresSafeIdent,
         main_table: &Ciboulette2PostgresTableSettings,
         rel_table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -87,7 +90,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b" ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key")
         self.write_list(
-            [(main_key, None, None), (rel_key, None, None)].iter(),
+            [
+                (main_key.clone(), None, None),
+                (rel_key.clone(), None, None),
+            ]
+            .iter(),
             &dest_table,
             true,
             Self::insert_ident,
@@ -95,11 +102,25 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT
         self.buf.write_all(b" SELECT ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key"
-        self.insert_ident(&("id", Some(main_key), None), main_table)?;
+        self.insert_ident(
+            &(
+                Ciboulette2PostgresSafeIdent::try_from("id")?,
+                Some(main_key.clone()),
+                None,
+            ),
+            main_table,
+        )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key",
         self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key"
-        self.insert_ident(&("id", Some(rel_key), None), rel_table)?;
+        self.insert_ident(
+            &(
+                Ciboulette2PostgresSafeIdent::try_from("id")?,
+                Some(rel_key.clone()),
+                None,
+            ),
+            rel_table,
+        )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM
         self.buf.write_all(b" FROM ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table"
@@ -111,15 +132,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING
         self.buf.write_all(b" RETURNING ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id"
-        self.insert_ident(&(dest_table.id_name(), None, None), dest_table)?;
+        self.insert_ident(&(dest_table.id_name().clone(), None, None), dest_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id",
         self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key"
-        self.insert_ident(&(main_key, None, None), dest_table)?;
+        self.insert_ident(&(main_key.clone(), None, None), dest_table)?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key",
         self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key", "schema"."mytable"."rel_key",
-        self.insert_ident(&(rel_key, None, None), dest_table)?;
+        self.insert_ident(&(rel_key.clone(), None, None), dest_table)?;
         Ok(())
     }
 
@@ -142,13 +163,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.buf.write_all(b", ")?;
             let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
             let rel_cte_id =
-                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_id", rel_table.name())));
+                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_id", rel_table.name())))?;
             let rel_cte_insert =
-                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_insert", rel_table.name())));
+                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_insert", rel_table.name())))?;
             let rel_cte_rel_data =
-                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())));
+                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
             let rel_cte_data =
-                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())));
+                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())))?;
             // "cte_rel_myrel_id"
             self.write_table_info(&rel_cte_id)?;
             // "cte_rel_myrel_id" AS (VALUES
@@ -164,8 +185,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt)
             self.gen_rel_insert(
                 &rel_table,
-                bucket.from().as_str(),
-                bucket.to().as_str(),
+                &Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
+                &Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
                 &main_cte_data,
                 &rel_cte_id,
             )?;
@@ -200,9 +221,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let main_type = request.path().main_type();
         let main_table = ciboulette_table_store.get(main_type.name().as_str())?;
         let main_cte_insert =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_insert", main_table.name())));
+            main_table.to_cte(Cow::Owned(format!("cte_{}_insert", main_table.name())))?;
         let main_cte_data =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())));
+            main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
         table_list.push(main_cte_data.clone());
         // WITH
         se.buf.write_all(b"WITH \n")?;
@@ -233,7 +254,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             se.buf.write_all(b", ")?;
             let rel_table = ciboulette_table_store.get(key)?;
             let rel_table_cte =
-                rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())));
+                rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
             let rel_type = main_type.get_relationship(&ciboulette_store, key)?;
             se.write_table_info(&rel_table_cte)?;
             se.buf.write_all(b" AS (")?;
@@ -242,7 +263,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_type,
                 &request.query(),
                 &main_cte_insert,
-                key,
+                &Ciboulette2PostgresSafeIdent::try_from(key)?,
             )?;
             se.buf.write_all(b")")?;
             table_list.push(rel_table_cte);

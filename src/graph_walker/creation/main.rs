@@ -54,6 +54,9 @@ pub fn fill_attributes<'a>(
 ) -> Result<(), Ciboulette2SqlError> {
     if let Some(obj) = obj {
         for (k, v) in obj.iter() {
+            if matches!(v, MessyJsonValue::Null(_, _)) {
+                continue;
+            }
             // Iterate over every attribute
             args.push((k, Ciboulette2SqlValue::try_from(v)?));
         }

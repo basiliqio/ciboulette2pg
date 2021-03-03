@@ -16,28 +16,28 @@ mod union_select_all;
 fn gen_table_store<'a>() -> Ciboulette2PostgresTableStore<'a> {
     vec![
         Ciboulette2PostgresTableSettings::new(
-            Cow::Borrowed("id"),
-            Cow::Borrowed("uuid"),
-            Some(Cow::Borrowed("public")),
-            Cow::Borrowed("people-article"),
+            Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+            Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+            Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+            Ciboulette2PostgresSafeIdent::try_from("people-article").unwrap(),
         ),
         Ciboulette2PostgresTableSettings::new(
-            Cow::Borrowed("id"),
-            Cow::Borrowed("uuid"),
-            Some(Cow::Borrowed("public")),
-            Cow::Borrowed("articles"),
+            Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+            Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+            Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+            Ciboulette2PostgresSafeIdent::try_from("articles").unwrap(),
         ),
         Ciboulette2PostgresTableSettings::new(
-            Cow::Borrowed("id"),
-            Cow::Borrowed("uuid"),
-            Some(Cow::Borrowed("public")),
-            Cow::Borrowed("peoples"),
+            Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+            Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+            Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+            Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         ),
         Ciboulette2PostgresTableSettings::new(
-            Cow::Borrowed("id"),
-            Cow::Borrowed("uuid"),
-            Some(Cow::Borrowed("public")),
-            Cow::Borrowed("favorite_color"),
+            Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+            Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+            Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+            Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         ),
     ]
     .into_iter()

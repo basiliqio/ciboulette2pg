@@ -12,7 +12,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn insert_ident(
         &mut self,
-        (ident, alias, cast): &(&str, Option<&str>, Option<&str>),
+        (ident, alias, cast): &(
+            Ciboulette2PostgresSafeIdent,
+            Option<Ciboulette2PostgresSafeIdent>,
+            Option<Ciboulette2PostgresSafeIdent>,
+        ),
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(table)?;

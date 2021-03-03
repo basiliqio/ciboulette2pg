@@ -12,7 +12,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // SELECT
         self.buf.write_all(b"SELECT ")?;
         // SELECT "schema"."mytable"."id"
-        self.insert_ident(&(table.id_name(), Some("id"), Some("TEXT")), table)?;
+        self.insert_ident(
+            &(
+                table.id_name().clone(),
+                Some(Ciboulette2PostgresSafeIdent::try_from("id")?),
+                Some(Ciboulette2PostgresSafeIdent::try_from("TEXT")?),
+            ),
+            table,
+        )?;
         // SELECT "schema"."mytable"."id",
         self.buf.write_all(b", ")?;
         // SELECT "schema"."mytable"."id", $0
@@ -37,18 +44,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
         main_table: &Ciboulette2PostgresTableSettings<'a>,
-        field_id: &str,
+        field_id: &Ciboulette2PostgresSafeIdent<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable"
         self.gen_select_cte_final(&table, &type_, &query)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE
         self.buf.write_all(b" WHERE ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id"
-        self.insert_ident(&(table.id_name().as_ref(), None, None), &table)?;
+        self.insert_ident(&(table.id_name().clone(), None, None), &table)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT
         self.buf.write_all(b" IN (SELECT ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id"
-        self.insert_ident(&(field_id, None, None), &main_table)?;
+        self.insert_ident(&(field_id.clone(), None, None), &main_table)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id" FROM
         self.buf.write_all(b" FROM ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id" FROM "schema"."othertable"
@@ -89,7 +96,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 _ => {
                     self.insert_params(Ciboulette2SqlValue::Text(Some(Cow::Borrowed(el))), &table)?;
                     self.buf.write_all(b", ")?;
-                    self.insert_ident(&(el, None, None), &table)?;
+                    self.insert_ident(
+                        &(Ciboulette2PostgresSafeIdent::try_from(el)?, None, None),
+                        &table,
+                    )?;
                 }
             }
             if fields.peek().is_some() {

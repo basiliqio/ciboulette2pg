@@ -14,6 +14,10 @@ pub enum Ciboulette2SqlError {
     UnknownTable(String),
     #[error("A relationship value was empty for type `{0}`")]
     EmptyRelValue(String),
+    #[error("A null char was found in a indentifier `${0}`")]
+    NullCharIdent(String),
+    #[error("A non-ascii char was found in a indentifier `${0}`")]
+    NonAsciiCharInIdent(String),
     #[error(transparent)]
     CibouletteError(#[from] ciboulette::CibouletteError),
     #[error(transparent)]

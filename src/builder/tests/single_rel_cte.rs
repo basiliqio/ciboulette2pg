@@ -4,16 +4,16 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let rel_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("favorite_color"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
     );
     let main_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("cte_peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples").unwrap();
@@ -24,7 +24,7 @@ fn simple() {
             store.get_type("favorite_color").unwrap(),
             ciboulette_request.query(),
             &main_table,
-            "favorite_color",
+            &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         )
         .unwrap();
 
@@ -36,16 +36,16 @@ fn simple() {
 fn sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let rel_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("favorite_color"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
     );
     let main_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("cte_peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples?fields[favorite_color]=color").unwrap();
@@ -56,7 +56,7 @@ fn sparse() {
             store.get_type("favorite_color").unwrap(),
             ciboulette_request.query(),
             &main_table,
-            "favorite_color",
+            &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         )
         .unwrap();
 
@@ -68,16 +68,16 @@ fn sparse() {
 fn empty_sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let rel_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("favorite_color"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
     );
     let main_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("cte_peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples?fields[favorite_color]=").unwrap();
@@ -88,7 +88,7 @@ fn empty_sparse() {
             store.get_type("favorite_color").unwrap(),
             ciboulette_request.query(),
             &main_table,
-            "favorite_color",
+            &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         )
         .unwrap();
 

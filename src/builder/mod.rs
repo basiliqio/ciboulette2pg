@@ -6,6 +6,7 @@ use std::io::Write;
 mod insert;
 mod select;
 mod utils;
+// mod update;
 
 #[cfg(test)]
 mod tests;

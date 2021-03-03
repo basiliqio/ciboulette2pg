@@ -4,10 +4,10 @@ use super::*;
 fn no_sparse_fields() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples").unwrap();
@@ -28,10 +28,10 @@ fn no_sparse_fields() {
 fn sparse_field() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples?fields[peoples]=first-name,last-name").unwrap();
@@ -52,10 +52,10 @@ fn sparse_field() {
 fn sparse_field_empty() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples?fields[peoples]=").unwrap();

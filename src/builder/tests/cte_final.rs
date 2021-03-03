@@ -4,10 +4,10 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples").unwrap();
@@ -28,10 +28,10 @@ fn simple() {
 fn sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples?fields[peoples]=first-name").unwrap();
@@ -52,10 +52,10 @@ fn sparse() {
 fn empty_sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("peoples"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     let store = gen_bag();
     let url = Url::parse("http://localhost/peoples?fields[peoples]=").unwrap();

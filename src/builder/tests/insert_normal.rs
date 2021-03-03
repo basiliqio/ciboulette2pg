@@ -4,10 +4,10 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("mysimpletable"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
     );
     let params: Vec<(&str, Ciboulette2SqlValue<'_>)> = vec![
         (
@@ -29,10 +29,10 @@ fn simple() {
 fn no_returning() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("mysimpletable"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
     );
     let params: Vec<(&str, Ciboulette2SqlValue<'_>)> = vec![
         (
@@ -54,10 +54,10 @@ fn no_returning() {
 fn no_params() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("mysimpletable"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
     );
     builder.gen_insert_normal(&table, vec![], true).unwrap();
     let res = builder.build().unwrap();

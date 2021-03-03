@@ -4,30 +4,30 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("people_article"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("people_article").unwrap(),
     );
 
     let main_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("cte_main_insert"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("cte_main_insert").unwrap(),
     );
     let rel_table = Ciboulette2PostgresTableSettings::new(
-        Cow::Borrowed("id"),
-        Cow::Borrowed("uuid"),
-        Some(Cow::Borrowed("public")),
-        Cow::Borrowed("cte_rel_data"),
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
+        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PostgresSafeIdent::try_from("cte_rel_data").unwrap(),
     );
 
     builder
         .gen_rel_insert(
             &dest_table,
-            "author_id",
-            "article_id",
+            &Ciboulette2PostgresSafeIdent::try_from("author_id").unwrap(),
+            &Ciboulette2PostgresSafeIdent::try_from("article_id").unwrap(),
             &main_table,
             &rel_table,
         )

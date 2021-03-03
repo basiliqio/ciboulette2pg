@@ -159,7 +159,6 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#f19cd643346ad8b770c6d3973ca2e53fde63343b"
 dependencies = [
  "getset",
  "lazy_static",
@@ -197,7 +196,6 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#f19cd643346ad8b770c6d3973ca2e53fde63343b"
 dependencies = [
  "ciboulette",
  "messy_json",
@@ -674,7 +672,7 @@ checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
 [[package]]
 name = "messy_json"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/messy_json.git#565ce1b98d60eff86595ad58e39a2bf80a202d06"
+source = "git+https://gitlab.com/basiliq/messy_json.git#de4106275a1991affdc342aeb209027a5d8a995a"
 dependencies = [
  "itertools",
  "serde",
