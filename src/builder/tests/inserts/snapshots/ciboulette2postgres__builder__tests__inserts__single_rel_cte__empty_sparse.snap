@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/single_rel_cte.rs
+source: src/builder/tests/inserts/single_rel_cte.rs
 expression: res
 
 ---

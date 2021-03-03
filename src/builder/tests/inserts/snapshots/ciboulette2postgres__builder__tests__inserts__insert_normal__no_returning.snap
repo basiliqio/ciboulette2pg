@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/insert_normal.rs
+source: src/builder/tests/inserts/insert_normal.rs
 expression: res
 
 ---

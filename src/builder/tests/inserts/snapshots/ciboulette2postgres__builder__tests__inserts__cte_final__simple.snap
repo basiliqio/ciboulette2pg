@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/cte_final.rs
+source: src/builder/tests/inserts/cte_final.rs
 expression: res
 
 ---

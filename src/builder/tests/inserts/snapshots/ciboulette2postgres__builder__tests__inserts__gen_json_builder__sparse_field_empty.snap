@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/gen_json_builder.rs
+source: src/builder/tests/inserts/gen_json_builder.rs
 expression: res
 
 ---

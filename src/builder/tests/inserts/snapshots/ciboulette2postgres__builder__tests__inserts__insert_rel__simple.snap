@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/insert_rel.rs
+source: src/builder/tests/inserts/insert_rel.rs
 expression: res
 
 ---

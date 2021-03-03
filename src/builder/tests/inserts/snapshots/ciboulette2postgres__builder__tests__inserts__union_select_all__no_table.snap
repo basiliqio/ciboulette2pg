@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/union_select_all.rs
+source: src/builder/tests/inserts/union_select_all.rs
 expression: res
 
 ---
