@@ -194,3 +194,162 @@ fn relationship_single_with_multiple_values() {
         true
     );
 }
+
+#[test]
+fn not_all_required_fields() {
+    let ciboulette_store = gen_bag();
+    let table_store = gen_table_store();
+    let parsed_url =
+        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
+    const INTENTION: CibouletteIntention = CibouletteIntention::Update;
+    const BODY: Option<&str> = Some(
+        r#"
+	{
+		"data":
+		{
+			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
+			"type": "peoples",
+			"attributes":
+			{
+				"first-name": "Bonjour"
+			}
+		}
+	}
+	"#,
+    );
+
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let request = req_builder.build(&ciboulette_store).unwrap();
+    let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
+    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+        &ciboulette_store,
+        &table_store,
+        &ciboulette_request,
+    )
+    .unwrap();
+
+    let res = builder.build().unwrap();
+
+    insta::assert_debug_snapshot!(res);
+}
+
+#[test]
+fn forced_null_fields() {
+    let ciboulette_store = gen_bag();
+    let table_store = gen_table_store();
+    let parsed_url =
+        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
+    const INTENTION: CibouletteIntention = CibouletteIntention::Update;
+    const BODY: Option<&str> = Some(
+        r#"
+	{
+		"data":
+		{
+			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
+			"type": "peoples",
+			"attributes":
+			{
+				"first-name": "Bonjour",
+				"gender": null
+			}
+		}
+	}
+	"#,
+    );
+
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let request = req_builder.build(&ciboulette_store).unwrap();
+    let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
+    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+        &ciboulette_store,
+        &table_store,
+        &ciboulette_request,
+    )
+    .unwrap();
+
+    let res = builder.build().unwrap();
+
+    insta::assert_debug_snapshot!(res);
+}
+
+#[test]
+fn include_single_rel() {
+    let ciboulette_store = gen_bag();
+    let table_store = gen_table_store();
+    let parsed_url = Url::parse(
+        "http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2?include=favorite_color",
+    )
+    .unwrap();
+    const INTENTION: CibouletteIntention = CibouletteIntention::Update;
+    const BODY: Option<&str> = Some(
+        r#"
+	{
+		"data":
+		{
+			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
+			"type": "peoples",
+			"attributes":
+			{
+				"first-name": "Bonjour",
+				"last-name": "Le Monde"
+			}
+		}
+	}
+	"#,
+    );
+
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let request = req_builder.build(&ciboulette_store).unwrap();
+    let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
+    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+        &ciboulette_store,
+        &table_store,
+        &ciboulette_request,
+    )
+    .unwrap();
+
+    let res = builder.build().unwrap();
+
+    insta::assert_debug_snapshot!(res);
+}
+
+#[test]
+fn include_multi_rel() {
+    let ciboulette_store = gen_bag();
+    let table_store = gen_table_store();
+    let parsed_url = Url::parse(
+        "http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2?include=articles",
+    )
+    .unwrap();
+    const INTENTION: CibouletteIntention = CibouletteIntention::Update;
+    const BODY: Option<&str> = Some(
+        r#"
+	{
+		"data":
+		{
+			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
+			"type": "peoples",
+			"attributes":
+			{
+				"first-name": "Bonjour",
+				"last-name": "Le Monde"
+			}
+		}
+	}
+	"#,
+    );
+
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let request = req_builder.build(&ciboulette_store).unwrap();
+    let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
+    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+        &ciboulette_store,
+        &table_store,
+        &ciboulette_request,
+    )
+    .unwrap();
+
+    let res = builder.build().unwrap();
+
+    insta::assert_debug_snapshot!(res);
+}
