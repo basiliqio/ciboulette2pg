@@ -191,7 +191,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.buf.write_all(b")")?;
             }
         }
-        self.gen_select_rel_routine(
+        self.gen_select_multi_rel_routine(
             ciboulette_table_store,
             request.query(),
             table_list,
@@ -245,25 +245,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             request.data().relationships(),
         )?;
 
-        let main_single_relationships_iter = main_single_relationships.into_iter();
-        for key in main_single_relationships_iter {
-            se.buf.write_all(b", ")?;
-            let rel_table = ciboulette_table_store.get(key)?;
-            let rel_table_cte =
-                rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
-            let rel_type = main_type.get_relationship(&ciboulette_store, key)?;
-            se.write_table_info(&rel_table_cte)?;
-            se.buf.write_all(b" AS (")?;
-            se.gen_select_cte_single_rel(
-                &rel_table,
-                &rel_type,
-                &request.query(),
-                &main_cte_insert,
-                &Ciboulette2PostgresSafeIdent::try_from(key)?,
-            )?;
-            se.buf.write_all(b")")?;
-            table_list.push(rel_table_cte);
-        }
+        se.gen_select_single_rel_routine(
+            &ciboulette_store,
+            &ciboulette_table_store,
+            request.query(),
+            &mut table_list,
+            &main_type,
+            &main_cte_insert,
+            main_single_relationships,
+        )?;
 
         // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt),
         // * handle every (one-to-many) relationships *

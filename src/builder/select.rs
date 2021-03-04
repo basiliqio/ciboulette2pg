@@ -178,7 +178,39 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(crate) fn gen_select_rel_routine(
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn gen_select_single_rel_routine(
+        &mut self,
+        ciboulette_store: &'a CibouletteStore<'a>,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
+        query: &'a CibouletteQueryParameters<'a>,
+        table_list: &mut Vec<Ciboulette2PostgresTableSettings<'a>>,
+        main_type: &'a CibouletteResourceType<'a>,
+        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        rels: Vec<&'a str>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        for key in rels.into_iter() {
+            self.buf.write_all(b", ")?;
+            let rel_table = ciboulette_table_store.get(key)?;
+            let rel_table_cte =
+                rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
+            let rel_type = main_type.get_relationship(&ciboulette_store, key)?;
+            self.write_table_info(&rel_table_cte)?;
+            self.buf.write_all(b" AS (")?;
+            self.gen_select_cte_single_rel(
+                &rel_table,
+                &rel_type,
+                &query,
+                &main_cte_data,
+                &Ciboulette2PostgresSafeIdent::try_from(key)?,
+            )?;
+            self.buf.write_all(b")")?;
+            table_list.push(rel_table_cte);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn gen_select_multi_rel_routine(
         &mut self,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         query: &'a CibouletteQueryParameters<'a>,

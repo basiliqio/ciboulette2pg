@@ -12,12 +12,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b"UPDATE ")?;
         self.write_table_info(table)?;
         self.buf.write_all(b" SET ")?;
-        let mut param_ident: Vec<(
-            Ciboulette2PostgresSafeIdent,
-            Option<Ciboulette2PostgresSafeIdent>,
-            Option<Ciboulette2PostgresSafeIdent>,
-        )> = Vec::with_capacity(params.len());
-        let mut param_value: Vec<Ciboulette2SqlValue<'_>> = Vec::with_capacity(params.len());
         let mut iter = params.into_iter().peekable();
         while let Some((n, v)) = iter.next() {
             self.insert_ident(
@@ -78,25 +72,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b" AS (")?;
         se.gen_select_cte_final(&main_cte_update, &main_type, &request.query(), true)?;
         se.buf.write_all(b")")?;
-        let main_single_relationships_iter = main_single_relationships.into_iter();
-        for key in main_single_relationships_iter {
-            se.buf.write_all(b", ")?;
-            let rel_table = ciboulette_table_store.get(key)?;
-            let rel_table_cte =
-                rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
-            let rel_type = main_type.get_relationship(&ciboulette_store, key)?;
-            se.write_table_info(&rel_table_cte)?;
-            se.buf.write_all(b" AS (")?;
-            se.gen_select_cte_single_rel(
-                &rel_table,
-                &rel_type,
-                &request.query(),
-                &main_cte_update,
-                &Ciboulette2PostgresSafeIdent::try_from(key)?,
-            )?;
-            se.buf.write_all(b")")?;
-            table_list.push(rel_table_cte);
-        }
+        se.gen_select_single_rel_routine(
+            &ciboulette_store,
+            &ciboulette_table_store,
+            request.query(),
+            &mut table_list,
+            &main_type,
+            &main_cte_update,
+            main_single_relationships,
+        )?;
         let rels = crate::graph_walker::relationships::gen_query(
             &ciboulette_store,
             request.resource_type(),
@@ -105,7 +89,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         if rels.iter().any(|x| x.values().is_some()) {
             return Err(Ciboulette2SqlError::UpdateManyRelationships);
         }
-        se.gen_select_rel_routine(
+        se.gen_select_multi_rel_routine(
             &ciboulette_table_store,
             &request.query(),
             &mut table_list,
