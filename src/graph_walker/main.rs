@@ -23,7 +23,7 @@ fn check_single_relationships<'a>(
             ))),
             Some(CibouletteResourceIdentifierSelector::Many(_)) => {
                 return Err(Ciboulette2SqlError::RequiredSingleRelationship(
-                    from_type_.name().to_string(),
+                    to_type_.name().to_string(),
                 ));
             }
             None => {
@@ -64,7 +64,7 @@ pub fn fill_attributes<'a>(
     Ok(())
 }
 
-pub fn gen_query_insert<'a>(
+pub fn gen_query<'a>(
     store: &'a CibouletteStore,
     main_type: &'a CibouletteResourceType<'a>,
     attributes: &'a Option<MessyJsonObjectValue<'a>>,

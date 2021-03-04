@@ -55,7 +55,7 @@ fn extract_relationships<'a>(
     }
 }
 
-pub fn gen_query_insert<'a>(
+pub fn gen_query<'a>(
     store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,

@@ -48,12 +48,12 @@
 //     //         .unwrap();
 //     println!(
 //         "Main : {:#?}",
-//         ciboulette2sql::creation::main::gen_query_insert_main(&store, &req).unwrap()
+//         ciboulette2sql::creation::main::gen_query_main(&store, &req).unwrap()
 //     );
 
 //     println!(
 //         "Rel : {:#?}",
-//         ciboulette2sql::creation::relationships::gen_query_insert_relationships(
+//         ciboulette2sql::creation::relationships::gen_query_relationships(
 //             &store, &req, "MAIN_ID"
 //         )
 //         .unwrap()
