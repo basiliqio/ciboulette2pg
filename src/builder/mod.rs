@@ -5,8 +5,8 @@ use std::io::Write;
 
 mod insert;
 mod select;
+mod update;
 mod utils;
-// mod update;
 
 #[cfg(test)]
 mod tests;

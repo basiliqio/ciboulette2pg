@@ -54,7 +54,7 @@ pub fn fill_attributes<'a>(
 ) -> Result<(), Ciboulette2SqlError> {
     if let Some(obj) = obj {
         for (k, v) in obj.iter() {
-            if matches!(v, MessyJsonValue::Null(_, _)) {
+            if matches!(v, MessyJsonValue::Null(MessyJsonNullType::Absent, _)) {
                 continue;
             }
             // Iterate over every attribute
@@ -66,16 +66,17 @@ pub fn fill_attributes<'a>(
 
 pub fn gen_query_insert<'a>(
     store: &'a CibouletteStore,
-    req: &'a CibouletteCreateRequest<'a>,
+    main_type: &'a CibouletteResourceType<'a>,
+    attributes: &'a Option<MessyJsonObjectValue<'a>>,
+    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
 ) -> Result<Ciboulette2PostgresMain<'a>, Ciboulette2SqlError> {
     let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
     let mut res_rel: Vec<&'a str> = Vec::with_capacity(128);
-    let main_type = req.path().main_type();
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
 
-    fill_attributes(&mut res_val, &req.data().attributes())?;
+    fill_attributes(&mut res_val, &attributes)?;
     let mut walker = store
         .graph()
         .neighbors_directed(*main_type_index, petgraph::Direction::Outgoing)
@@ -88,16 +89,12 @@ pub fn gen_query_insert<'a>(
         {
             let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
             let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
-            if let Some(v) = check_single_relationships(
-                &req.data().relationships(),
-                &main_type,
-                &node_weight,
-                alias,
-                opt,
-            )? {
+            if let Some(v) =
+                check_single_relationships(&relationships, &main_type, &node_weight, alias, opt)?
+            {
                 res_val.push(v); // Insert the relationship values
-                res_rel.push(alias.as_str());
             }
+            res_rel.push(alias.as_str());
         }
     }
     Ok(Ciboulette2PostgresMain {

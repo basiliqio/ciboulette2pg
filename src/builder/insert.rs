@@ -193,7 +193,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         self.gen_select_rel_routine(
             ciboulette_table_store,
-            request,
+            request.query(),
             table_list,
             main_cte_data,
             rels,
@@ -224,7 +224,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let Ciboulette2PostgresMain {
             insert_values: main_inserts_values,
             single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::gen_query_insert(&ciboulette_store, &request)?;
+        } = crate::graph_walker::main::gen_query_insert(
+            &ciboulette_store,
+            request.path().main_type(),
+            request.data().attributes(),
+            request.data().relationships(),
+        )?;
         // WITH "cte_main_insert" AS (insert_stmt)
         se.gen_insert_normal(&main_table, main_inserts_values, true)?;
         se.buf.write_all(b"), ")?;
@@ -234,8 +239,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query(), true)?;
         // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt)
         se.buf.write_all(b")")?;
-        let rels =
-            crate::graph_walker::relationships::gen_query_insert(&ciboulette_store, &request)?;
+        let rels = crate::graph_walker::relationships::gen_query_insert(
+            &ciboulette_store,
+            &request.path().main_type(),
+            request.data().relationships(),
+        )?;
 
         let main_single_relationships_iter = main_single_relationships.into_iter();
         for key in main_single_relationships_iter {

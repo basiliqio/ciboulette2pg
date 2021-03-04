@@ -16,7 +16,9 @@ pub use value::Ciboulette2SqlValue;
 
 use builder::Ciboulette2SqlArguments;
 use getset::Getters;
-use messy_json::{MessyJson, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue};
+use messy_json::{
+    MessyJson, MessyJsonNullType, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue,
+};
 use safe_ident::Ciboulette2PostgresSafeIdent;
 use std::collections::BTreeMap;
 

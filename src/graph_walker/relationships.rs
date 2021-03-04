@@ -57,11 +57,11 @@ fn extract_relationships<'a>(
 
 pub fn gen_query_insert<'a>(
     store: &'a CibouletteStore<'a>,
-    req: &'a CibouletteCreateRequest<'a>,
+    main_type: &'a CibouletteResourceType<'a>,
+    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
 ) -> Result<Vec<Ciboulette2PostgresRelationships<'a>>, Ciboulette2SqlError> {
     let mut res: Vec<Ciboulette2PostgresRelationships<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
 
-    let main_type = req.path().main_type();
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -75,13 +75,7 @@ pub fn gen_query_insert<'a>(
         if let CibouletteRelationshipOption::ManyDirect(opt) = edge_weight {
             let node_weight = store.graph().node_weight(node_index).unwrap(); //TODO unwrap // Get the node weight
             let type_to_alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
-            extract_relationships(
-                &mut res,
-                req.data().relationships(),
-                node_weight,
-                type_to_alias,
-                &opt,
-            );
+            extract_relationships(&mut res, relationships, node_weight, type_to_alias, &opt);
         }
     }
     Ok(res)

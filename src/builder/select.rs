@@ -181,7 +181,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_select_rel_routine(
         &mut self,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        request: &'a CibouletteCreateRequest<'a>,
+        query: &'a CibouletteQueryParameters<'a>,
         table_list: &mut Vec<Ciboulette2PostgresTableSettings<'a>>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: Vec<Ciboulette2PostgresRelationships<'a>>,
@@ -208,8 +208,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.gen_select_cte_final(
                 &rel_rel_table,
                 &bucket.resource(),
-                &request.query(),
-                request.query().include().contains(&bucket.resource()),
+                &query,
+                query.include().contains(&bucket.resource()),
             )?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE
             self.buf.write_all(b" WHERE ")?;
@@ -237,8 +237,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.gen_select_cte_final(
                 &rel_table,
                 &rel_type,
-                &request.query(),
-                request.query().include().contains(&rel_type),
+                &query,
+                query.include().contains(&rel_type),
             )?;
             self.buf.write_all(b" WHERE ")?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
