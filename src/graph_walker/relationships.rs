@@ -15,39 +15,6 @@ pub struct Ciboulette2PostgresRelationships<'a> {
     pub values: Option<Vec<Ciboulette2SqlValue<'a>>>,
 }
 
-pub enum Ciboulette2PostgresRelationshipsResultType<'a> {
-    Single(Ciboulette2PostgresMain<'a>),
-    Multi(Ciboulette2PostgresRelationships<'a>),
-}
-
-fn extract_multi_relationships_from_ressource_identifiers<'a>(
-    rel_ids: &'a CibouletteResourceIdentifierSelector<'a>,
-    rel_opt: &'a CibouletteRelationshipBucket<'a>,
-    rel_type: &'a CibouletteResourceType<'a>,
-) -> Result<Ciboulette2PostgresRelationships<'a>, Ciboulette2SqlError> {
-    match rel_ids {
-        CibouletteResourceIdentifierSelector::One(rel_id) => Ok(Ciboulette2PostgresRelationships {
-            type_: rel_type,
-            bucket: rel_opt,
-            values: Some(vec![Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
-                rel_id.id(),
-            )))]),
-        }),
-        CibouletteResourceIdentifierSelector::Many(rels_id) => {
-            Ok(Ciboulette2PostgresRelationships {
-                type_: rel_type,
-                bucket: rel_opt,
-                values: Some(
-                    rels_id
-                        .iter()
-                        .map(|x| Ciboulette2SqlValue::Text(Some(Cow::Borrowed(x.id()))))
-                        .collect(),
-                ),
-            })
-        }
-    }
-}
-
 fn extract_single_relationships_from_ressource_identifiers<'a>(
     rel_ids: &'a CibouletteUpdateRelationship<'a>,
     rel_opt: &'a CibouletteRelationshipOneToOneOption,
@@ -62,7 +29,9 @@ fn extract_single_relationships_from_ressource_identifiers<'a>(
                 single_relationships: vec![rel_opt.key().as_str()],
             })
         }
-        CibouletteOptionalData::Object(_) => Err(Ciboulette2SqlError::UpdatingManyRelationships),
+        CibouletteOptionalData::Object(_) => {
+            Err(Ciboulette2SqlError::MultiIdsForSingleRelationships)
+        }
         CibouletteOptionalData::Null(x) if *x => Ok(Ciboulette2PostgresMain {
             insert_values: vec![(
                 rel_opt.key().as_str(),
@@ -134,7 +103,7 @@ pub fn gen_query_rel<'a>(
 
     for rel in store
         .graph()
-        .edges_connecting(*rel_type_index, *main_type_index)
+        .edges_connecting(*main_type_index, *rel_type_index)
     {
         match rel.weight() {
             CibouletteRelationshipOption::One(opt) => {
@@ -142,7 +111,7 @@ pub fn gen_query_rel<'a>(
                     &rels, &opt,
                 )?)
             }
-            CibouletteRelationshipOption::ManyDirect(opt) => {
+            CibouletteRelationshipOption::ManyDirect(_) => {
                 return Err(Ciboulette2SqlError::UpdatingManyRelationships)
             }
             CibouletteRelationshipOption::Many(_) => continue,

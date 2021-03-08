@@ -1,0 +1,57 @@
+---
+source: src/builder/tests/update/update_rel.rs
+expression: res
+
+---
+(
+    "WITH \n\"cte_peoples_update\" AS (UPDATE \"public\".\"peoples\" SET \"public\".\"peoples\".\"favorite_color\" = $0 WHERE \"public\".\"peoples\".\"id\" = $1 RETURNING *), \"cte_peoples_data\" AS (SELECT \"cte_peoples_update\".\"id\"::TEXT AS \"id\", $2::TEXT AS \"type\", JSON_BUILD_OBJECT($3, \"cte_peoples_update\".\"age\", $4, \"cte_peoples_update\".\"first-name\", $5, \"cte_peoples_update\".\"gender\", $6, \"cte_peoples_update\".\"last-name\", $7, \"cte_peoples_update\".\"twitter\")  AS \"data\" FROM \"cte_peoples_update\"), \"cte_favorite_color_data\" AS (SELECT \"public\".\"favorite_color\".\"id\"::TEXT AS \"id\", $8::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"favorite_color\" WHERE \"public\".\"favorite_color\".\"id\" IN (SELECT \"cte_peoples_update\".\"favorite_color\" FROM \"cte_peoples_update\")) SELECT * FROM \"cte_peoples_data\" UNION ALL SELECT * FROM \"cte_favorite_color_data\"",
+    Ciboulette2SqlArguments {
+        inner: [
+            Text(
+                Some(
+                    "5be39677-c0b4-4812-b85a-fbe903daab96",
+                ),
+            ),
+            Text(
+                Some(
+                    "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
+                ),
+            ),
+            Text(
+                Some(
+                    "peoples",
+                ),
+            ),
+            Text(
+                Some(
+                    "age",
+                ),
+            ),
+            Text(
+                Some(
+                    "first-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "gender",
+                ),
+            ),
+            Text(
+                Some(
+                    "last-name",
+                ),
+            ),
+            Text(
+                Some(
+                    "twitter",
+                ),
+            ),
+            Text(
+                Some(
+                    "favorite_color",
+                ),
+            ),
+        ],
+    },
+)
