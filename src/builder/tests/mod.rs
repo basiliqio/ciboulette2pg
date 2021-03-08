@@ -5,6 +5,7 @@ use url::Url;
 use ciboulette_test_helper::ciboulette::*;
 use ciboulette_test_helper::*;
 
+mod delete;
 mod inserts;
 mod update;
 

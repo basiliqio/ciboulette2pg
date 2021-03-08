@@ -3,6 +3,7 @@ use getset::Getters;
 use numtoa::NumToA;
 use std::io::Write;
 
+mod delete;
 mod insert;
 mod select;
 mod update;

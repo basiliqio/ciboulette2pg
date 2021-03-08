@@ -24,6 +24,10 @@ pub enum Ciboulette2SqlError {
     UpdatingMainObject,
     #[error("Multiple ids were provided for a one-to-one relationships")]
     MultiIdsForSingleRelationships,
+    #[error("One-to-many relationship can't be deleted in bulk")]
+    BulkRelationshipDelete,
+    #[error("Non optional relationship `{1}` for type `{0}`")]
+    RequiredRelationship(String, String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
     #[error(transparent)]
