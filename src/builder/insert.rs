@@ -229,6 +229,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             request.path().main_type(),
             request.data().attributes(),
             request.data().relationships(),
+            false,
         )?;
         // WITH "cte_main_insert" AS (insert_stmt)
         se.gen_insert_normal(&main_table, main_inserts_values, true)?;

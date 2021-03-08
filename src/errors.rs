@@ -18,8 +18,12 @@ pub enum Ciboulette2SqlError {
     NullCharIdent(String),
     #[error("Updating relationships cannot be done with main object")]
     UpdatingRelationships,
+    #[error("Updating one-to-many or many-to-many relationships is forbidden")]
+    UpdatingManyRelationships,
     #[error("Updating main object cannot be done with relationships")]
     UpdatingMainObject,
+    #[error("Multiple ids were provided for a one-to-one relationships")]
+    MultiIdsForSingleRelationships,
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
     #[error(transparent)]

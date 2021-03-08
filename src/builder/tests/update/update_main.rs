@@ -76,17 +76,60 @@ fn relationship_internal() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_update_main(
+    let builder = Ciboulette2PostgresBuilder::gen_update_main(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,
     )
-    .unwrap_err();
+    .unwrap();
+    let res = builder.build().unwrap();
 
-    assert_eq!(
-        matches!(err, Ciboulette2SqlError::UpdatingRelationships),
-        true
+    insta::assert_debug_snapshot!(res);
+}
+
+#[test]
+fn relationship_internal_force_null() {
+    let ciboulette_store = gen_bag();
+    let table_store = gen_table_store();
+    let parsed_url =
+        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
+    const INTENTION: CibouletteIntention = CibouletteIntention::Update;
+    const BODY: Option<&str> = Some(
+        r#"
+	{
+		"data":
+		{
+			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
+			"type": "peoples",
+			"attributes":
+			{
+				"first-name": "Bonjour",
+				"last-name": "Monde"
+			},
+			"relationships":
+			{
+				"favorite_color":
+				{
+					"data": null
+				}
+			}
+		}
+	}
+	"#,
     );
+
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let request = req_builder.build(&ciboulette_store).unwrap();
+    let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
+    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+        &ciboulette_store,
+        &table_store,
+        &ciboulette_request,
+    )
+    .unwrap();
+    let res = builder.build().unwrap();
+
+    insta::assert_debug_snapshot!(res);
 }
 
 #[test]
@@ -135,7 +178,7 @@ fn relationship_external() {
     .unwrap_err();
 
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::UpdatingRelationships),
+        matches!(err, Ciboulette2SqlError::UpdatingManyRelationships),
         true
     );
 }
