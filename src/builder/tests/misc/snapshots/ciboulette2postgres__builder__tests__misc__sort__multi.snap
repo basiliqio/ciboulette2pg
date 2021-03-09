@@ -1,0 +1,13 @@
+---
+source: src/builder/tests/misc/sort.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+"cte_articles_data" AS (
+  SELECT
+    "cte_peoples_main"."id",
+    "public"."articles"."title"
+  FROM
+    "cte_peoples_main"
+    INNER JOIN "public"."people-article" ON "public"."people-article"."people_id" = "cte_peoples_main"."id"
+    INNER JOIN "public"."articles" ON "public"."articles"."id" = "public"."people-article"."article_id";

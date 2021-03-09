@@ -98,7 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         se.buf.write_all(b" ")?;
         se.included_tables.insert(&main_table, main_cte_data);
-        se.gen_union_select_all()?;
+        se.gen_union_select_all(request.query())?;
         Ok(se)
     }
 
@@ -160,7 +160,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             single_relationships,
         )?;
         se.buf.write_all(b" ")?;
-        se.gen_union_select_all()?;
+        se.gen_union_select_all(request.query())?;
         Ok(se)
     }
 }

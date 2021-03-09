@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/inserts/cte_final.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+SELECT
+  "public"."peoples"."id" :: TEXT AS "id",
+  $0 :: TEXT AS "type",
+  NULL :: json AS "data"
+FROM
+  "public"."peoples";

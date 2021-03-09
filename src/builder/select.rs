@@ -157,7 +157,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(crate) fn gen_union_select_all(&mut self) -> Result<(), Ciboulette2SqlError> {
+    pub(crate) fn gen_union_select_all(
+        &mut self,
+        query: &'a CibouletteQueryParameters<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
         let mut iter = self.included_tables.values().peekable();
         while let Some(v) = iter.next() {
             // SELECT * FROM
@@ -239,6 +242,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         table.to_cte(Cow::Owned(format!("cte_{}_data", table.name())))?;
                     self.write_table_info(&table_cte)?;
                     self.buf.write_all(b" AS (SELECT ")?;
+                    self.insert_ident(
+                        &(main_cte_data.id_name().clone(), None, None),
+                        main_cte_data,
+                    )?;
+                    if !fields.is_empty() {
+                        self.buf.write_all(b", ")?;
+                    }
                     self.write_list(&fields, &table, false, Self::insert_ident)?;
                     self.buf.write_all(b" FROM ")?;
                     self.write_table_info(&main_cte_data)?;

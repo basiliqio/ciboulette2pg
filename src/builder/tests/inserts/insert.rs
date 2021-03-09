@@ -35,7 +35,7 @@ fn simple() {
     let res = builder.build().unwrap();
 
     println!("{}", res.0);
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn relationship_external_single() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res)
+    test_sql!(res);
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn relationship_external_multiple() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -191,7 +191,7 @@ fn relationship_external_multiple_include() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -247,7 +247,7 @@ fn relationship_external_multiple_include_rel() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -295,7 +295,7 @@ fn relationship_internal_single() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -343,7 +343,7 @@ fn relationship_internal_single_include() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -393,5 +393,5 @@ fn relationship_internal_single_include_all() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }

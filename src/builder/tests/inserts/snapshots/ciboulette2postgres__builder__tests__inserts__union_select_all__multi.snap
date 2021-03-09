@@ -1,0 +1,15 @@
+---
+source: src/builder/tests/inserts/union_select_all.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+SELECT
+  *
+FROM
+  "public"."articles"
+UNION
+ALL
+SELECT
+  *
+FROM
+  "public"."peoples";

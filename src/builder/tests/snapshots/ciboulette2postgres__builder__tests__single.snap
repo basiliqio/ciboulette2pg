@@ -1,9 +1,0 @@
----
-source: src/builder/tests/mod.rs
-expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
-
----
-SELECT
-  *
-FROM
-  "public"."peoples";

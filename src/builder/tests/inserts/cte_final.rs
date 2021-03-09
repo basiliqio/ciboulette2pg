@@ -22,7 +22,7 @@ fn simple() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn sparse() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn empty_sparse() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -97,5 +97,5 @@ fn non_included() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    test_sql(&res);
+    test_sql!(res);
 }

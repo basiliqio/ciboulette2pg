@@ -17,7 +17,7 @@ fn simple_single_rel() {
         .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]

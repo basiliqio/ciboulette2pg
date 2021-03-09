@@ -1,0 +1,9 @@
+---
+source: src/builder/tests/inserts/insert_normal.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+INSERT INTO
+  "public"."mysimpletable" DEFAULT
+VALUES
+  RETURNING *;

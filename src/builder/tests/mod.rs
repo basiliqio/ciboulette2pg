@@ -120,13 +120,16 @@ impl<'a> std::string::ToString for Ciboulette2SqlArguments<'a> {
     }
 }
 
-fn test_sql(res: &(String, Ciboulette2SqlArguments<'_>)) {
-    let (query, _) = res;
-    // let stringified_params: Vec<String> = params.iter().map(|x| x.to_string()).collect();
+#[macro_export]
+macro_rules! test_sql {
+    ($query:ident) => {
+        let (query, _) = $query;
+        // let stringified_params: Vec<String> = params.iter().map(|x| x.to_string()).collect();
 
-    insta::assert_snapshot!(sqlformat::format(
-        query.as_str(),
-        &sqlformat::QueryParams::None,
-        sqlformat::FormatOptions::default()
-    ));
+        insta::assert_snapshot!(sqlformat::format(
+            query.as_str(),
+            &sqlformat::QueryParams::None,
+            sqlformat::FormatOptions::default()
+        ));
+    };
 }

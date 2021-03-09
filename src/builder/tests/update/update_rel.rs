@@ -29,7 +29,7 @@ fn simple() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -58,7 +58,7 @@ fn forced_null() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]

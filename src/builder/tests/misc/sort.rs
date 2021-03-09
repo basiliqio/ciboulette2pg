@@ -46,7 +46,7 @@ fn multi() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    test_sql(&res);
+    test_sql!(res);
 }
 
 #[test]
@@ -95,5 +95,5 @@ fn single() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    test_sql(&res);
+    test_sql!(res);
 }

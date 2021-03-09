@@ -1,0 +1,96 @@
+---
+source: src/builder/tests/update/update_main.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_peoples_update" AS (
+  UPDATE
+    "public"."peoples"
+  SET
+    "public"."peoples"."first-name" = $0,
+    "public"."peoples"."last-name" = $1,
+    "public"."peoples"."favorite_color" = $2
+  WHERE
+    "public"."peoples"."id" = $3 RETURNING *
+),
+"cte_peoples_data" AS (
+  SELECT
+    "cte_peoples_update"."id" :: TEXT AS "id",
+    $4 :: TEXT AS "type",
+    JSON_BUILD_OBJECT(
+      $5,
+      "cte_peoples_update"."age",
+      $6,
+      "cte_peoples_update"."first-name",
+      $7,
+      "cte_peoples_update"."gender",
+      $8,
+      "cte_peoples_update"."last-name",
+      $9,
+      "cte_peoples_update"."twitter"
+    ) AS "data"
+  FROM
+    "cte_peoples_update"
+),
+"cte_favorite_color_data" AS (
+  SELECT
+    "public"."favorite_color"."id" :: TEXT AS "id",
+    $10 :: TEXT AS "type",
+    NULL :: json AS "data"
+  FROM
+    "public"."favorite_color"
+  WHERE
+    "public"."favorite_color"."id" IN (
+      SELECT
+        "cte_peoples_update"."favorite_color"
+      FROM
+        "cte_peoples_update"
+    )
+),
+"cte_rel_articles_rel_data" AS (
+  SELECT
+    "public"."people-article"."id" :: TEXT AS "id",
+    $11 :: TEXT AS "type",
+    NULL :: json AS "data"
+  FROM
+    "public"."people-article"
+  WHERE
+    "public"."people-article"."people_id" = "cte_peoples_data"."id"
+),
+"cte_rel_articles_data" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    $12 :: TEXT AS "type",
+    NULL :: json AS "data"
+  FROM
+    "public"."articles"
+  WHERE
+    "public"."articles"."id" IN (
+      SELECT
+        "cte_rel_articles_rel_data"."article_id"
+      FROM
+        "cte_rel_articles_rel_data"
+    )
+)
+SELECT
+  *
+FROM
+  "cte_rel_articles_data"
+UNION
+ALL
+SELECT
+  *
+FROM
+  "cte_favorite_color_data"
+UNION
+ALL
+SELECT
+  *
+FROM
+  "cte_rel_articles_rel_data"
+UNION
+ALL
+SELECT
+  *
+FROM
+  "cte_peoples_data";

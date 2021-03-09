@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/inserts/gen_json_builder.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+JSON_BUILD_OBJECT(
+  $0,
+  "public"."peoples"."first-name",
+  $1,
+  "public"."peoples"."last-name"
+);
