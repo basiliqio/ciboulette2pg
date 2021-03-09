@@ -1,0 +1,17 @@
+---
+source: src/builder/tests/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+JSON_BUILD_OBJECT(
+  $0,
+  "public"."peoples"."age",
+  $1,
+  "public"."peoples"."first-name",
+  $2,
+  "public"."peoples"."gender",
+  $3,
+  "public"."peoples"."last-name",
+  $4,
+  "public"."peoples"."twitter"
+);

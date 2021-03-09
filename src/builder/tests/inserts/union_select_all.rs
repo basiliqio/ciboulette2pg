@@ -24,7 +24,7 @@ fn multi() {
         .insert(&dest_table, dest_table.clone());
     builder.gen_union_select_all().unwrap();
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn single() {
         .insert(&dest_table, dest_table.clone());
     builder.gen_union_select_all().unwrap();
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -49,5 +49,5 @@ fn no_table() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     builder.gen_union_select_all().unwrap();
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }

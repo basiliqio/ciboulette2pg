@@ -41,3 +41,92 @@ fn gen_table_store<'a>() -> Ciboulette2PostgresTableStore<'a> {
     .map(|x| (x.name().to_string(), x))
     .collect()
 }
+
+impl<'a> std::string::ToString for Ciboulette2SqlValue<'a> {
+    fn to_string(&self) -> String {
+        let null = "<NULL>";
+        match self {
+            Ciboulette2SqlValue::Xml(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Uuid(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Time(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Text(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Numeric(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Json(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Integer(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Float(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Enum(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Double(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::DateTime(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Date(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Char(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Bytes(x) => x
+                .clone()
+                .map(|x| String::from_utf8_lossy(x.as_ref()).to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Boolean(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::Array(x) => x
+                .clone()
+                .map(|x| x.into_iter().map(|y| y.to_string()).collect())
+                .unwrap_or_else(|| null.to_string()),
+        }
+    }
+}
+
+impl<'a> std::string::ToString for Ciboulette2SqlArguments<'a> {
+    fn to_string(&self) -> String {
+        self.inner.iter().cloned().map(|x| x.to_string()).collect()
+    }
+}
+
+fn test_sql(res: &(String, Ciboulette2SqlArguments<'_>)) {
+    let (query, _) = res;
+    // let stringified_params: Vec<String> = params.iter().map(|x| x.to_string()).collect();
+
+    insta::assert_snapshot!(sqlformat::format(
+        query.as_str(),
+        &sqlformat::QueryParams::None,
+        sqlformat::FormatOptions::default()
+    ));
+}

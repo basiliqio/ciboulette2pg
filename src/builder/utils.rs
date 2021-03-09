@@ -2,7 +2,8 @@ use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
-    pub fn build(self) -> Result<(String, Ciboulette2SqlArguments<'a>), Ciboulette2SqlError> {
+    pub fn build(mut self) -> Result<(String, Ciboulette2SqlArguments<'a>), Ciboulette2SqlError> {
+        self.buf.write_all(b";")?;
         Ok((
             String::from_utf8(self.buf.into_inner()?.into_inner())?,
             self.params,

@@ -1,0 +1,18 @@
+---
+source: src/builder/tests/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+SELECT
+  "public"."favorite_color"."id" :: TEXT AS "id",
+  $0 :: TEXT AS "type",
+  NULL :: json AS "data"
+FROM
+  "public"."favorite_color"
+WHERE
+  "public"."favorite_color"."id" IN (
+    SELECT
+      "public"."cte_peoples"."favorite_color"
+    FROM
+      "public"."cte_peoples"
+  );

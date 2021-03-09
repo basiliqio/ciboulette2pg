@@ -17,5 +17,5 @@ fn simple() {
         .unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }

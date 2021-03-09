@@ -29,7 +29,7 @@ fn simple() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn sparse() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -93,5 +93,5 @@ fn empty_sparse() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }

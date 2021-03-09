@@ -22,7 +22,7 @@ fn no_sparse_fields() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn sparse_field() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn sparse_field_empty() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -97,5 +97,5 @@ fn not_included() {
         .unwrap();
 
     let res = builder.build().unwrap();
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }

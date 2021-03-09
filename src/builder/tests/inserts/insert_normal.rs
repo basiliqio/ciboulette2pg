@@ -22,7 +22,7 @@ fn simple() {
     builder.gen_insert_normal(&table, params, true).unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn no_returning() {
     builder.gen_insert_normal(&table, params, false).unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -62,5 +62,5 @@ fn no_params() {
     builder.gen_insert_normal(&table, vec![], true).unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }

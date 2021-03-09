@@ -389,7 +389,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.buf.write_all(b" FROM ")?;
             self.write_table_info(&rel_cte_rel_data)?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM "cte_rel_myrel_id")
-            self.buf.write_all(b")")?;
+            self.buf.write_all(b"))")?;
             self.included_tables.insert(&rel_table, rel_cte_data);
             self.included_tables
                 .insert(&rel_rel_table, rel_cte_rel_data);

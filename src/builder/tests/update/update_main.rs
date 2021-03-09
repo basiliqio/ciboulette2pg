@@ -35,7 +35,7 @@ fn simple() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -84,7 +84,7 @@ fn relationship_internal() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -129,7 +129,7 @@ fn relationship_internal_force_null() {
     .unwrap();
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -218,7 +218,7 @@ fn not_all_required_fields() {
 
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -257,7 +257,7 @@ fn forced_null_fields() {
 
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -298,7 +298,7 @@ fn include_single_rel() {
 
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }
 
 #[test]
@@ -339,5 +339,5 @@ fn include_multi_rel() {
 
     let res = builder.build().unwrap();
 
-    insta::assert_debug_snapshot!(res);
+    test_sql(&res);
 }

@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+UPDATE
+  "public"."peoples"
+SET
+  "public"."peoples"."favorite_color" = NULL
+WHERE
+  "public"."peoples"."id" $0;

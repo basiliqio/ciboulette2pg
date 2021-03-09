@@ -1,0 +1,22 @@
+---
+source: src/builder/tests/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+SELECT
+  "public"."peoples"."id" :: TEXT AS "id",
+  $0 :: TEXT AS "type",
+  JSON_BUILD_OBJECT(
+    $1,
+    "public"."peoples"."age",
+    $2,
+    "public"."peoples"."first-name",
+    $3,
+    "public"."peoples"."gender",
+    $4,
+    "public"."peoples"."last-name",
+    $5,
+    "public"."peoples"."twitter"
+  ) AS "data"
+FROM
+  "public"."peoples";
