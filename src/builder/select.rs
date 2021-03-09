@@ -277,6 +277,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         }
                         CibouletteRelationshipOption::One(opt) => {
                             self.buf.write_all(b" INNER JOIN ")?;
+                            self.write_table_info(&main_table)?;
+                            self.buf.write_all(b" ON ")?;
+                            self.insert_ident(
+                                &(main_table.id_name().clone(), None, None),
+                                main_table,
+                            )?;
+                            self.buf.write_all(b" = ")?;
+                            self.insert_ident(
+                                &(main_cte_data.id_name().clone(), None, None),
+                                main_cte_data,
+                            )?;
+                            self.buf.write_all(b" INNER JOIN ")?;
                             self.write_table_info(&table)?;
                             self.buf.write_all(b" ON ")?;
                             self.insert_ident(&(table.id_name().clone(), None, None), table)?;
@@ -287,7 +299,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                                     None,
                                     None,
                                 ),
-                                main_cte_data,
+                                main_table,
                             )?;
                         }
                         _ => {

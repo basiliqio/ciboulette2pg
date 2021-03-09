@@ -1,0 +1,11 @@
+---
+source: src/builder/tests/misc/sort.rs
+expression: res
+
+---
+(
+    "\"cte_favorite_color_data\" AS (SELECT \"public\".\"favorite_color\".\"color\" FROM \"cte_peoples_main\" INNER JOIN \"public\".\"peoples\" ON \"public\".\"peoples\".\"id\" = \"cte_peoples_main\".\"id\" INNER JOIN \"public\".\"favorite_color\" ON \"public\".\"favorite_color\".\"id\" = \"public\".\"peoples\".\"favorite_color\"",
+    Ciboulette2SqlArguments {
+        inner: [],
+    },
+)
