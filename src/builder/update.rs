@@ -44,7 +44,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteUpdateRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
-        let mut table_list: Vec<Ciboulette2PostgresTableSettings<'_>> = Vec::with_capacity(128);
         let main_type = request.resource_type();
         let main_attrs = match request.data() {
             CibouletteUpdateRequestType::MainType(attr) => attr,
@@ -57,7 +56,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             main_table.to_cte(Cow::Owned(format!("cte_{}_update", main_table.name())))?;
         let main_cte_data =
             main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
-        table_list.push(main_cte_data.clone());
         // WITH
         se.buf.write_all(b"WITH \n")?;
         // WITH "cte_main_update"
@@ -83,7 +81,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             request.query(),
-            &mut table_list,
             &main_type,
             &main_cte_update,
             main_single_relationships,
@@ -96,12 +93,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.gen_select_multi_rel_routine(
             &ciboulette_table_store,
             &request.query(),
-            &mut table_list,
             &main_cte_data,
             rels,
         )?;
         se.buf.write_all(b" ")?;
-        se.gen_union_select_all(&table_list)?;
+        se.included_tables.insert(&main_table, main_cte_data);
+        se.gen_union_select_all()?;
         Ok(se)
     }
 
@@ -158,13 +155,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             request.query(),
-            &mut table_list,
             &main_type,
             &main_cte_update,
             single_relationships,
         )?;
         se.buf.write_all(b" ")?;
-        se.gen_union_select_all(&table_list)?;
+        se.gen_union_select_all()?;
         Ok(se)
     }
 }

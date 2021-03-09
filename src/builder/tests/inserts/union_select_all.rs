@@ -17,8 +17,12 @@ fn multi() {
         Ciboulette2PostgresSafeIdent::try_from("articles").unwrap(),
     );
     builder
-        .gen_union_select_all(vec![from_table, dest_table].iter())
-        .unwrap();
+        .included_tables
+        .insert(&from_table, from_table.clone());
+    builder
+        .included_tables
+        .insert(&dest_table, dest_table.clone());
+    builder.gen_union_select_all().unwrap();
     let res = builder.build().unwrap();
     insta::assert_debug_snapshot!(res);
 }
@@ -33,8 +37,9 @@ fn single() {
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
     );
     builder
-        .gen_union_select_all(vec![dest_table].iter())
-        .unwrap();
+        .included_tables
+        .insert(&dest_table, dest_table.clone());
+    builder.gen_union_select_all().unwrap();
     let res = builder.build().unwrap();
     insta::assert_debug_snapshot!(res);
 }
@@ -42,7 +47,7 @@ fn single() {
 #[test]
 fn no_table() {
     let mut builder = Ciboulette2PostgresBuilder::default();
-    builder.gen_union_select_all(vec![].iter()).unwrap();
+    builder.gen_union_select_all().unwrap();
     let res = builder.build().unwrap();
     insta::assert_debug_snapshot!(res);
 }

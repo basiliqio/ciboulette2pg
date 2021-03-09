@@ -4,7 +4,7 @@ expression: res
 
 ---
 (
-    "WITH \n\"cte_peoples_insert\" AS (INSERT INTO \"public\".\"peoples\" (\"public\".\"peoples\".\"first-name\", \"public\".\"peoples\".\"last-name\", \"public\".\"peoples\".\"favorite_color\") VALUES ($0, $1, $2) RETURNING *), \"cte_peoples_data\" AS (SELECT \"cte_peoples_insert\".\"id\"::TEXT AS \"id\", $3::TEXT AS \"type\", JSON_BUILD_OBJECT($4, \"cte_peoples_insert\".\"age\", $5, \"cte_peoples_insert\".\"first-name\", $6, \"cte_peoples_insert\".\"gender\", $7, \"cte_peoples_insert\".\"last-name\", $8, \"cte_peoples_insert\".\"twitter\")  AS \"data\" FROM \"cte_peoples_insert\"), \"cte_favorite_color_data\" AS (SELECT \"public\".\"favorite_color\".\"id\"::TEXT AS \"id\", $9::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"favorite_color\" WHERE \"public\".\"favorite_color\".\"id\" IN (SELECT \"cte_peoples_insert\".\"favorite_color\" FROM \"cte_peoples_insert\")), \"cte_rel_articles_rel_data\" AS (SELECT \"public\".\"people-article\".\"id\"::TEXT AS \"id\", $10::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"people-article\" WHERE \"public\".\"people-article\".\"people_id\" = \"cte_peoples_data\".\"id\"), \"cte_rel_articles_data\" AS (SELECT \"public\".\"articles\".\"id\"::TEXT AS \"id\", $11::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"articles\" WHERE \"public\".\"articles\".\"id\" IN (SELECT \"cte_rel_articles_rel_data\".\"article_id\" FROM \"cte_rel_articles_rel_data\") SELECT * FROM \"cte_peoples_data\" UNION ALL SELECT * FROM \"cte_favorite_color_data\" UNION ALL SELECT * FROM \"cte_rel_articles_data\" UNION ALL SELECT * FROM \"cte_rel_articles_rel_data\"",
+    "WITH \n\"cte_peoples_insert\" AS (INSERT INTO \"public\".\"peoples\" (\"public\".\"peoples\".\"first-name\", \"public\".\"peoples\".\"last-name\", \"public\".\"peoples\".\"favorite_color\") VALUES ($0, $1, $2) RETURNING *), \"cte_favorite_color_data\" AS (SELECT \"public\".\"favorite_color\".\"id\"::TEXT AS \"id\", $3::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"favorite_color\" WHERE \"public\".\"favorite_color\".\"id\" IN (SELECT \"cte_peoples_insert\".\"favorite_color\" FROM \"cte_peoples_insert\")), \"cte_rel_articles_rel_data\" AS (SELECT \"public\".\"people-article\".\"id\"::TEXT AS \"id\", $4::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"people-article\" WHERE \"public\".\"people-article\".\"people_id\" = \"cte_peoples_data\".\"id\"), \"cte_rel_articles_data\" AS (SELECT \"public\".\"articles\".\"id\"::TEXT AS \"id\", $5::TEXT AS \"type\", NULL::json  AS \"data\" FROM \"public\".\"articles\" WHERE \"public\".\"articles\".\"id\" IN (SELECT \"cte_rel_articles_rel_data\".\"article_id\" FROM \"cte_rel_articles_rel_data\"), \"cte_peoples_data\" AS (SELECT \"cte_peoples_insert\".\"id\"::TEXT AS \"id\", $6::TEXT AS \"type\", JSON_BUILD_OBJECT($7, \"cte_peoples_insert\".\"age\", $8, \"cte_peoples_insert\".\"first-name\", $9, \"cte_peoples_insert\".\"gender\", $10, \"cte_peoples_insert\".\"last-name\", $11, \"cte_peoples_insert\".\"twitter\")  AS \"data\" FROM \"cte_peoples_insert\") SELECT * FROM \"cte_rel_articles_data\" UNION ALL SELECT * FROM \"cte_favorite_color_data\" UNION ALL SELECT * FROM \"cte_rel_articles_rel_data\" UNION ALL SELECT * FROM \"cte_peoples_data\"",
     Ciboulette2SqlArguments {
         inner: [
             Text(
@@ -20,6 +20,21 @@ expression: res
             Text(
                 Some(
                     "8759b021-0932-40cb-8386-e1a83da1c73e",
+                ),
+            ),
+            Text(
+                Some(
+                    "favorite_color",
+                ),
+            ),
+            Text(
+                Some(
+                    "people-article",
+                ),
+            ),
+            Text(
+                Some(
+                    "articles",
                 ),
             ),
             Text(
@@ -50,21 +65,6 @@ expression: res
             Text(
                 Some(
                     "twitter",
-                ),
-            ),
-            Text(
-                Some(
-                    "favorite_color",
-                ),
-            ),
-            Text(
-                Some(
-                    "people-article",
-                ),
-            ),
-            Text(
-                Some(
-                    "articles",
                 ),
             ),
         ],

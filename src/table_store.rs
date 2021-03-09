@@ -33,7 +33,7 @@ impl<'a> std::iter::FromIterator<(String, Ciboulette2PostgresTableSettings<'a>)>
     }
 }
 
-#[derive(Getters, Clone, Default, Debug)]
+#[derive(Getters, Clone, Default, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresTableSettings<'a> {
     id_name: Ciboulette2PostgresSafeIdent<'a>,

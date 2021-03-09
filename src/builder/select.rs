@@ -156,14 +156,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(crate) fn gen_union_select_all<'b, I>(
-        &mut self,
-        tables: I,
-    ) -> Result<(), Ciboulette2SqlError>
-    where
-        I: IntoIterator<Item = &'b Ciboulette2PostgresTableSettings<'b>>,
-    {
-        let mut iter = tables.into_iter().peekable();
+    pub(crate) fn gen_union_select_all(&mut self) -> Result<(), Ciboulette2SqlError> {
+        let tables = std::mem::take(&mut self.included_tables);
+        let mut iter = tables.values().into_iter().peekable();
         while let Some(table) = iter.next() {
             // SELECT * FROM
             self.buf.write_all(b"SELECT * FROM ")?;
@@ -184,7 +179,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         ciboulette_store: &'a CibouletteStore<'a>,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         query: &'a CibouletteQueryParameters<'a>,
-        table_list: &mut Vec<Ciboulette2PostgresTableSettings<'a>>,
         main_type: &'a CibouletteResourceType<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: Vec<&'a str>,
@@ -205,7 +199,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &Ciboulette2PostgresSafeIdent::try_from(key)?,
             )?;
             self.buf.write_all(b")")?;
-            table_list.push(rel_table_cte);
+            self.included_tables.insert(&rel_table, rel_table_cte);
         }
         Ok(())
     }
@@ -214,7 +208,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         query: &'a CibouletteQueryParameters<'a>,
-        table_list: &mut Vec<Ciboulette2PostgresTableSettings<'a>>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -228,8 +221,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.buf.write_all(b", ")?;
             let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
             let rel_rel_table = ciboulette_table_store.get(bucket.resource().name().as_str())?;
-            let rel_cte_rel_data =
-                rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
+            let rel_cte_rel_data = rel_rel_table
+                .to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
             let rel_cte_data =
                 rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())))?;
             // "cte_rel_myrel_rel_data"
@@ -289,8 +282,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.write_table_info(&rel_cte_rel_data)?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM "cte_rel_myrel_id")
             self.buf.write_all(b")")?;
-            table_list.push(rel_cte_data);
-            table_list.push(rel_cte_rel_data);
+            self.included_tables.insert(&rel_table, rel_cte_data);
+            self.included_tables
+                .insert(&rel_rel_table, rel_cte_rel_data);
         }
         Ok(())
     }

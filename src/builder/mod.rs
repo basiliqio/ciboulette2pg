@@ -1,5 +1,5 @@
 use super::*;
-use getset::Getters;
+use getset::{Getters, MutGetters};
 use numtoa::NumToA;
 use std::io::Write;
 
@@ -46,11 +46,14 @@ impl<'a> std::ops::DerefMut for Ciboulette2SqlArguments<'a> {
     }
 }
 
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, MutGetters)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresBuilder<'a> {
     buf: Ciboulette2PostgresBuf,
     params: Ciboulette2SqlArguments<'a>,
+    #[getset(get_mut = "pub")]
+    included_tables:
+        BTreeMap<&'a Ciboulette2PostgresTableSettings<'a>, Ciboulette2PostgresTableSettings<'a>>,
     nb_cte: usize,
 }
 
@@ -61,6 +64,7 @@ impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
                 4096,
             ))),
             params: Ciboulette2SqlArguments::with_capacity(128),
+            included_tables: BTreeMap::default(),
             nb_cte: 0,
         }
     }
