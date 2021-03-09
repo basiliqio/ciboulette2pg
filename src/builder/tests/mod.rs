@@ -7,6 +7,7 @@ use ciboulette_test_helper::*;
 
 mod delete;
 mod inserts;
+mod misc;
 mod update;
 
 fn gen_table_store<'a>() -> Ciboulette2PostgresTableStore<'a> {

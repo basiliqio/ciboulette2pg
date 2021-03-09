@@ -1,5 +1,6 @@
 use super::*;
 use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
+use itertools::Itertools;
 
 const EMPTY_LIST: [Cow<'static, str>; 0] = [];
 
@@ -157,13 +158,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     pub(crate) fn gen_union_select_all(&mut self) -> Result<(), Ciboulette2SqlError> {
-        let tables = std::mem::take(&mut self.included_tables);
-        let mut iter = tables.values().into_iter().peekable();
-        while let Some(table) = iter.next() {
+        let mut iter = self.included_tables.values().peekable();
+        while let Some(v) = iter.next() {
             // SELECT * FROM
             self.buf.write_all(b"SELECT * FROM ")?;
             // SELECT * FROM "schema"."mytable"
-            self.write_table_info(table)?;
+            Self::write_table_info_inner(&mut self.buf, v)?;
             if iter.peek().is_some() {
                 // If there's more :
                 // SELECT * FROM "schema"."mytable" UNION ALL ...
@@ -173,7 +173,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn gen_select_single_rel_routine(
         &mut self,
         ciboulette_store: &'a CibouletteStore<'a>,
@@ -200,6 +199,103 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             )?;
             self.buf.write_all(b")")?;
             self.included_tables.insert(&rel_table, rel_table_cte);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn gen_cte_for_sort(
+        &mut self,
+        ciboulette_store: &'a CibouletteStore<'a>,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
+        query: &'a CibouletteQueryParameters<'a>,
+        main_type: &'a CibouletteResourceType<'a>,
+        main_table: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        let tables = query.sorting().iter().into_group_map_by(|x| x.type_());
+        for (type_, sorting_elements) in tables.into_iter() {
+            if type_ == &main_type {
+                continue;
+            }
+            let table = ciboulette_table_store.get(type_.name())?;
+            match self.included_tables.get(&table) {
+                Some(_cte_table) => continue,
+                None => {
+                    let mut fields: Vec<(
+                        Ciboulette2PostgresSafeIdent<'a>,
+                        Option<Ciboulette2PostgresSafeIdent<'a>>,
+                        Option<Ciboulette2PostgresSafeIdent<'a>>,
+                    )> = Vec::with_capacity(sorting_elements.len());
+                    let (_, opt) = ciboulette_store
+                        .get_rel(main_type.name().as_str(), type_.name().as_str())?;
+                    for el in sorting_elements.iter() {
+                        fields.push((
+                            Ciboulette2PostgresSafeIdent::try_from(el.field().as_ref())?,
+                            None,
+                            None,
+                        ));
+                    }
+                    let table_cte =
+                        table.to_cte(Cow::Owned(format!("cte_{}_data", table.name())))?;
+                    self.write_table_info(&table_cte)?;
+                    self.buf.write_all(b" AS (SELECT ")?;
+                    self.write_list(&fields, &table, false, Self::insert_ident)?;
+                    self.buf.write_all(b" FROM ")?;
+                    self.write_table_info(&main_cte_data)?;
+                    match opt {
+                        CibouletteRelationshipOption::ManyDirect(opt) => {
+                            let rel_table = ciboulette_table_store.get(opt.resource().name())?;
+                            self.buf.write_all(b" INNER JOIN ")?;
+                            self.write_table_info(&rel_table)?;
+                            self.buf.write_all(b" ON ")?;
+                            self.insert_ident(
+                                &(
+                                    Ciboulette2PostgresSafeIdent::try_from(opt.to().as_str())?,
+                                    None,
+                                    None,
+                                ),
+                                rel_table,
+                            )?;
+                            self.buf.write_all(b" = ")?;
+                            self.insert_ident(
+                                &(main_cte_data.id_name().clone(), None, None),
+                                main_cte_data,
+                            )?;
+                            self.buf.write_all(b" INNER JOIN ")?;
+                            self.write_table_info(&table)?;
+                            self.buf.write_all(b" ON ")?;
+                            self.insert_ident(&(table.id_name().clone(), None, None), table)?;
+                            self.buf.write_all(b" = ")?;
+                            self.insert_ident(
+                                &(
+                                    Ciboulette2PostgresSafeIdent::try_from(opt.from().as_str())?,
+                                    None,
+                                    None,
+                                ),
+                                rel_table,
+                            )?;
+                        }
+                        CibouletteRelationshipOption::One(opt) => {
+                            self.buf.write_all(b" INNER JOIN ")?;
+                            self.write_table_info(&table)?;
+                            self.buf.write_all(b" ON ")?;
+                            self.insert_ident(&(table.id_name().clone(), None, None), table)?;
+                            self.buf.write_all(b" = ")?;
+                            self.insert_ident(
+                                &(
+                                    Ciboulette2PostgresSafeIdent::try_from(opt.key().as_str())?,
+                                    None,
+                                    None,
+                                ),
+                                main_cte_data,
+                            )?;
+                        }
+                        _ => {
+                            return Err(Ciboulette2SqlError::UnkownError);
+                        }
+                    }
+                }
+            }
         }
         Ok(())
     }

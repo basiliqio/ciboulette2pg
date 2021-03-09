@@ -59,21 +59,29 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
+    pub(crate) fn write_table_info_inner(
+        buf: &mut Ciboulette2PostgresBuf,
+        table: &Ciboulette2PostgresTableSettings,
+    ) -> Result<(), Ciboulette2SqlError> {
+        buf.write_all(POSTGRES_QUOTE)?;
+        match table.schema() {
+            Some(x) => {
+                buf.write_all(x.as_bytes())?;
+                buf.write_all(b"\".\"")?;
+            }
+            None => (),
+        };
+        buf.write_all(table.name().as_bytes())?;
+        buf.write_all(POSTGRES_QUOTE)?;
+        Ok(())
+    }
+
+    #[inline]
     pub(crate) fn write_table_info(
         &mut self,
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.buf.write_all(POSTGRES_QUOTE)?;
-        match table.schema() {
-            Some(x) => {
-                self.buf.write_all(x.as_bytes())?;
-                self.buf.write_all(b"\".\"")?;
-            }
-            None => (),
-        };
-        self.buf.write_all(table.name().as_bytes())?;
-        self.buf.write_all(POSTGRES_QUOTE)?;
-        Ok(())
+        Self::write_table_info_inner(&mut self.buf, table)
     }
 
     pub(crate) fn write_list<I, F>(
