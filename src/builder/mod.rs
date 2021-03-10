@@ -17,7 +17,7 @@ use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 type CibouletteSortingMap<'a> =
-    HashMap<&'a CibouletteResourceType<'a>, Vec<&'a CibouletteSortingElement<'a>>>;
+    BTreeMap<&'a CibouletteResourceType<'a>, Vec<CibouletteSortingElement<'a>>>;
 
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]

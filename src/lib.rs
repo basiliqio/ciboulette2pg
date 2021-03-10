@@ -20,6 +20,6 @@ use messy_json::{
     MessyJson, MessyJsonNullType, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue,
 };
 use safe_ident::Ciboulette2PostgresSafeIdent;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 const POSTGRES_QUOTE: &[u8] = b"\"";

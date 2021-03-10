@@ -1,9 +1,27 @@
+use std::convert::TryInto;
+
 use super::*;
+
+lazy_static::lazy_static! {
+    /// This is an example for using doc comment attributes
+    static ref PARSED_URL: Url = {
+        Url::parse("http://localhost/peoples").unwrap()
+    };
+}
+
+fn gen_request<'a>(store: &'a CibouletteStore<'a>) -> CibouletteReadRequest<'_> {
+    const INTENTION: CibouletteIntention = CibouletteIntention::Read;
+
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &PARSED_URL, &None);
+    let request = req_builder.build(&store).unwrap();
+    request.try_into().unwrap()
+}
 
 #[test]
 fn multi() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
+    let req = gen_request(&store);
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
@@ -27,7 +45,7 @@ fn multi() {
         .included_tables
         .insert(&dest_table, dest_table.clone());
     builder
-        .gen_union_select_all(&table_store, &CibouletteSortingMap::default())
+        .gen_union_select_all(&table_store, &req.query())
         .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
@@ -37,6 +55,7 @@ fn multi() {
 fn single() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
+    let req = gen_request(&store);
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
@@ -49,7 +68,7 @@ fn single() {
         .included_tables
         .insert(&dest_table, dest_table.clone());
     builder
-        .gen_union_select_all(&table_store, &CibouletteSortingMap::default())
+        .gen_union_select_all(&table_store, &req.query())
         .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
@@ -59,9 +78,10 @@ fn single() {
 fn no_table() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
+    let req = gen_request(&store);
     let mut builder = Ciboulette2PostgresBuilder::default();
     builder
-        .gen_union_select_all(&table_store, &CibouletteSortingMap::default())
+        .gen_union_select_all(&table_store, &req.query())
         .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);

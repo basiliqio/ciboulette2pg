@@ -91,7 +91,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
         let main_attrs = extract_data(&request)?;
-        let main_table = ciboulette_table_store.get(request.resource_type().name().as_str())?;
+        let main_type = request.resource_type();
+        let main_table = ciboulette_table_store.get(main_type.name().as_str())?;
         let main_cte_update =
             main_table.to_cte(Cow::Owned(format!("cte_{}_update", main_table.name())))?;
         let main_cte_data =
@@ -101,14 +102,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             single_relationships: main_single_relationships,
         } = crate::graph_walker::main::gen_query(
             &ciboulette_store,
-            request.resource_type(),
+            main_type,
             main_attrs.attributes(),
             Some(main_attrs.relationships()),
             true,
         )?;
         let main_multi_relationships = crate::graph_walker::relationships::gen_query(
             &ciboulette_store,
-            request.resource_type(),
+            main_type,
             Some(main_attrs.relationships()),
         )?;
         se.buf.write_all(b"WITH ")?;
@@ -127,19 +128,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_cte_data,
             main_multi_relationships,
         )?;
-        let sorting_map = se.gen_cte_for_sort(
+        se.buf.write_all(b" ")?;
+        se.gen_cte_for_sort(
             &ciboulette_store,
             &ciboulette_table_store,
-            request.query(),
-            &request.resource_type(),
+            &request.query(),
+            &main_type,
             &main_table,
             &main_cte_data,
         )?;
-        se.buf.write_all(b" ")?;
-        se.included_tables
-            .insert(&main_table, main_cte_data.clone());
+        se.included_tables.insert(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
-        se.gen_union_select_all(&ciboulette_table_store, &sorting_map)?;
+        se.gen_union_select_all(&ciboulette_table_store, &request.query())?;
         Ok(se)
     }
 }
