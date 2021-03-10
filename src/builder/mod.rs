@@ -12,6 +12,8 @@ mod utils;
 #[cfg(test)]
 mod tests;
 
+use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
+
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 type CibouletteSortingMap<'a> = std::collections::HashMap<
     &'a CibouletteResourceType<'a>,

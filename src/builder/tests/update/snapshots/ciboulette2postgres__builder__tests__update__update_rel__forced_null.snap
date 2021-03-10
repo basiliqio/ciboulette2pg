@@ -48,4 +48,10 @@ WITH "cte_peoples_update" AS (
 SELECT
   *
 FROM
-  "cte_favorite_color_data";
+  "cte_favorite_color_data"
+UNION
+ALL
+SELECT
+  *
+FROM
+  "cte_peoples_data";

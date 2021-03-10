@@ -128,22 +128,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
-    pub(crate) fn handle_sorting(
-        &mut self,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        sorting_map: &CibouletteSortingMap<'a>,
-        table: &Ciboulette2PostgresTableSettings<'a>,
-    ) -> Result<(), Ciboulette2SqlError> {
-        Self::handle_sorting_routine(
-            &mut self.buf,
-            ciboulette_table_store,
-            sorting_map,
-            table,
-            &self.included_tables,
-        )
-    }
-
-    #[inline]
     pub(crate) fn write_table_info_inner(
         buf: &mut Ciboulette2PostgresBuf,
         table: &Ciboulette2PostgresTableSettings,
