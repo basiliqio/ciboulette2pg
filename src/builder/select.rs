@@ -160,7 +160,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(crate) fn gen_union_select_all(
         &mut self,
-        query: &'a CibouletteQueryParameters<'a>,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
+        sorting_map: &CibouletteSortingMap<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut iter = self.included_tables.values().peekable();
         while let Some(v) = iter.next() {
@@ -168,6 +169,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.buf.write_all(b"SELECT * FROM ")?;
             // SELECT * FROM "schema"."mytable"
             Self::write_table_info_inner(&mut self.buf, v)?;
+            Self::handle_sorting_routine(
+                &mut self.buf,
+                &ciboulette_table_store,
+                &sorting_map,
+                v,
+                &self.included_tables,
+            )?;
             if iter.peek().is_some() {
                 // If there's more :
                 // SELECT * FROM "schema"."mytable" UNION ALL ...
@@ -223,6 +231,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 continue;
             }
             let table = ciboulette_table_store.get(type_.name())?;
+            if table == main_table {
+                continue;
+            }
             match self.included_tables.get(&table) {
                 Some(_cte_table) => continue,
                 None => {
@@ -471,9 +482,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_cte_data,
             rels,
         )?;
-        se.included_tables
-            .insert(&main_table, main_cte_data.clone());
-        se.gen_cte_for_sort(
+        let sorting_map = se.gen_cte_for_sort(
             &ciboulette_store,
             &ciboulette_table_store,
             request.query(),
@@ -481,8 +490,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_table,
             &main_cte_data,
         )?;
+        se.included_tables.insert(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
-        se.gen_union_select_all(request.query())?;
+        se.gen_union_select_all(&ciboulette_table_store, &sorting_map)?;
         Ok(se)
     }
 }

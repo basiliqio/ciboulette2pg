@@ -73,19 +73,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
-    pub(crate) fn insert_sort_join_inner(
+    pub(crate) fn handle_sorting_routine(
         mut buf: &mut Ciboulette2PostgresBuf,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         sorting_map: &CibouletteSortingMap<'a>,
         table: &Ciboulette2PostgresTableSettings<'a>,
-        included_tables: &BTreeMap<
+        included_tables_map: &BTreeMap<
             &'a Ciboulette2PostgresTableSettings<'a>,
             Ciboulette2PostgresTableSettings<'a>,
         >,
     ) -> Result<(), Ciboulette2SqlError> {
+        let mut included_tables: Vec<&Ciboulette2PostgresTableSettings<'a>> =
+            Vec::with_capacity(sorting_map.len());
+
         if let Some(sorting_el) = sorting_map.get(table.ciboulette_type()) {
             for el in sorting_el {
-                let included_table = included_tables
+                let included_table = included_tables_map
                     .get(ciboulette_table_store.get(el.type_().name().as_str())?)
                     .ok_or_else(|| {
                         Ciboulette2SqlError::MissingRelationForOrdering(table.name().to_string())
@@ -100,19 +103,38 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 )?;
                 buf.write_all(b" = ")?;
                 Self::insert_ident_inner(&mut buf, &(table.id_name(), &None, &None), table)?;
+                included_tables.push(included_table);
+            }
+            buf.write_all(b" ORDER BY ")?;
+
+            let mut iter = sorting_el.iter().zip(included_tables.iter()).peekable();
+
+            while let Some((el, table)) = iter.next() {
+                Self::insert_ident_inner(
+                    &mut buf,
+                    &(
+                        &Ciboulette2PostgresSafeIdent::try_from(el.field().as_ref())?,
+                        &None,
+                        &None,
+                    ),
+                    table,
+                )?;
+                if iter.peek().is_some() {
+                    buf.write_all(b", ")?;
+                }
             }
         }
         Ok(())
     }
 
     #[inline]
-    pub(crate) fn insert_sort_join(
+    pub(crate) fn handle_sorting(
         &mut self,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         sorting_map: &CibouletteSortingMap<'a>,
         table: &Ciboulette2PostgresTableSettings<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        Self::insert_sort_join_inner(
+        Self::handle_sorting_routine(
             &mut self.buf,
             ciboulette_table_store,
             sorting_map,

@@ -252,9 +252,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt)
         se.buf.write_all(b") ")?;
 
+        let sorting_map = se.gen_cte_for_sort(
+            &ciboulette_store,
+            &ciboulette_table_store,
+            request.query(),
+            &main_type,
+            &main_table,
+            &main_cte_data,
+        )?;
         se.included_tables.insert(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
-        se.gen_union_select_all(request.query())?;
+        se.gen_union_select_all(&ciboulette_table_store, &sorting_map)?;
         Ok(se)
     }
 }

@@ -97,8 +97,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             rels,
         )?;
         se.buf.write_all(b" ")?;
-        se.included_tables.insert(&main_table, main_cte_data);
-        se.gen_union_select_all(request.query())?;
+        se.included_tables
+            .insert(&main_table, main_cte_data.clone());
+        let sorting_map = se.gen_cte_for_sort(
+            &ciboulette_store,
+            &ciboulette_table_store,
+            request.query(),
+            &main_type,
+            &main_table,
+            &main_cte_data,
+        )?;
+        // Aggregate every table using UNION ALL
+        se.gen_union_select_all(&ciboulette_table_store, &sorting_map)?;
         Ok(se)
     }
 
@@ -160,7 +170,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             single_relationships,
         )?;
         se.buf.write_all(b" ")?;
-        se.gen_union_select_all(request.query())?;
+        let sorting_map = se.gen_cte_for_sort(
+            &ciboulette_store,
+            &ciboulette_table_store,
+            request.query(),
+            &main_type,
+            &main_table,
+            &main_cte_data,
+        )?;
+        // Aggregate every table using UNION ALL
+        se.gen_union_select_all(&ciboulette_table_store, &sorting_map)?;
         Ok(se)
     }
 }

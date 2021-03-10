@@ -1,19 +1,9 @@
 use super::*;
 
-fn gen_req<'a>(store: &'a CibouletteStore<'a>, q: &'a Url) -> CibouletteQueryParameters<'a> {
-    const INTENTION: CibouletteIntention = CibouletteIntention::Read;
-    const BODY: Option<&str> = None;
-
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &q, &BODY);
-    let CibouletteRequest { query, .. } = req_builder.build(&store).unwrap();
-    query.unwrap_or_default()
-}
-
 #[test]
 fn multi() {
     let store = gen_bag();
-    let q_url = Url::parse("http://localhost/peoples").unwrap();
-    let q = gen_req(&store, &q_url);
+    let table_store = gen_table_store(&store);
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
@@ -36,7 +26,9 @@ fn multi() {
     builder
         .included_tables
         .insert(&dest_table, dest_table.clone());
-    builder.gen_union_select_all(&q).unwrap();
+    builder
+        .gen_union_select_all(&table_store, &CibouletteSortingMap::default())
+        .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
 }
@@ -44,8 +36,7 @@ fn multi() {
 #[test]
 fn single() {
     let store = gen_bag();
-    let q_url = Url::parse("http://localhost/peoples").unwrap();
-    let q = gen_req(&store, &q_url);
+    let table_store = gen_table_store(&store);
     let mut builder = Ciboulette2PostgresBuilder::default();
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
@@ -57,7 +48,9 @@ fn single() {
     builder
         .included_tables
         .insert(&dest_table, dest_table.clone());
-    builder.gen_union_select_all(&q).unwrap();
+    builder
+        .gen_union_select_all(&table_store, &CibouletteSortingMap::default())
+        .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
 }
@@ -65,10 +58,11 @@ fn single() {
 #[test]
 fn no_table() {
     let store = gen_bag();
-    let q_url = Url::parse("http://localhost/peoples").unwrap();
-    let q = gen_req(&store, &q_url);
+    let table_store = gen_table_store(&store);
     let mut builder = Ciboulette2PostgresBuilder::default();
-    builder.gen_union_select_all(&q).unwrap();
+    builder
+        .gen_union_select_all(&table_store, &CibouletteSortingMap::default())
+        .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
 }
