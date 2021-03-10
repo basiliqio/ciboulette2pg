@@ -5,7 +5,6 @@ mod gen_json_builder;
 mod gen_values;
 mod insert;
 mod insert_normal;
-mod insert_rel;
 mod single_rel_cte;
 mod union_select_all;
 

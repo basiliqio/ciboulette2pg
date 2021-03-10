@@ -12,13 +12,12 @@ mod utils;
 #[cfg(test)]
 mod tests;
 
+use crate::graph_walker::main::Ciboulette2PostgresMain;
 use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
-type CibouletteSortingMap<'a> = std::collections::HashMap<
-    &'a CibouletteResourceType<'a>,
-    Vec<&'a CibouletteSortingElement<'a>>,
->;
+type CibouletteSortingMap<'a> =
+    HashMap<&'a CibouletteResourceType<'a>, Vec<&'a CibouletteSortingElement<'a>>>;
 
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
