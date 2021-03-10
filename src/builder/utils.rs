@@ -11,6 +11,40 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
+    pub(crate) fn insert_ident_inner(
+        buf: &mut Ciboulette2PostgresBuf,
+        (ident, alias, cast): &(
+            &Ciboulette2PostgresSafeIdent,
+            &Option<Ciboulette2PostgresSafeIdent>,
+            &Option<Ciboulette2PostgresSafeIdent>,
+        ),
+        table: &Ciboulette2PostgresTableSettings,
+    ) -> Result<(), Ciboulette2SqlError> {
+        Self::write_table_info_inner(buf, table)?;
+        buf.write_all(b".")?;
+        buf.write_all(POSTGRES_QUOTE)?;
+        buf.write_all(ident.as_bytes())?;
+        buf.write_all(POSTGRES_QUOTE)?;
+        match cast {
+            Some(cast) => {
+                buf.write_all(b"::")?;
+                buf.write_all(cast.as_bytes())?;
+            }
+            None => (),
+        };
+        match alias {
+            Some(alias) => {
+                buf.write_all(b" AS ")?;
+                buf.write_all(POSTGRES_QUOTE)?;
+                buf.write_all(alias.as_bytes())?;
+                buf.write_all(POSTGRES_QUOTE)?;
+            }
+            None => (),
+        };
+        Ok(())
+    }
+
+    #[inline]
     pub(crate) fn insert_ident(
         &mut self,
         (ident, alias, cast): &(
@@ -20,28 +54,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         ),
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.write_table_info(table)?;
-        self.buf.write_all(b".")?;
-        self.buf.write_all(POSTGRES_QUOTE)?;
-        self.buf.write_all(ident.as_bytes())?;
-        self.buf.write_all(POSTGRES_QUOTE)?;
-        match cast {
-            Some(cast) => {
-                self.buf.write_all(b"::")?;
-                self.buf.write_all(cast.as_bytes())?;
-            }
-            None => (),
-        };
-        match alias {
-            Some(alias) => {
-                self.buf.write_all(b" AS ")?;
-                self.buf.write_all(POSTGRES_QUOTE)?;
-                self.buf.write_all(alias.as_bytes())?;
-                self.buf.write_all(POSTGRES_QUOTE)?;
-            }
-            None => (),
-        };
-        Ok(())
+        Self::insert_ident_inner(&mut self.buf, &(ident, alias, cast), table)
     }
 
     #[inline]
@@ -60,19 +73,52 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
+    pub(crate) fn insert_sort_join_inner(
+        mut buf: &mut Ciboulette2PostgresBuf,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
+        sorting_map: &CibouletteSortingMap<'a>,
+        table: &Ciboulette2PostgresTableSettings<'a>,
+        included_tables: &BTreeMap<
+            &'a Ciboulette2PostgresTableSettings<'a>,
+            Ciboulette2PostgresTableSettings<'a>,
+        >,
+    ) -> Result<(), Ciboulette2SqlError> {
+        if let Some(sorting_el) = sorting_map.get(table.ciboulette_type()) {
+            for el in sorting_el {
+                let included_table = included_tables
+                    .get(ciboulette_table_store.get(el.type_().name().as_str())?)
+                    .ok_or_else(|| {
+                        Ciboulette2SqlError::MissingRelationForOrdering(table.name().to_string())
+                    })?;
+                buf.write_all(b" INNER JOIN ")?;
+                Self::write_table_info_inner(buf, included_table)?;
+                buf.write_all(b" ON ")?;
+                Self::insert_ident_inner(
+                    &mut buf,
+                    &(included_table.id_name(), &None, &None),
+                    included_table,
+                )?;
+                buf.write_all(b" = ")?;
+                Self::insert_ident_inner(&mut buf, &(table.id_name(), &None, &None), table)?;
+            }
+        }
+        Ok(())
+    }
+
+    #[inline]
     pub(crate) fn insert_sort_join(
         &mut self,
-        query: &'a CibouletteQueryParameters<'a>,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         sorting_map: &CibouletteSortingMap<'a>,
         table: &Ciboulette2PostgresTableSettings<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        let mut buffer = [0u8; 20];
-        let old_len = self.params.len();
-
-        // self.params.push(param);
-        self.buf.write_all(b"$")?;
-        self.buf.write_all(old_len.numtoa(10, &mut buffer))?;
-        Ok(())
+        Self::insert_sort_join_inner(
+            &mut self.buf,
+            ciboulette_table_store,
+            sorting_map,
+            table,
+            &self.included_tables,
+        )
     }
 
     #[inline]

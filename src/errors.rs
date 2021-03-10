@@ -26,6 +26,8 @@ pub enum Ciboulette2SqlError {
     MultiIdsForSingleRelationships,
     #[error("One-to-many relationship can't be deleted in bulk")]
     BulkRelationshipDelete,
+    #[error("One of the needed relation for ordering couldn't be found : `{0}`")]
+    MissingRelationForOrdering(String),
     #[error("Non optional relationship `{1}` for type `{0}`")]
     RequiredRelationship(String, String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]
