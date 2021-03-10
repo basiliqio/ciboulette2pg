@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn simple_single_rel() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
 		Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Delete;
@@ -23,7 +23,7 @@ fn simple_single_rel() {
 #[test]
 fn simple_single_rel_non_optional() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(
         "http://localhost/comments/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/author",
     )
@@ -46,7 +46,7 @@ fn simple_single_rel_non_optional() {
 #[test]
 fn multi_relationships() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(
         "http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/articles",
     )

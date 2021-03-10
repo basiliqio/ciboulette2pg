@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn simple() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -41,7 +41,7 @@ fn simple() {
 #[test]
 fn relationship_internal() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -90,7 +90,7 @@ fn relationship_internal() {
 #[test]
 fn relationship_internal_force_null() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -135,7 +135,7 @@ fn relationship_internal_force_null() {
 #[test]
 fn relationship_external() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -186,7 +186,7 @@ fn relationship_external() {
 #[test]
 fn not_all_required_fields() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -224,7 +224,7 @@ fn not_all_required_fields() {
 #[test]
 fn forced_null_fields() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -263,7 +263,7 @@ fn forced_null_fields() {
 #[test]
 fn include_single_rel() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(
         "http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2?include=favorite_color",
     )
@@ -304,7 +304,7 @@ fn include_single_rel() {
 #[test]
 fn include_multi_rel() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(
         "http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2?include=articles",
     )

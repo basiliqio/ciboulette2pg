@@ -20,6 +20,7 @@ fn multi() {
         Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
+        store.get_type("peoples").unwrap(),
     );
 
     let from_table = Ciboulette2PostgresTableSettings::new(
@@ -27,6 +28,7 @@ fn multi() {
         Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("articles").unwrap(),
+        store.get_type("articles").unwrap(),
     );
     builder
         .included_tables
@@ -50,6 +52,7 @@ fn single() {
         Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
+        store.get_type("peoples").unwrap(),
     );
     builder
         .included_tables

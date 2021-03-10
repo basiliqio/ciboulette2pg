@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn simple() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -35,7 +35,7 @@ fn simple() {
 #[test]
 fn forced_null() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -64,7 +64,7 @@ fn forced_null() {
 #[test]
 fn forbidden_multi_ids() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
@@ -105,7 +105,7 @@ fn forbidden_multi_ids() {
 #[test]
 fn forbidden_one_to_many() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(
         "http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/articles",
     )

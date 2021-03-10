@@ -214,9 +214,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_type: &'a CibouletteResourceType<'a>,
         main_table: &Ciboulette2PostgresTableSettings<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
-    ) -> Result<(), Ciboulette2SqlError> {
-        let tables = query.sorting().iter().into_group_map_by(|x| x.type_());
-        for (type_, sorting_elements) in tables.into_iter() {
+    ) -> Result<CibouletteSortingMap<'a>, Ciboulette2SqlError> {
+        let tables: CibouletteSortingMap<'a> =
+            query.sorting().iter().into_group_map_by(|x| x.type_);
+        for (type_, sorting_elements) in tables.iter() {
             if type_ == &main_type {
                 continue;
             }
@@ -319,7 +320,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 }
             }
         }
-        Ok(())
+        Ok(tables)
     }
 
     pub(crate) fn gen_select_multi_rel_routine(

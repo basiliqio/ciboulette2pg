@@ -13,6 +13,10 @@ mod utils;
 mod tests;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
+type CibouletteSortingMap<'a> = std::collections::HashMap<
+    &'a CibouletteResourceType<'a>,
+    Vec<&'a CibouletteSortingElement<'a>>,
+>;
 
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]

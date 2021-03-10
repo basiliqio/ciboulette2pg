@@ -60,6 +60,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
+    pub(crate) fn insert_sort_join(
+        &mut self,
+        query: &'a CibouletteQueryParameters<'a>,
+        sorting_map: &CibouletteSortingMap<'a>,
+        table: &Ciboulette2PostgresTableSettings<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        let mut buffer = [0u8; 20];
+        let old_len = self.params.len();
+
+        // self.params.push(param);
+        self.buf.write_all(b"$")?;
+        self.buf.write_all(old_len.numtoa(10, &mut buffer))?;
+        Ok(())
+    }
+
+    #[inline]
     pub(crate) fn write_table_info_inner(
         buf: &mut Ciboulette2PostgresBuf,
         table: &Ciboulette2PostgresTableSettings,

@@ -51,6 +51,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_rel_values(
         &mut self,
         ids: Vec<value::Ciboulette2SqlValue<'a>>,
+        table: &'a Ciboulette2PostgresTableSettings<'a>,
         type_: &str,
     ) -> Result<(), Ciboulette2SqlError> {
         // It's a logic error to have an empty id vector here
@@ -58,19 +59,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             return Err(Ciboulette2SqlError::EmptyRelValue(type_.to_string()));
         }
         // ($x::type), ($x::type), ($x::type)
-        self.write_list(
-            ids,
-            &Ciboulette2PostgresTableSettings::default(),
-            false,
-            |ref mut se, curr, t| {
-                se.buf.write_all(b"(")?;
-                se.insert_params(curr, t)?;
-                se.buf.write_all(b"::")?;
-                se.buf.write_all(type_.as_bytes())?;
-                se.buf.write_all(b")")?;
-                Ok(())
-            },
-        )?;
+        self.write_list(ids, &table, false, |ref mut se, curr, t| {
+            se.buf.write_all(b"(")?;
+            se.insert_params(curr, t)?;
+            se.buf.write_all(b"::")?;
+            se.buf.write_all(type_.as_bytes())?;
+            se.buf.write_all(b")")?;
+            Ok(())
+        })?;
         Ok(())
     }
 
@@ -172,7 +168,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 // "cte_rel_myrel_id" AS (VALUES
                 self.buf.write_all(b" AS (VALUES ")?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)
-                self.gen_rel_values(rel_ids, rel_table.id_type())?;
+                self.gen_rel_values(rel_ids, &rel_table, rel_table.id_type())?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)),
                 self.buf.write_all(b"), ")?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert"

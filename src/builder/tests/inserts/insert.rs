@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn simple() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
@@ -41,7 +41,7 @@ fn simple() {
 #[test]
 fn relationship_external_single() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
@@ -89,7 +89,7 @@ fn relationship_external_single() {
 #[test]
 fn relationship_external_multiple() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
@@ -143,7 +143,7 @@ fn relationship_external_multiple() {
 #[test]
 fn relationship_external_multiple_include() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples?include=articles").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
@@ -197,7 +197,7 @@ fn relationship_external_multiple_include() {
 #[test]
 fn relationship_external_multiple_include_rel() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples?include=favorite_color,articles,people-article")
             .unwrap();
@@ -253,7 +253,7 @@ fn relationship_external_multiple_include_rel() {
 #[test]
 fn relationship_internal_single() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
@@ -301,7 +301,7 @@ fn relationship_internal_single() {
 #[test]
 fn relationship_internal_single_include() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples?include=favorite_color").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
@@ -349,7 +349,7 @@ fn relationship_internal_single_include() {
 #[test]
 fn relationship_internal_single_include_all() {
     let ciboulette_store = gen_bag();
-    let table_store = gen_table_store();
+    let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
         Url::parse("http://localhost/peoples?include=favorite_color,articles,people-article")
             .unwrap();
