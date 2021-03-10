@@ -4,12 +4,16 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 
 ---
 SELECT
-  *
+  "public"."articles"."id",
+  "public"."articles"."type",
+  "public"."articles"."data"
 FROM
   "public"."articles"
 UNION
 ALL
 SELECT
-  *
+  "public"."peoples"."id",
+  "public"."peoples"."type",
+  "public"."peoples"."data"
 FROM
   "public"."peoples";

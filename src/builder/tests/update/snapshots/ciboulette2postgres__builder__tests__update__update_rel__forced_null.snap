@@ -46,12 +46,16 @@ WITH "cte_peoples_update" AS (
     )
 )
 SELECT
-  *
+  "cte_favorite_color_data"."id",
+  "cte_favorite_color_data"."type",
+  "cte_favorite_color_data"."data"
 FROM
   "cte_favorite_color_data"
 UNION
 ALL
 SELECT
-  *
+  "cte_peoples_data"."id",
+  "cte_peoples_data"."type",
+  "cte_peoples_data"."data"
 FROM
   "cte_peoples_data";

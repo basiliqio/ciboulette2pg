@@ -54,7 +54,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let Ciboulette2PostgresMain {
             insert_values: rel_values,
             single_relationships,
-        } = crate::graph_walker::relationships::gen_query_rel(
+        } = crate::graph_walker::relationships::extract_fields_rel(
             &ciboulette_store,
             &request.resource_type(),
             &rels,

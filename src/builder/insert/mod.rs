@@ -19,14 +19,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let Ciboulette2PostgresMain {
             insert_values: main_inserts_values,
             single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::gen_query(
+        } = crate::graph_walker::main::extract_fields(
             &ciboulette_store,
             request.path().main_type(),
             request.data().attributes(),
-            Some(request.data().relationships()),
+            request.data().relationships(),
             false,
         )?;
-        let rels = crate::graph_walker::relationships::gen_query(
+        let rels = crate::graph_walker::relationships::extract_fields(
             &ciboulette_store,
             &request.path().main_type(),
             Some(request.data().relationships()),

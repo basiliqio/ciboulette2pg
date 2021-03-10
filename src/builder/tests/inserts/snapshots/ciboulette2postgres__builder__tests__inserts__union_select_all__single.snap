@@ -4,6 +4,8 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 
 ---
 SELECT
-  *
+  "public"."peoples"."id",
+  "public"."peoples"."type",
+  "public"."peoples"."data"
 FROM
   "public"."peoples";

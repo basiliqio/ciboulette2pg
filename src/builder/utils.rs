@@ -99,6 +99,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         mut buf: &mut Ciboulette2PostgresBuf,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         sorting_map: &CibouletteSortingMap<'a>,
+        // main_table: &Ciboulette2PostgresTableSettings<'a>,
         table: &Ciboulette2PostgresTableSettings<'a>,
         included_tables_map: &BTreeMap<
             &'a Ciboulette2PostgresTableSettings<'a>,
@@ -109,6 +110,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             Vec::with_capacity(sorting_map.len());
 
         if let Some(sorting_el) = sorting_map.get(table.ciboulette_type()) {
+            // if table != main_table {
             for el in sorting_el {
                 let included_table = included_tables_map
                     .get(ciboulette_table_store.get(el.type_().name().as_str())?)
@@ -127,24 +129,26 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 Self::insert_ident_inner(&mut buf, &(table.id_name(), &None, &None), table)?;
                 included_tables.push(included_table);
             }
-            buf.write_all(b" ORDER BY ")?;
+            // }
+            // TODO First write all the inner join, then the order by only of the main data
+            // buf.write_all(b" ORDER BY ")?;
 
-            let mut iter = sorting_el.iter().zip(included_tables.iter()).peekable();
+            // let mut iter = sorting_el.iter().zip(included_tables.iter()).peekable();
 
-            while let Some((el, table)) = iter.next() {
-                Self::insert_ident_inner(
-                    &mut buf,
-                    &(
-                        &Ciboulette2PostgresSafeIdent::try_from(el.field().as_ref())?,
-                        &None,
-                        &None,
-                    ),
-                    table,
-                )?;
-                if iter.peek().is_some() {
-                    buf.write_all(b", ")?;
-                }
-            }
+            // while let Some((el, table)) = iter.next() {
+            //     Self::insert_ident_inner(
+            //         &mut buf,
+            //         &(
+            //             &Ciboulette2PostgresSafeIdent::try_from(format!("sort_{}", el.field().as_ref()).as_str())?,
+            //             &None,
+            //             &None,
+            //         ),
+            //         table,
+            //     )?;
+            //     if iter.peek().is_some() {
+            //         buf.write_all(b", ")?;
+            //     }
+            // }
         }
         Ok(())
     }

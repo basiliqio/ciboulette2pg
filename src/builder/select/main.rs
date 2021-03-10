@@ -32,21 +32,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             _ => (),
         }
         se.buf.write_all(b")")?;
-        let Ciboulette2PostgresMain {
-            insert_values: _,
-            single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::gen_query(
+        let main_single_relationships = crate::graph_walker::main::get_fields_single_rel(
             &ciboulette_store,
             request.path().main_type(),
-            &None,
-            None,
-            false,
         )?;
 
-        let rels = crate::graph_walker::relationships::gen_query(
+        let rels = crate::graph_walker::relationships::get_fields_multi_rels(
             &ciboulette_store,
             &request.path().main_type(),
-            None,
         )?;
         se.gen_select_single_rel_routine(
             &ciboulette_store,

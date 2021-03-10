@@ -1,7 +1,6 @@
 use super::*;
 
 #[test]
-#[ignore]
 fn multi() {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
@@ -23,7 +22,6 @@ fn multi() {
 }
 
 #[test]
-#[ignore]
 fn single() {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);

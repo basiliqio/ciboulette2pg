@@ -9,6 +9,20 @@ mod select;
 mod update;
 mod utils;
 
+lazy_static::lazy_static! {
+    static ref CIBOULETTE_ID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+        Ciboulette2PostgresSafeIdent::try_from("id").unwrap()
+    };
+
+    static ref CIBOULETTE_TYPE_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+        Ciboulette2PostgresSafeIdent::try_from("type").unwrap()
+    };
+
+    static ref CIBOULETTE_DATA_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+        Ciboulette2PostgresSafeIdent::try_from("data").unwrap()
+    };
+}
+
 #[cfg(test)]
 mod tests;
 

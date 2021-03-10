@@ -100,7 +100,7 @@ fn extract_relationships<'a>(
     }
 }
 
-pub fn gen_query_rel<'a>(
+pub fn extract_fields_rel<'a>(
     store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
     rels: &'a CibouletteUpdateRelationship<'a>,
@@ -136,7 +136,7 @@ pub fn gen_query_rel<'a>(
     ))
 }
 
-pub fn gen_query<'a>(
+pub fn extract_fields<'a>(
     store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
     relationships: Option<&'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>>,
@@ -157,6 +157,34 @@ pub fn gen_query<'a>(
             let node_weight = store.graph().node_weight(node_index).unwrap(); //TODO unwrap // Get the node weight
             let type_to_alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
             extract_relationships(&mut res, relationships, node_weight, type_to_alias, &opt);
+        }
+    }
+    Ok(res)
+}
+
+pub fn get_fields_multi_rels<'a>(
+    store: &'a CibouletteStore<'a>,
+    main_type: &'a CibouletteResourceType<'a>,
+) -> Result<Vec<Ciboulette2PostgresRelationships<'a>>, Ciboulette2SqlError> {
+    let mut res: Vec<Ciboulette2PostgresRelationships<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
+
+    let main_type_index = store
+        .get_type_index(main_type.name())
+        .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
+    let mut walker = store
+        .graph()
+        .neighbors_directed(*main_type_index, petgraph::Direction::Incoming)
+        .detach(); // Create a graph walker
+    while let Some((edge_index, node_index)) = walker.next(&store.graph()) {
+        // For each connect edge outgoing from the original node
+        let edge_weight = store.graph().edge_weight(edge_index).unwrap(); //TODO unwrap // Get the edge weight
+        if let CibouletteRelationshipOption::ManyDirect(opt) = edge_weight {
+            let node_weight = store.graph().node_weight(node_index).unwrap(); //TODO unwrap // Get the node weight
+            res.push(Ciboulette2PostgresRelationships {
+                type_: node_weight,
+                bucket: opt,
+                values: None,
+            });
         }
     }
     Ok(res)

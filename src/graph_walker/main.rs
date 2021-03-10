@@ -68,11 +68,11 @@ pub fn fill_attributes<'a>(
     Ok(())
 }
 
-pub fn gen_query<'a>(
+pub fn extract_fields<'a>(
     store: &'a CibouletteStore,
     main_type: &'a CibouletteResourceType<'a>,
     attributes: &'a Option<MessyJsonObjectValue<'a>>,
-    relationships: Option<&'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>>,
+    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
     fails_on_many: bool,
 ) -> Result<Ciboulette2PostgresMain<'a>, Ciboulette2SqlError> {
     let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
@@ -94,23 +94,13 @@ pub fn gen_query<'a>(
         if let CibouletteRelationshipOption::One(opt) =
             store.graph().edge_weight(edge_index).unwrap()
         {
-            if let Some(relationships) = relationships {
-                if let Some(v) = check_single_relationships(
-                    &relationships,
-                    &main_type,
-                    &node_weight,
-                    alias,
-                    opt,
-                )? {
-                    res_val.push(v); // Insert the relationship values
-                }
+            if let Some(v) =
+                check_single_relationships(&relationships, &main_type, &node_weight, alias, opt)?
+            {
+                res_val.push(v); // Insert the relationship values
             }
             res_rel.push(alias.as_str());
-        } else if fails_on_many
-            && relationships
-                .map(|x| x.contains_key(alias.as_str()))
-                .unwrap_or(false)
-        {
+        } else if fails_on_many && relationships.contains_key(alias.as_str()) {
             return Err(Ciboulette2SqlError::UpdatingManyRelationships);
         }
     }
@@ -118,4 +108,26 @@ pub fn gen_query<'a>(
         insert_values: res_val,
         single_relationships: res_rel,
     })
+}
+
+pub fn get_fields_single_rel<'a>(
+    store: &'a CibouletteStore,
+    main_type: &'a CibouletteResourceType<'a>,
+) -> Result<Vec<&'a str>, Ciboulette2SqlError> {
+    let mut res: Vec<&'a str> = Vec::with_capacity(128);
+    let main_type_index = store
+        .get_type_index(main_type.name())
+        .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
+
+    let mut walker = store
+        .graph()
+        .neighbors_directed(*main_type_index, petgraph::Direction::Outgoing)
+        .detach(); // Create a graph walker
+    while let Some((_edge_index, node_index)) = walker.next(&store.graph()) {
+        // For each connect edge outgoing from the original node
+        let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
+        let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
+        res.push(alias.as_str());
+    }
+    Ok(res)
 }

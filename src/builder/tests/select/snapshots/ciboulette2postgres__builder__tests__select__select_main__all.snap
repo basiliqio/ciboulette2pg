@@ -22,10 +22,25 @@ WITH "cte_peoples_data" AS (
   FROM
     "public"."peoples"
 ),
+"cte_articles_data" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    $6 :: TEXT AS "type",
+    NULL :: json AS "data"
+  FROM
+    "public"."articles"
+  WHERE
+    "public"."articles"."id" IN (
+      SELECT
+        "cte_peoples_data"."articles"
+      FROM
+        "cte_peoples_data"
+    )
+),
 "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
-    $6 :: TEXT AS "type",
+    $7 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."favorite_color"
@@ -40,7 +55,7 @@ WITH "cte_peoples_data" AS (
 "cte_rel_articles_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
-    $7 :: TEXT AS "type",
+    $8 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."people-article"
@@ -50,7 +65,7 @@ WITH "cte_peoples_data" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $8 :: TEXT AS "type",
+    $9 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."articles"
@@ -63,24 +78,32 @@ WITH "cte_peoples_data" AS (
     )
 )
 SELECT
-  *
+  "cte_rel_articles_data"."id",
+  "cte_rel_articles_data"."type",
+  "cte_rel_articles_data"."data"
 FROM
   "cte_rel_articles_data"
 UNION
 ALL
 SELECT
-  *
+  "cte_favorite_color_data"."id",
+  "cte_favorite_color_data"."type",
+  "cte_favorite_color_data"."data"
 FROM
   "cte_favorite_color_data"
 UNION
 ALL
 SELECT
-  *
+  "cte_rel_articles_rel_data"."id",
+  "cte_rel_articles_rel_data"."type",
+  "cte_rel_articles_rel_data"."data"
 FROM
   "cte_rel_articles_rel_data"
 UNION
 ALL
 SELECT
-  *
+  "cte_peoples_data"."id",
+  "cte_peoples_data"."type",
+  "cte_peoples_data"."data"
 FROM
   "cte_peoples_data";

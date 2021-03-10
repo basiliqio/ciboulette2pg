@@ -115,6 +115,30 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         Ok(())
     }
+    pub(crate) fn gen_sorting_keys(
+        &mut self,
+        table: &Ciboulette2PostgresTableSettings<'a>,
+        type_: &'a CibouletteResourceType<'a>,
+        query: &'a CibouletteQueryParameters<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        if let Some(sorting_arr) = query.sorting_map().get(&type_) {
+            for el in sorting_arr {
+                self.buf.write_all(b", ")?;
+                self.insert_ident(
+                    &(
+                        Ciboulette2PostgresSafeIdent::try_from(el.field().as_ref())?,
+                        Some(Ciboulette2PostgresSafeIdent::try_from(
+                            format!("sort_{}", el.field().as_ref()).as_str(),
+                        )?),
+                        None,
+                    ),
+                    table,
+                )?;
+            }
+        }
+        Ok(())
+    }
+
     pub(crate) fn gen_select_cte_final(
         &mut self,
         table: &Ciboulette2PostgresTableSettings<'a>,
@@ -145,7 +169,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..)
         self.gen_json_builder(table, type_, query, include)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM
-        self.buf.write_all(b" AS \"data\" FROM ")?;
+        self.buf.write_all(b" AS \"data\"")?;
+        self.gen_sorting_keys(&table, &type_, &query)?;
+        self.buf.write_all(b" FROM ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."other_table"
         self.write_table_info(table)?;
         Ok(())
@@ -186,7 +212,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let mut iter = self.included_tables.values().peekable();
         while let Some(v) = iter.next() {
             // SELECT * FROM
-            self.buf.write_all(b"SELECT * FROM ")?;
+            self.buf.write_all(b"SELECT ")?;
+            Self::insert_ident_inner(&mut self.buf, &(&CIBOULETTE_ID_IDENT, &None, &None), v)?;
+            self.buf.write_all(b", ")?;
+            Self::insert_ident_inner(&mut self.buf, &(&CIBOULETTE_TYPE_IDENT, &None, &None), v)?;
+            self.buf.write_all(b", ")?;
+            Self::insert_ident_inner(&mut self.buf, &(&CIBOULETTE_DATA_IDENT, &None, &None), v)?;
+            self.buf.write_all(b" FROM ")?;
             // SELECT * FROM "schema"."mytable"
             Self::write_table_info_inner(&mut self.buf, v)?;
             Self::handle_sorting_routine(
