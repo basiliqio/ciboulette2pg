@@ -68,7 +68,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             request.resource_type(),
             main_attrs.attributes(),
-            main_attrs.relationships(),
+            Some(main_attrs.relationships()),
             true,
         )?;
         se.gen_update_normal(&main_table, main_update_values, &request, true)?;
@@ -88,7 +88,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let rels = crate::graph_walker::relationships::gen_query(
             &ciboulette_store,
             request.resource_type(),
-            main_attrs.relationships(),
+            Some(main_attrs.relationships()),
         )?;
         se.gen_select_multi_rel_routine(
             &ciboulette_table_store,

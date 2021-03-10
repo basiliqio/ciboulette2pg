@@ -45,11 +45,22 @@ fn extract_single_relationships_from_ressource_identifiers<'a>(
 
 fn extract_relationships<'a>(
     buf: &mut Vec<Ciboulette2PostgresRelationships<'a>>,
-    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
+    relationships: Option<&'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>>,
     type_: &'a CibouletteResourceType<'a>,
     type_to_alias: &'a str,
     opt: &'a CibouletteRelationshipBucket<'a>,
 ) {
+    let relationships = match relationships {
+        Some(x) => x,
+        None => {
+            buf.push(Ciboulette2PostgresRelationships {
+                type_,
+                bucket: opt,
+                values: None,
+            });
+            return;
+        }
+    };
     match relationships
         .get(type_to_alias)
         .map(|x| x.data())
@@ -128,7 +139,7 @@ pub fn gen_query_rel<'a>(
 pub fn gen_query<'a>(
     store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
-    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
+    relationships: Option<&'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>>,
 ) -> Result<Vec<Ciboulette2PostgresRelationships<'a>>, Ciboulette2SqlError> {
     let mut res: Vec<Ciboulette2PostgresRelationships<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
 

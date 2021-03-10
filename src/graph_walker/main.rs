@@ -72,7 +72,7 @@ pub fn gen_query<'a>(
     store: &'a CibouletteStore,
     main_type: &'a CibouletteResourceType<'a>,
     attributes: &'a Option<MessyJsonObjectValue<'a>>,
-    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
+    relationships: Option<&'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>>,
     fails_on_many: bool,
 ) -> Result<Ciboulette2PostgresMain<'a>, Ciboulette2SqlError> {
     let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
@@ -94,13 +94,23 @@ pub fn gen_query<'a>(
         if let CibouletteRelationshipOption::One(opt) =
             store.graph().edge_weight(edge_index).unwrap()
         {
-            if let Some(v) =
-                check_single_relationships(&relationships, &main_type, &node_weight, alias, opt)?
-            {
-                res_val.push(v); // Insert the relationship values
+            if let Some(relationships) = relationships {
+                if let Some(v) = check_single_relationships(
+                    &relationships,
+                    &main_type,
+                    &node_weight,
+                    alias,
+                    opt,
+                )? {
+                    res_val.push(v); // Insert the relationship values
+                }
             }
             res_rel.push(alias.as_str());
-        } else if fails_on_many && relationships.contains_key(alias.as_str()) {
+        } else if fails_on_many
+            && relationships
+                .map(|x| x.contains_key(alias.as_str()))
+                .unwrap_or(false)
+        {
             return Err(Ciboulette2SqlError::UpdatingManyRelationships);
         }
     }

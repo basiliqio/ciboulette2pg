@@ -59,6 +59,18 @@ impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
     }
 }
 
+impl<'a> From<&'a str> for Ciboulette2SqlValue<'a> {
+    fn from(val: &'a str) -> Ciboulette2SqlValue<'a> {
+        Ciboulette2SqlValue::Text(Some(Cow::Borrowed(val)))
+    }
+}
+
+impl<'a> From<Cow<'a, str>> for Ciboulette2SqlValue<'a> {
+    fn from(val: Cow<'a, str>) -> Ciboulette2SqlValue<'a> {
+        Ciboulette2SqlValue::Text(Some(val))
+    }
+}
+
 impl<'a, 'q> sqlx::Encode<'q, sqlx::Postgres> for Ciboulette2SqlValue<'a> {
     #[inline]
     fn encode(

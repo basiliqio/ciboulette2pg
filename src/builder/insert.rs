@@ -220,7 +220,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             request.path().main_type(),
             request.data().attributes(),
-            request.data().relationships(),
+            Some(request.data().relationships()),
             false,
         )?;
         // WITH "cte_main_insert" AS (insert_stmt)
@@ -229,7 +229,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let rels = crate::graph_walker::relationships::gen_query(
             &ciboulette_store,
             &request.path().main_type(),
-            request.data().relationships(),
+            Some(request.data().relationships()),
         )?;
 
         se.gen_select_single_rel_routine(
