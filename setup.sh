@@ -16,4 +16,4 @@ export PGPASSWORD=postgres
 #	&&
 #psql -U postgres -h localhost -d postgres -a -f tests_migrations/article-author.sql
 
-pg_restore --dbname=postgres --verbose db_backup.tar 
+pg_restore -U postgres -h localhost --dbname=postgres --verbose db_backup.tar

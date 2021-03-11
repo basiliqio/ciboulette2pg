@@ -6,7 +6,6 @@ mod gen_values;
 mod insert;
 mod insert_normal;
 mod single_rel_cte;
-mod union_select_all;
 
 fn gen_req_create_people<'a>(
     store: &'a CibouletteStore<'a>,

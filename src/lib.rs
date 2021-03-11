@@ -4,6 +4,9 @@ mod errors;
 pub mod graph_walker;
 mod safe_ident;
 mod table_store;
+#[cfg(test)]
+mod tests;
+
 mod value;
 
 pub use builder::Ciboulette2PostgresBuilder;

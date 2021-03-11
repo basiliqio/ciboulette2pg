@@ -22,10 +22,14 @@ itertools = "0.10.0"
 
 [dev-dependencies]
 ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git", package = "ciboulette_test_helper" }
+ciboulette2postgres_test_proc_macro = { path = "./ciboulette2postgres_test_proc_macro" }
 url = "2.2.0"
 tokio = { version = "1", features = ["full"] }
 insta = "1.7"
 sqlformat = "0.1.6"
+refinery = { version = "0.5.0", features = ["tokio", "tokio-postgres"] }
+num_cpus = "1.13.0"
+uuid = { version = "0.8", features = ["v4"] }
 
 [dev-dependencies.cargo-husky]
 version = "1"
