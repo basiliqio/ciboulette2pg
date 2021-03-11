@@ -1,0 +1,115 @@
+---
+source: src/builder/tests/misc/sort.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_peoples_data" AS (
+  SELECT
+    "public"."peoples"."id" :: TEXT AS "id",
+    $0 :: TEXT AS "type",
+    JSON_BUILD_OBJECT(
+      $1,
+      "public"."peoples"."age",
+      $2,
+      "public"."peoples"."first-name",
+      $3,
+      "public"."peoples"."gender",
+      $4,
+      "public"."peoples"."last-name",
+      $5,
+      "public"."peoples"."twitter"
+    ) AS "data"
+  FROM
+    "public"."peoples"
+),
+"cte_articles_data" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    $6 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."articles"."title" AS "sort_title"
+  FROM
+    "public"."articles"
+  WHERE
+    "public"."articles"."id" IN (
+      SELECT
+        "cte_peoples_data"."articles"
+      FROM
+        "cte_peoples_data"
+    )
+),
+"cte_favorite_color_data" AS (
+  SELECT
+    "public"."favorite_color"."id" :: TEXT AS "id",
+    $7 :: TEXT AS "type",
+    NULL :: json AS "data"
+  FROM
+    "public"."favorite_color"
+  WHERE
+    "public"."favorite_color"."id" IN (
+      SELECT
+        "cte_peoples_data"."favorite_color"
+      FROM
+        "cte_peoples_data"
+    )
+),
+"cte_rel_articles_rel_data" AS (
+  SELECT
+    "public"."people-article"."id" :: TEXT AS "id",
+    $8 :: TEXT AS "type",
+    NULL :: json AS "data"
+  FROM
+    "public"."people-article"
+  WHERE
+    "public"."people-article"."people_id" = "cte_peoples_data"."id"
+),
+"cte_rel_articles_data" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    $9 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."articles"."title" AS "sort_title"
+  FROM
+    "public"."articles"
+  WHERE
+    "public"."articles"."id" IN (
+      SELECT
+        "cte_rel_articles_rel_data"."article_id"
+      FROM
+        "cte_rel_articles_rel_data"
+    )
+)
+SELECT
+  "cte_rel_articles_data"."id",
+  "cte_rel_articles_data"."type",
+  "cte_rel_articles_data"."data"
+FROM
+  "cte_rel_articles_data"
+UNION
+ALL
+SELECT
+  "cte_favorite_color_data"."id",
+  "cte_favorite_color_data"."type",
+  "cte_favorite_color_data"."data"
+FROM
+  "cte_favorite_color_data"
+UNION
+ALL
+SELECT
+  "cte_rel_articles_rel_data"."id",
+  "cte_rel_articles_rel_data"."type",
+  "cte_rel_articles_rel_data"."data"
+FROM
+  "cte_rel_articles_rel_data"
+UNION
+ALL
+SELECT
+  "cte_peoples_data"."id",
+  "cte_peoples_data"."type",
+  "cte_peoples_data"."data"
+FROM
+  "cte_peoples_data"
+  INNER JOIN "public"."people-article" ON "public"."people-article"."people_id" = "cte_peoples_data"."id"
+  INNER JOIN "cte_rel_articles_data" ON "cte_rel_articles_data"."id" = "public"."people-article"."article_id"
+ORDER BY
+  "cte_rel_articles_data"."sort_title";
