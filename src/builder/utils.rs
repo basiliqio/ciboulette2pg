@@ -80,6 +80,38 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     #[inline]
+    pub(crate) fn insert_ident_name(
+        &mut self,
+        (ident, alias, cast): &(
+            Ciboulette2PostgresSafeIdent,
+            Option<Ciboulette2PostgresSafeIdent>,
+            Option<Ciboulette2PostgresSafeIdent>,
+        ),
+        _table: &Ciboulette2PostgresTableSettings,
+    ) -> Result<(), Ciboulette2SqlError> {
+        self.buf.write_all(POSTGRES_QUOTE)?;
+        self.buf.write_all(ident.as_bytes())?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
+        match cast {
+            Some(cast) => {
+                self.buf.write_all(b"::")?;
+                self.buf.write_all(cast.as_bytes())?;
+            }
+            None => (),
+        };
+        match alias {
+            Some(alias) => {
+                self.buf.write_all(b" AS ")?;
+                self.buf.write_all(POSTGRES_QUOTE)?;
+                self.buf.write_all(alias.as_bytes())?;
+                self.buf.write_all(POSTGRES_QUOTE)?;
+            }
+            None => (),
+        };
+        Ok(())
+    }
+
+    #[inline]
     pub(crate) fn insert_params(
         &mut self,
         param: Ciboulette2SqlValue<'a>,

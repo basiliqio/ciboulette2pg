@@ -32,7 +32,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     param_value.push(v);
                 }
                 // INSERT INTO "schema"."mytable" (..params..)
-                self.write_list(&param_ident, &table, true, Self::insert_ident)?;
+                self.write_list(&param_ident, &table, true, Self::insert_ident_name)?;
                 // INSERT INTO "schema"."mytable" (..params..) VALUES
                 self.buf.write_all(b" VALUES ")?;
                 // INSERT INTO "schema"."mytable" (..params..) VALUES (..values..)

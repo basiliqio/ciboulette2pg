@@ -5,11 +5,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 ---
 WITH "cte_peoples_insert" AS (
   INSERT INTO
-    "public"."peoples" (
-      "public"."peoples"."first-name",
-      "public"."peoples"."last-name",
-      "public"."peoples"."favorite_color"
-    )
+    "public"."peoples" ("first-name", "last-name", "favorite_color")
   VALUES
     ($0, $1, $2) RETURNING *
 ),

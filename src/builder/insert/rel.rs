@@ -24,7 +24,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             .iter(),
             &dest_table,
             true,
-            Self::insert_ident,
+            Self::insert_ident_name,
         )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT
         self.buf.write_all(b" SELECT ")?;

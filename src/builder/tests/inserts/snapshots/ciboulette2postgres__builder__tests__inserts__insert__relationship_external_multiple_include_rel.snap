@@ -5,10 +5,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 ---
 WITH "cte_peoples_insert" AS (
   INSERT INTO
-    "public"."peoples" (
-      "public"."peoples"."first-name",
-      "public"."peoples"."last-name"
-    )
+    "public"."peoples" ("first-name", "last-name")
   VALUES
     ($0, $1) RETURNING *
 ),
@@ -53,10 +50,7 @@ WITH "cte_peoples_insert" AS (
 ),
 "cte_rel_articles_insert" AS (
   INSERT INTO
-    "public"."people-article" (
-      "public"."people-article"."article_id",
-      "public"."people-article"."people_id"
-    )
+    "public"."people-article" ("article_id", "people_id")
   SELECT
     "cte_peoples_data"."id" AS "article_id",
     "cte_rel_articles_id"."id" AS "people_id"

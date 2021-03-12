@@ -4,9 +4,6 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 
 ---
 INSERT INTO
-  "public"."mysimpletable" (
-    "public"."mysimpletable"."first-name",
-    "public"."mysimpletable"."last-name"
-  )
+  "public"."mysimpletable" ("first-name", "last-name")
 VALUES
   ($0, $1);
