@@ -24,7 +24,7 @@ lazy_static::lazy_static! {
 }
 
 #[cfg(test)]
-mod tests;
+pub mod tests;
 
 use crate::graph_walker::main::Ciboulette2PostgresMain;
 use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;

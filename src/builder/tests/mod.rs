@@ -11,7 +11,7 @@ mod misc;
 mod select;
 mod update;
 
-fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2PostgresTableStore<'a> {
+pub fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2PostgresTableStore<'a> {
     vec![
         Ciboulette2PostgresTableSettings::new(
             Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),

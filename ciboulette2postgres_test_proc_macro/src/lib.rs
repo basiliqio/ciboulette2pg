@@ -15,11 +15,10 @@ pub fn ciboulette2postgres_test(_metadata: TokenStream, input: TokenStream) -> T
 		#[tokio::test]
         async fn #function_name()
         {
-			println!("\nHello World");
-
         	let (db_id, pool) = init_db().await;
-
-            #new_function_name(pool).await;
+			
+			let mut tx = pool.begin().await.expect("to get a transaction");
+            #new_function_name(tx).await;
         }
 
         #input_fn
