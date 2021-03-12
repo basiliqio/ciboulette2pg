@@ -45,5 +45,5 @@ pub enum Ciboulette2SqlError {
     #[error(transparent)]
     Utf8(#[from] std::string::FromUtf8Error),
     #[error("An unknown error occurred")]
-    UnkownError,
+    UnknownError,
 }

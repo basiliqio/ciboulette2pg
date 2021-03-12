@@ -69,9 +69,8 @@ pub struct Ciboulette2PostgresBuilder<'a> {
     buf: Ciboulette2PostgresBuf,
     params: Ciboulette2SqlArguments<'a>,
     #[getset(get_mut = "pub")]
-    included_tables:
+    working_tables:
         BTreeMap<&'a Ciboulette2PostgresTableSettings<'a>, Ciboulette2PostgresTableSettings<'a>>,
-    nb_cte: usize,
 }
 
 impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
@@ -81,8 +80,17 @@ impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
                 4096,
             ))),
             params: Ciboulette2SqlArguments::with_capacity(128),
-            included_tables: BTreeMap::default(),
-            nb_cte: 0,
+            working_tables: BTreeMap::default(),
         }
+    }
+}
+
+impl<'a> Ciboulette2PostgresBuilder<'a> {
+    pub(crate) fn add_working_table(
+        &mut self,
+        main_table: &'a Ciboulette2PostgresTableSettings<'a>,
+        res_table: Ciboulette2PostgresTableSettings<'a>,
+    ) {
+        self.working_tables.insert(main_table, res_table);
     }
 }

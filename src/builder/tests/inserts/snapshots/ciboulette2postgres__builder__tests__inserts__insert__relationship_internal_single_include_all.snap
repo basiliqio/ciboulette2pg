@@ -13,11 +13,30 @@ WITH "cte_peoples_insert" AS (
   VALUES
     ($0, $1, $2) RETURNING *
 ),
+"cte_peoples_data" AS (
+  SELECT
+    "cte_peoples_insert"."id" :: TEXT AS "id",
+    $3 :: TEXT AS "type",
+    JSON_BUILD_OBJECT(
+      $4,
+      "cte_peoples_insert"."age",
+      $5,
+      "cte_peoples_insert"."first-name",
+      $6,
+      "cte_peoples_insert"."gender",
+      $7,
+      "cte_peoples_insert"."last-name",
+      $8,
+      "cte_peoples_insert"."twitter"
+    ) AS "data"
+  FROM
+    "cte_peoples_insert"
+),
 "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
-    $3 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($4, "public"."favorite_color"."color") AS "data"
+    $9 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($10, "public"."favorite_color"."color") AS "data"
   FROM
     "public"."favorite_color"
   WHERE
@@ -31,11 +50,11 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
-    $5 :: TEXT AS "type",
+    $11 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $6,
+      $12,
       "public"."people-article"."article_id",
-      $7,
+      $13,
       "public"."people-article"."people_id"
     ) AS "data"
   FROM
@@ -46,11 +65,11 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $8 :: TEXT AS "type",
+    $14 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $9,
+      $15,
       "public"."articles"."body",
-      $10,
+      $16,
       "public"."articles"."title"
     ) AS "data"
   FROM
@@ -62,25 +81,6 @@ WITH "cte_peoples_insert" AS (
       FROM
         "cte_rel_articles_rel_data"
     )
-),
-"cte_peoples_data" AS (
-  SELECT
-    "cte_peoples_insert"."id" :: TEXT AS "id",
-    $11 :: TEXT AS "type",
-    JSON_BUILD_OBJECT(
-      $12,
-      "cte_peoples_insert"."age",
-      $13,
-      "cte_peoples_insert"."first-name",
-      $14,
-      "cte_peoples_insert"."gender",
-      $15,
-      "cte_peoples_insert"."last-name",
-      $16,
-      "cte_peoples_insert"."twitter"
-    ) AS "data"
-  FROM
-    "cte_peoples_insert"
 )
 SELECT
   "cte_rel_articles_data"."id",

@@ -76,7 +76,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 )?;
             }
             _ => {
-                return Err(Ciboulette2SqlError::UnkownError);
+                return Err(Ciboulette2SqlError::UnknownError);
             }
         }
         Ok(())
@@ -95,7 +95,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             if table == main_table || table == main_cte_data {
                 continue;
             }
-            match self.included_tables.get(&table) {
+            match self.working_tables.get(&table) {
                 Some(_cte_table) => continue,
                 None => {
                     let mut fields: Vec<(
@@ -235,10 +235,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         query: &'a CibouletteQueryParameters<'a>,
         main_table: &Ciboulette2PostgresTableSettings<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        let main_cte_table = self.included_tables.get(&main_table).ok_or_else(|| {
+        let main_cte_table = self.working_tables.get(&main_table).ok_or_else(|| {
             CibouletteError::UnknownError("Can't find the main_cte_table".to_string())
         })?;
-        let mut iter = self.included_tables.values().peekable();
+        let mut iter = self.working_tables.values().peekable();
         while let Some(v) = iter.next() {
             // SELECT * FROM
             self.buf.write_all(b"SELECT ")?;
@@ -258,7 +258,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &main_table,
                 &main_cte_table,
                 v,
-                &self.included_tables,
+                &self.working_tables,
             )?;
             if iter.peek().is_some() {
                 // If there's more :

@@ -1,7 +1,7 @@
 use super::*;
 
 fn extract_rels<'a>(
-    request: &'a CibouletteUpdateRequest<'a>,
+    request: &'a CibouletteUpdateRequest<'a>
 ) -> Result<&'a CibouletteUpdateRelationship<'a>, Ciboulette2SqlError> {
     match request.data() {
         CibouletteUpdateRequestType::MainType(_) => Err(Ciboulette2SqlError::UpdatingMainObject),
@@ -85,7 +85,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_table,
             &main_cte_data,
         )?;
-        se.included_tables.insert(&main_table, main_cte_data);
+        se.add_working_table(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(
             &ciboulette_store,

@@ -63,7 +63,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_table,
             &main_cte_data,
         )?;
-        se.included_tables.insert(&main_table, main_cte_data);
+        se.add_working_table(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(
             &ciboulette_store,

@@ -31,14 +31,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &request.path().main_type(),
             Some(request.data().relationships()),
         )?;
-        // WITH
         se.buf.write_all(b"WITH \n")?;
-        // WITH "cte_main_insert"
         se.write_table_info(&main_cte_insert)?;
-        // WITH "cte_main_insert" AS (
         se.buf.write_all(b" AS (")?;
-        // WITH "cte_main_insert" AS (insert_stmt)
         se.gen_insert_normal(&main_table, main_inserts_values, true)?;
+        se.buf.write_all(b"),")?;
+        se.write_table_info(&main_cte_data)?;
+        se.buf.write_all(b" AS (")?;
+        se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query(), true)?;
         se.buf.write_all(b")")?;
 
         se.gen_select_single_rel_routine(
@@ -49,19 +49,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_cte_insert,
             main_single_relationships,
         )?;
-
-        // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt),
-        // * handle every (one-to-many) relationships *
         se.gen_insert_rel_routine(&ciboulette_table_store, &request, &main_cte_data, rels)?;
-        se.buf.write_all(b", ")?;
-        // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data"
-        se.write_table_info(&main_cte_data)?;
-        se.buf.write_all(b" AS (")?;
-        se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query(), true)?;
-        // WITH "cte_main_insert" AS (insert_stmt), "cte_main_data" AS (select_stmt)
-        se.buf.write_all(b") ")?;
-
-        se.included_tables.insert(&main_table, main_cte_data);
+        se.add_working_table(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(
             &ciboulette_store,

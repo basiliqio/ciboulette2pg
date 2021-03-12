@@ -7,7 +7,11 @@ pub struct Ciboulette2PostgresTableStore<'a> {
 }
 
 impl<'a> Ciboulette2PostgresTableStore<'a> {
-    pub fn add_table(&mut self, key: String, val: Ciboulette2PostgresTableSettings<'a>) {
+    pub fn add_table(
+        &mut self,
+        key: String,
+        val: Ciboulette2PostgresTableSettings<'a>,
+    ) {
         self.map.insert(key, val);
     }
 
@@ -25,7 +29,7 @@ impl<'a> std::iter::FromIterator<(String, Ciboulette2PostgresTableSettings<'a>)>
     for Ciboulette2PostgresTableStore<'a>
 {
     fn from_iter<I: IntoIterator<Item = (String, Ciboulette2PostgresTableSettings<'a>)>>(
-        iter: I,
+        iter: I
     ) -> Ciboulette2PostgresTableStore<'a> {
         Ciboulette2PostgresTableStore {
             map: iter.into_iter().collect(),
@@ -60,7 +64,10 @@ impl<'a> Ciboulette2PostgresTableSettings<'a> {
         }
     }
 
-    pub fn to_cte(&'a self, name: Cow<'a, str>) -> Result<Self, Ciboulette2SqlError> {
+    pub fn to_cte(
+        &'a self,
+        name: Cow<'a, str>,
+    ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTableSettings {
             id_name: self.id_name.clone(),
             id_type: self.id_type.clone(),
