@@ -33,7 +33,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(&main_cte_update, &main_type, &request.query(), true)?;
+        self.gen_select_cte_final(&main_cte_update, &main_type, &request.query(), &[], true)?;
         self.buf.write_all(b")")?;
         Ok(())
     }

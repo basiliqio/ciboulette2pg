@@ -38,7 +38,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b"),")?;
         se.write_table_info(&main_cte_data)?;
         se.buf.write_all(b" AS (")?;
-        se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query(), true)?;
+        se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query(), &[], true)?;
         se.buf.write_all(b")")?;
 
         se.gen_select_single_rel_routine(

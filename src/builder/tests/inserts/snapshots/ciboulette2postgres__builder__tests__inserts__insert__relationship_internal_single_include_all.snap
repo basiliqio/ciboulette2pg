@@ -52,7 +52,9 @@ WITH "cte_peoples_insert" AS (
       "public"."people-article"."article_id",
       $13,
       "public"."people-article"."people_id"
-    ) AS "data"
+    ) AS "data",
+    "public"."people-article"."article_id" AS "sort_article_id",
+    "public"."people-article"."people_id" AS "sort_people_id"
   FROM
     "public"."people-article"
   WHERE

@@ -9,7 +9,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let mut iter = params.into_iter().peekable();
         while let Some((n, v)) = iter.next() {
             self.insert_ident(
-                &(Ciboulette2PostgresSafeIdent::try_from(n)?, None, None),
+                &Ciboulette2PostgresTableField::new_owned(
+                    Ciboulette2PostgresSafeIdent::try_from(n)?,
+                    None,
+                    None,
+                ),
                 &table,
             )?;
             self.buf.write_all(b" = ")?;

@@ -33,7 +33,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     self.insert_params(Ciboulette2SqlValue::Text(Some(Cow::Borrowed(el))), &table)?;
                     self.buf.write_all(b", ")?;
                     self.insert_ident(
-                        &(Ciboulette2PostgresSafeIdent::try_from(el)?, None, None),
+                        &Ciboulette2PostgresTableField::new_owned(
+                            Ciboulette2PostgresSafeIdent::try_from(el)?,
+                            None,
+                            None,
+                        ),
                         &table,
                     )?;
                 }

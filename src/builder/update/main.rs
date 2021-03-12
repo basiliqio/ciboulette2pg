@@ -41,6 +41,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_update_cte,
             &request.resource_type(),
             &request.query(),
+            &[],
             true,
         )?;
         self.buf.write_all(b")")?;

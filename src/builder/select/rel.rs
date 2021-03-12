@@ -31,6 +31,28 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         Ok(())
     }
+    fn gen_rel_additional_params(
+        bucket: &'a CibouletteRelationshipBucket
+    ) -> Result<[Ciboulette2SqlAdditonalField<'a>; 2], Ciboulette2SqlError> {
+        Ok([
+            Ciboulette2SqlAdditonalField::new(
+                Ciboulette2PostgresTableField::new_owned(
+                    Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
+                    None,
+                    None,
+                ),
+                Ciboulette2SqlAdditonalFieldType::Relationship,
+            ),
+            Ciboulette2SqlAdditonalField::new(
+                Ciboulette2PostgresTableField::new_owned(
+                    Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
+                    None,
+                    None,
+                ),
+                Ciboulette2SqlAdditonalFieldType::Relationship,
+            ),
+        ])
+    }
     pub(crate) fn gen_select_multi_rel_routine(
         &mut self,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
@@ -46,6 +68,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         } in rel_iter
         {
             self.buf.write_all(b", ")?;
+            let additional_params = Self::gen_rel_additional_params(&bucket)?;
             let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
             let rel_rel_table = ciboulette_table_store.get(bucket.resource().name().as_str())?;
             let rel_cte_rel_data = rel_rel_table
@@ -61,13 +84,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_rel_table,
                 &bucket.resource(),
                 &query,
+                &additional_params,
                 query.include().contains(&bucket.resource()),
             )?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE
             self.buf.write_all(b" WHERE ")?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to"
             self.insert_ident(
-                &(
+                &Ciboulette2PostgresTableField::new_owned(
                     Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
                     None,
                     None,
@@ -78,7 +102,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.buf.write_all(b" = ")?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"
             self.insert_ident(
-                &(main_cte_data.id_name().clone(), None, None),
+                &Ciboulette2PostgresTableField::new_ref(main_cte_data.id_name(), None, None),
                 &main_cte_data,
             )?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"),
@@ -90,15 +114,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_table,
                 &rel_type,
                 &query,
+                &[],
                 query.include().contains(&rel_type),
             )?;
             self.buf.write_all(b" WHERE ")?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
-            self.insert_ident(&(rel_table.id_name().clone(), None, None), &rel_table)?;
+            self.insert_ident(
+                &Ciboulette2PostgresTableField::new_ref(rel_table.id_name(), None, None),
+                &rel_table,
+            )?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
             self.buf.write_all(b" IN (SELECT ")?;
             self.insert_ident(
-                &(
+                &Ciboulette2PostgresTableField::new_owned(
                     Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
                     None,
                     None,

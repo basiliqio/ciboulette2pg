@@ -4,6 +4,7 @@ use numtoa::NumToA;
 use std::io::Write;
 
 mod delete;
+mod field_name;
 mod insert;
 mod select;
 mod update;
@@ -28,6 +29,7 @@ pub mod tests;
 
 use crate::graph_walker::main::Ciboulette2PostgresMain;
 use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
+use field_name::Ciboulette2PostgresTableField;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 

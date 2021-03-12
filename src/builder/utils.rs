@@ -35,26 +35,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn insert_ident_inner(
         buf: &mut Ciboulette2PostgresBuf,
-        (ident, alias, cast): &(
-            &Ciboulette2PostgresSafeIdent,
-            &Option<Ciboulette2PostgresSafeIdent>,
-            &Option<Ciboulette2PostgresSafeIdent>,
-        ),
+        field: &Ciboulette2PostgresTableField,
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::write_table_info_inner(buf, table)?;
         buf.write_all(b".")?;
         buf.write_all(POSTGRES_QUOTE)?;
-        buf.write_all(ident.as_bytes())?;
+        buf.write_all(field.name().as_bytes())?;
         buf.write_all(POSTGRES_QUOTE)?;
-        match cast {
+        match field.cast() {
             Some(cast) => {
                 buf.write_all(b"::")?;
                 buf.write_all(cast.as_bytes())?;
             }
             None => (),
         };
-        match alias {
+        match field.alias() {
             Some(alias) => {
                 buf.write_all(b" AS ")?;
                 buf.write_all(POSTGRES_QUOTE)?;
@@ -69,37 +65,29 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn insert_ident(
         &mut self,
-        (ident, alias, cast): &(
-            Ciboulette2PostgresSafeIdent,
-            Option<Ciboulette2PostgresSafeIdent>,
-            Option<Ciboulette2PostgresSafeIdent>,
-        ),
+        field: &Ciboulette2PostgresTableField,
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
-        Self::insert_ident_inner(&mut self.buf, &(ident, alias, cast), table)
+        Self::insert_ident_inner(&mut self.buf, &field, table)
     }
 
     #[inline]
     pub(crate) fn insert_ident_name(
         &mut self,
-        (ident, alias, cast): &(
-            Ciboulette2PostgresSafeIdent,
-            Option<Ciboulette2PostgresSafeIdent>,
-            Option<Ciboulette2PostgresSafeIdent>,
-        ),
+        field: &Ciboulette2PostgresTableField,
         _table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(POSTGRES_QUOTE)?;
-        self.buf.write_all(ident.as_bytes())?;
+        self.buf.write_all(field.name().as_bytes())?;
         self.buf.write_all(POSTGRES_QUOTE)?;
-        match cast {
+        match field.cast() {
             Some(cast) => {
                 self.buf.write_all(b"::")?;
                 self.buf.write_all(cast.as_bytes())?;
             }
             None => (),
         };
-        match alias {
+        match field.alias() {
             Some(alias) => {
                 self.buf.write_all(b" AS ")?;
                 self.buf.write_all(POSTGRES_QUOTE)?;
@@ -178,12 +166,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         while let Some((el, table)) = iter.next() {
             Self::insert_ident_inner(
                 &mut buf,
-                &(
-                    &Ciboulette2PostgresSafeIdent::try_from(
+                &Ciboulette2PostgresTableField::new_owned(
+                    Ciboulette2PostgresSafeIdent::try_from(
                         format!("sort_{}", el.field().as_ref()).as_str(),
                     )?,
-                    &None,
-                    &None,
+                    None,
+                    None,
                 ),
                 table,
             )?;

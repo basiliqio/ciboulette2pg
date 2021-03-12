@@ -1,4 +1,3 @@
-use super::*;
 use lazy_static::lazy_static;
 use std::str::FromStr;
 use std::sync::Mutex;
@@ -20,8 +19,8 @@ lazy_static! {
             .connect_lazy(&BASILIQ_DATABASE_URL)
             .expect("to initialize the management Postgres connection pool")
     };
-    static ref BASILIQ_DEFAULT_DATABASE: String = { format!("basiliq_test_{}", Uuid::new_v4()) };
-    static ref BASILIQ_DEFAULT_DATABASE_INIT: Mutex<bool> = { Mutex::new(false) };
+    static ref BASILIQ_DEFAULT_DATABASE: String = format!("basiliq_test_{}", Uuid::new_v4());
+    static ref BASILIQ_DEFAULT_DATABASE_INIT: Mutex<bool> = Mutex::new(false);
 }
 
 pub async fn run_migrations(db_name: &str) {

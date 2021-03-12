@@ -16,13 +16,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.write_table_info(&main_cte_data)?;
         // WITH "cte_main_insert" AS (
         se.buf.write_all(b" AS (")?;
-        se.gen_select_cte_final(&main_table, &main_type, request.query(), true)?;
+        se.gen_select_cte_final(&main_table, &main_type, &request.query(), &[], true)?;
         match request.path() {
             CiboulettePath::TypeId(_, id)
             | CiboulettePath::TypeIdRelated(_, id, _)
             | CiboulettePath::TypeIdRelationship(_, id, _) => {
                 se.buf.write_all(b" WHERE ")?;
-                se.insert_ident(&(main_table.id_name().clone(), None, None), &main_table)?;
+                se.insert_ident(
+                    &Ciboulette2PostgresTableField::new_ref(main_table.id_name(), None, None),
+                    &main_table,
+                )?;
                 se.buf.write_all(b" = ")?;
                 se.insert_params(
                     Ciboulette2SqlValue::Text(Some(Cow::Borrowed(id))),

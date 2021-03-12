@@ -11,7 +11,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b"DELETE FROM ")?;
         self.write_table_info(main_table)?;
         self.buf.write_all(b" WHERE ")?;
-        self.insert_ident(&(main_table.id_name().clone(), None, None), &main_table)?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(main_table.id_name(), None, None),
+            &main_table,
+        )?;
         self.buf.write_all(b" = ")?;
         self.insert_params(
             Ciboulette2SqlValue::Text(Some(Cow::Borrowed(query.resource_id().as_ref()))),

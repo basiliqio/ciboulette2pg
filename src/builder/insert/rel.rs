@@ -18,8 +18,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key")
         self.write_list(
             [
-                (main_key.clone(), None, None),
-                (rel_key.clone(), None, None),
+                Ciboulette2PostgresTableField::new_ref(main_key, None, None),
+                Ciboulette2PostgresTableField::new_ref(rel_key, None, None),
             ]
             .iter(),
             &dest_table,
@@ -30,9 +30,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b" SELECT ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key"
         self.insert_ident(
-            &(
-                Ciboulette2PostgresSafeIdent::try_from("id")?,
-                Some(main_key.clone()),
+            &Ciboulette2PostgresTableField::new_cow(
+                Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("id")?),
+                Some(Cow::Borrowed(main_key)),
                 None,
             ),
             main_table,
@@ -41,9 +41,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key"
         self.insert_ident(
-            &(
-                Ciboulette2PostgresSafeIdent::try_from("id")?,
-                Some(rel_key.clone()),
+            &Ciboulette2PostgresTableField::new_cow(
+                Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("id")?),
+                Some(Cow::Borrowed(rel_key)),
                 None,
             ),
             rel_table,
@@ -59,15 +59,24 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING
         self.buf.write_all(b" RETURNING ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id"
-        self.insert_ident(&(dest_table.id_name().clone(), None, None), dest_table)?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(dest_table.id_name(), None, None),
+            dest_table,
+        )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id",
         self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key"
-        self.insert_ident(&(main_key.clone(), None, None), dest_table)?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(main_key, None, None),
+            dest_table,
+        )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key",
         self.buf.write_all(b", ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id", "schema"."mytable"."main_key", "schema"."mytable"."rel_key",
-        self.insert_ident(&(rel_key.clone(), None, None), dest_table)?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(rel_key, None, None),
+            dest_table,
+        )?;
         Ok(())
     }
 

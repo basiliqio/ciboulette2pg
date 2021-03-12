@@ -13,7 +13,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.write_table_info(main_table)?;
         self.buf.write_all(b" SET ")?;
         self.insert_ident(
-            &(
+            &Ciboulette2PostgresTableField::new_owned(
                 Ciboulette2PostgresSafeIdent::try_from(rel_opt.key().as_str())?,
                 None,
                 None,
@@ -21,7 +21,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_table,
         )?;
         self.buf.write_all(b" = NULL WHERE ")?;
-        self.insert_ident(&(main_table.id_name().clone(), None, None), &main_table)?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(main_table.id_name(), None, None),
+            &main_table,
+        )?;
         self.insert_params(
             Ciboulette2SqlValue::Text(Some(Cow::Borrowed(query.resource_id().as_ref()))),
             &main_table,

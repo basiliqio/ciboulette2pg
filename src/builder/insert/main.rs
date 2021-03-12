@@ -19,16 +19,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.buf.write_all(b"DEFAULT VALUES")?;
             }
             _ => {
-                let mut param_ident: Vec<(
-                    Ciboulette2PostgresSafeIdent,
-                    Option<Ciboulette2PostgresSafeIdent>,
-                    Option<Ciboulette2PostgresSafeIdent>,
-                )> = Vec::with_capacity(params.len());
+                let mut param_ident: Vec<Ciboulette2PostgresTableField> =
+                    Vec::with_capacity(params.len());
                 let mut param_value: Vec<Ciboulette2SqlValue<'_>> =
                     Vec::with_capacity(params.len());
 
                 for (n, v) in params.into_iter() {
-                    param_ident.push((Ciboulette2PostgresSafeIdent::try_from(n)?, None, None));
+                    param_ident.push(Ciboulette2PostgresTableField::new_owned(
+                        Ciboulette2PostgresSafeIdent::try_from(n)?,
+                        None,
+                        None,
+                    ));
                     param_value.push(v);
                 }
                 // INSERT INTO "schema"."mytable" (..params..)
