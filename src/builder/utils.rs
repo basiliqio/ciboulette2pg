@@ -239,4 +239,27 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         Ok(())
     }
+
+    pub(crate) fn compare_fields<I, F>(
+        &mut self,
+        left_table: &Ciboulette2PostgresTableSettings<'a>,
+        left: &Ciboulette2PostgresTableField<'a>,
+        right_table: &Ciboulette2PostgresTableSettings<'a>,
+        right: &Ciboulette2PostgresTableField<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        match left_table.id_type() == right_table.id_type() {
+            true => {
+                self.insert_ident(&left, &left_table)?;
+                self.buf.write_all(b" = ")?;
+                self.insert_ident(&right, &right_table)?;
+            }
+            false => {
+                self.insert_ident(&left, &left_table)?;
+                self.buf.write_all(b"::TEXT = ")?;
+                self.insert_ident(&right, &right_table)?;
+                self.buf.write_all(b"::TEXT")?;
+            }
+        }
+        Ok(())
+    }
 }

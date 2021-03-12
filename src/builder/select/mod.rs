@@ -10,15 +10,13 @@ const EMPTY_LIST: [Cow<'static, str>; 0] = [];
 
 #[derive(Clone, Debug)]
 pub enum Ciboulette2SqlAdditonalFieldType {
-    Sort,
     Relationship,
 }
 
 impl Ciboulette2SqlAdditonalFieldType {
     pub fn as_str(&self) -> &str {
         match self {
-            Ciboulette2SqlAdditonalFieldType::Sort => "sort",
-            Ciboulette2SqlAdditonalFieldType::Relationship => "sort",
+            Ciboulette2SqlAdditonalFieldType::Relationship => "rel",
         }
     }
 }
