@@ -6,17 +6,17 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 WITH "cte_peoples_data" AS (
   SELECT
     "public"."peoples"."id" :: TEXT AS "id",
-    $0 :: TEXT AS "type",
+    $1 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $1,
-      "public"."peoples"."age",
       $2,
-      "public"."peoples"."first-name",
+      "public"."peoples"."age",
       $3,
-      "public"."peoples"."gender",
+      "public"."peoples"."first-name",
       $4,
-      "public"."peoples"."last-name",
+      "public"."peoples"."gender",
       $5,
+      "public"."peoples"."last-name",
+      $6,
       "public"."peoples"."twitter"
     ) AS "data"
   FROM
@@ -25,7 +25,7 @@ WITH "cte_peoples_data" AS (
 "cte_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $6 :: TEXT AS "type",
+    $7 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."articles"
@@ -40,7 +40,7 @@ WITH "cte_peoples_data" AS (
 "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
-    $7 :: TEXT AS "type",
+    $8 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."favorite_color"
@@ -55,22 +55,22 @@ WITH "cte_peoples_data" AS (
 "cte_rel_articles_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
-    $8 :: TEXT AS "type",
+    $9 :: TEXT AS "type",
     NULL :: json AS "data",
     "public"."people-article"."article_id" AS "rel_article_id",
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
     "public"."people-article"
-    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" = "cte_peoples_data"."id"
+    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" :: TEXT = "cte_peoples_data"."id" :: TEXT
 ),
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $9 :: TEXT AS "type",
+    $10 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."articles"
-    INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" = "public"."articles"."id"
+    INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
 )
 SELECT
   "cte_rel_articles_data"."id",

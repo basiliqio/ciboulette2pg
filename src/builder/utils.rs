@@ -37,19 +37,25 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         buf: &mut Ciboulette2PostgresBuf,
         field: &Ciboulette2PostgresTableField,
         table: &Ciboulette2PostgresTableSettings,
+        force_cast: Option<&'static str>,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::write_table_info_inner(buf, table)?;
         buf.write_all(b".")?;
         buf.write_all(POSTGRES_QUOTE)?;
         buf.write_all(field.name().as_bytes())?;
         buf.write_all(POSTGRES_QUOTE)?;
-        match field.cast() {
-            Some(cast) => {
-                buf.write_all(b"::")?;
-                buf.write_all(cast.as_bytes())?;
-            }
-            None => (),
-        };
+        if let Some(force_cast) = force_cast {
+            buf.write_all(b"::")?;
+            buf.write_all(force_cast.as_bytes())?;
+        } else {
+            match field.cast() {
+                Some(cast) => {
+                    buf.write_all(b"::")?;
+                    buf.write_all(cast.as_bytes())?;
+                }
+                None => (),
+            };
+        }
         match field.alias() {
             Some(alias) => {
                 buf.write_all(b" AS ")?;
@@ -68,7 +74,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         field: &Ciboulette2PostgresTableField,
         table: &Ciboulette2PostgresTableSettings,
     ) -> Result<(), Ciboulette2SqlError> {
-        Self::insert_ident_inner(&mut self.buf, &field, table)
+        Self::insert_ident_inner(&mut self.buf, &field, table, None)
     }
 
     #[inline]
@@ -106,11 +112,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         _table: &Ciboulette2PostgresTableSettings<'_>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut buffer = [0u8; 20];
-        let old_len = self.params.len();
-
         self.params.push(param);
+        let len = self.params.len();
+
         self.buf.write_all(b"$")?;
-        self.buf.write_all(old_len.numtoa(10, &mut buffer))?;
+        self.buf.write_all(len.numtoa(10, &mut buffer))?;
         Ok(())
     }
 
@@ -174,6 +180,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     None,
                 ),
                 table,
+                None,
             )?;
             if iter.peek().is_some() {
                 buf.write_all(b", ")?;
@@ -247,19 +254,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         right_table: &Ciboulette2PostgresTableSettings,
         right: &Ciboulette2PostgresTableField,
     ) -> Result<(), Ciboulette2SqlError> {
-        match left_table.id_type() == right_table.id_type() {
-            true => {
-                self.insert_ident(&left, &left_table)?;
-                self.buf.write_all(b" = ")?;
-                self.insert_ident(&right, &right_table)?;
-            }
-            false => {
-                self.insert_ident(&left, &left_table)?;
-                self.buf.write_all(b"::TEXT = ")?;
-                self.insert_ident(&right, &right_table)?;
-                self.buf.write_all(b"::TEXT")?;
-            }
-        }
+        Self::insert_ident_inner(&mut self.buf, left, &left_table, Some("TEXT"))?;
+        self.buf.write_all(b" = ")?;
+        Self::insert_ident_inner(&mut self.buf, &right, &right_table, Some("TEXT"))?;
+        //FIXME Make a better id type management system
         Ok(())
     }
 }

@@ -5,7 +5,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 ---
 SELECT
   "public"."peoples"."id" :: TEXT AS "id",
-  $0 :: TEXT AS "type",
-  JSON_BUILD_OBJECT($1, "public"."peoples"."first-name") AS "data"
+  $1 :: TEXT AS "type",
+  JSON_BUILD_OBJECT($2, "public"."peoples"."first-name") AS "data"
 FROM
   "public"."peoples";

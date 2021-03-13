@@ -4,8 +4,8 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 
 ---
 JSON_BUILD_OBJECT(
-  $0,
-  "public"."peoples"."first-name",
   $1,
+  "public"."peoples"."first-name",
+  $2,
   "public"."peoples"."last-name"
 );

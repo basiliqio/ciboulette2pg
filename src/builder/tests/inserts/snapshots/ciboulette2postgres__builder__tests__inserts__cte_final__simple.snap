@@ -5,17 +5,17 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 ---
 SELECT
   "public"."peoples"."id" :: TEXT AS "id",
-  $0 :: TEXT AS "type",
+  $1 :: TEXT AS "type",
   JSON_BUILD_OBJECT(
-    $1,
-    "public"."peoples"."age",
     $2,
-    "public"."peoples"."first-name",
+    "public"."peoples"."age",
     $3,
-    "public"."peoples"."gender",
+    "public"."peoples"."first-name",
     $4,
-    "public"."peoples"."last-name",
+    "public"."peoples"."gender",
     $5,
+    "public"."peoples"."last-name",
+    $6,
     "public"."peoples"."twitter"
   ) AS "data"
 FROM

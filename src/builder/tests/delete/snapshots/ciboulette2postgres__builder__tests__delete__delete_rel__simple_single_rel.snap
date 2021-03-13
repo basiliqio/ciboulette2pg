@@ -8,4 +8,4 @@ UPDATE
 SET
   "public"."peoples"."favorite_color" = NULL
 WHERE
-  "public"."peoples"."id" $0;
+  "public"."peoples"."id" $1;

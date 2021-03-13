@@ -7,24 +7,24 @@ WITH "cte_peoples_update" AS (
   UPDATE
     "public"."peoples"
   SET
-    "public"."peoples"."favorite_color" = $0
+    "public"."peoples"."favorite_color" = $1
   WHERE
-    "public"."peoples"."id" = $1 RETURNING *
+    "public"."peoples"."id" = $2 RETURNING *
 ),
 "cte_peoples_data" AS (
   SELECT
     "cte_peoples_update"."id" :: TEXT AS "id",
-    $2 :: TEXT AS "type",
+    $3 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $3,
-      "cte_peoples_update"."age",
       $4,
-      "cte_peoples_update"."first-name",
+      "cte_peoples_update"."age",
       $5,
-      "cte_peoples_update"."gender",
+      "cte_peoples_update"."first-name",
       $6,
-      "cte_peoples_update"."last-name",
+      "cte_peoples_update"."gender",
       $7,
+      "cte_peoples_update"."last-name",
+      $8,
       "cte_peoples_update"."twitter"
     ) AS "data"
   FROM
@@ -33,7 +33,7 @@ WITH "cte_peoples_update" AS (
 "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
-    $8 :: TEXT AS "type",
+    $9 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."favorite_color"

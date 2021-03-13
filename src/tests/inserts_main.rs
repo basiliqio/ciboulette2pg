@@ -1,4 +1,5 @@
 use super::*;
+use sqlx::Row;
 
 #[ciboulette2postgres_test]
 async fn insert_main_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
@@ -38,6 +39,11 @@ async fn insert_main_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Pos
         .fetch_all(&mut transaction)
         .await
         .unwrap();
+    let row: &sqlx::postgres::PgRow = res.get(0).unwrap();
+    let id: &str = row.try_get(0).unwrap();
+    let type_: &str = row.try_get(1).unwrap();
+    let data: serde_json::Value = row.try_get(2).unwrap();
+    println!("{} | {} | {}", id, type_, data);
     // insta::assert_debug_snapshot!(res);
 }
 

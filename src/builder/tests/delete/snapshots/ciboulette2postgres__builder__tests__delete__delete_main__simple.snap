@@ -6,4 +6,4 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 DELETE FROM
   "public"."peoples"
 WHERE
-  "public"."peoples"."id" = $0;
+  "public"."peoples"."id" = $1;

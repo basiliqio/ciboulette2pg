@@ -6,4 +6,4 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 INSERT INTO
   "public"."mysimpletable" ("first-name", "last-name")
 VALUES
-  ($0, $1) RETURNING *;
+  ($1, $2) RETURNING *;
