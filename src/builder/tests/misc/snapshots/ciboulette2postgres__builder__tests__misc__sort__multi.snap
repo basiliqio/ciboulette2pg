@@ -72,13 +72,7 @@ WITH "cte_peoples_data" AS (
     "public"."articles"."title" AS "sort_title"
   FROM
     "public"."articles"
-  WHERE
-    "public"."articles"."id" IN (
-      SELECT
-        "cte_rel_articles_rel_data"."article_id"
-      FROM
-        "cte_rel_articles_rel_data"
-    )
+    INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" = "public"."articles"."id"
 )
 SELECT
   "cte_rel_articles_data"."id",

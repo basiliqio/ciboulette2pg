@@ -207,14 +207,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         for field in additional_fields.iter() {
             self.buf.write_all(b", ")?;
             self.insert_ident(&field.ident(), table)?;
-            self.buf.write_all(
-                format!(
-                    " AS \"{}_{}\"",
-                    field.type_().as_str(),
-                    field.ident().name()
-                )
-                .as_bytes(),
-            )?;
+            self.buf
+                .write_all(format!(" AS \"{}\"", field.name()).as_bytes())?;
         }
         self.gen_sorting_keys(&table, &type_, &query)?;
         self.buf.write_all(b" FROM ")?;

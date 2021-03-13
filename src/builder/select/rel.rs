@@ -41,16 +41,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     None,
                     None,
                 ),
-                Ciboulette2SqlAdditonalFieldType::Relationship,
-            ),
+                Ciboulette2SqlAdditionalFieldType::Relationship,
+            )?,
             Ciboulette2SqlAdditonalField::new(
                 Ciboulette2PostgresTableField::new_owned(
                     Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
                     None,
                     None,
                 ),
-                Ciboulette2SqlAdditonalFieldType::Relationship,
-            ),
+                Ciboulette2SqlAdditionalFieldType::Relationship,
+            )?,
         ])
     }
     pub(crate) fn gen_select_multi_rel_routine(
@@ -110,26 +110,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &[],
                 query.include().contains(&rel_type),
             )?;
-            self.buf.write_all(b" WHERE ")?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
-            self.insert_ident(
-                &Ciboulette2PostgresTableField::new_ref(rel_table.id_name(), None, None),
-                &rel_table,
-            )?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
-            self.buf.write_all(b" IN (SELECT ")?;
-            self.insert_ident(
-                &Ciboulette2PostgresTableField::new_owned(
-                    Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
-                    None,
-                    None,
-                ),
-                &rel_cte_rel_data,
-            )?;
-            self.buf.write_all(b" FROM ")?;
+            self.buf.write_all(b" INNER JOIN ")?;
             self.write_table_info(&rel_cte_rel_data)?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM "cte_rel_myrel_id")
-            self.buf.write_all(b"))")?;
+            self.buf.write_all(b" ON ")?; // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"), "cte_rel_myrel_data" AS (select_stmt) WHERE "schema"."rel_table"."id" IN (SELECT \"id\" FROM
+            self.compare_fields(
+                &rel_cte_rel_data,
+                &Ciboulette2PostgresTableField::new_ref(&additional_params[0].name(), None, None),
+                &rel_table,
+                &Ciboulette2PostgresTableField::new_ref(rel_table.id_name(), None, None),
+            )?;
+            self.buf.write_all(b")")?;
             self.add_working_table(&rel_table, rel_cte_data);
             self.add_working_table(&rel_rel_table, rel_cte_rel_data);
         }
