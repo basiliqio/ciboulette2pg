@@ -240,12 +240,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(crate) fn compare_fields<I, F>(
+    pub(crate) fn compare_fields(
         &mut self,
-        left_table: &Ciboulette2PostgresTableSettings<'a>,
-        left: &Ciboulette2PostgresTableField<'a>,
-        right_table: &Ciboulette2PostgresTableSettings<'a>,
-        right: &Ciboulette2PostgresTableField<'a>,
+        left_table: &Ciboulette2PostgresTableSettings,
+        left: &Ciboulette2PostgresTableField,
+        right_table: &Ciboulette2PostgresTableSettings,
+        right: &Ciboulette2PostgresTableField,
     ) -> Result<(), Ciboulette2SqlError> {
         match left_table.id_type() == right_table.id_type() {
             true => {

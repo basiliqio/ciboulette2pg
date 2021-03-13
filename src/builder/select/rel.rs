@@ -75,11 +75,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 .to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
             let rel_cte_data =
                 rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())))?;
-            // "cte_rel_myrel_rel_data"
             self.write_table_info(&rel_cte_rel_data)?;
-            // "cte_rel_myrel_rel_data" AS (
             self.buf.write_all(b" AS (")?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt
             self.gen_select_cte_final(
                 &rel_rel_table,
                 &bucket.resource(),
@@ -87,23 +84,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &additional_params,
                 query.include().contains(&bucket.resource()),
             )?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE
-            self.buf.write_all(b" WHERE ")?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to"
-            self.insert_ident(
+            // "" AS (select_stmt WHERE
+            self.buf.write_all(b" INNER JOIN ")?;
+            self.write_table_info(&main_cte_data)?;
+            self.buf.write_all(b" ON ")?;
+            self.compare_fields(
+                &rel_rel_table,
                 &Ciboulette2PostgresTableField::new_owned(
                     Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
                     None,
                     None,
                 ),
-                &rel_rel_table,
-            )?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" =
-            self.buf.write_all(b" = ")?;
-            // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"
-            self.insert_ident(
-                &Ciboulette2PostgresTableField::new_ref(main_cte_data.id_name(), None, None),
                 &main_cte_data,
+                &Ciboulette2PostgresTableField::new_ref(main_cte_data.id_name(), None, None),
             )?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"),
             self.buf.write_all(b"), ")?;

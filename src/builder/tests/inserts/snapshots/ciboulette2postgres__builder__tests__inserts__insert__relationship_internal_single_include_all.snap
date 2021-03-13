@@ -57,8 +57,7 @@ WITH "cte_peoples_insert" AS (
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
     "public"."people-article"
-  WHERE
-    "public"."people-article"."people_id" = "cte_peoples_data"."id"
+    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" = "cte_peoples_data"."id"
 ),
 "cte_rel_articles_data" AS (
   SELECT
