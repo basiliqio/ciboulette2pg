@@ -5,8 +5,7 @@ fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
-        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap(),
@@ -22,7 +21,7 @@ fn simple() {
                 ))),
             ],
             &dest_table,
-            "uuid",
+            &Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         )
         .unwrap();
     let res = builder.build().unwrap();
@@ -35,18 +34,21 @@ fn empty() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
-        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap(),
     );
     let err = builder
-        .gen_rel_values(vec![], &dest_table, "mysimpletable")
+        .gen_rel_values(
+            vec![],
+            &dest_table,
+            &Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
+        )
         .unwrap_err();
 
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::EmptyRelValue(x) if x == "mysimpletable"),
+        matches!(err, Ciboulette2SqlError::EmptyRelValue(x) if x == "id"),
         true
     );
 }

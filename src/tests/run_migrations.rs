@@ -39,18 +39,19 @@ pub async fn init_db() -> (String, sqlx::PgPool) {
             .lock()
             .expect("the database management mutex is poisoned");
         {
-            sqlx::query(
-                format!("CREATE DATABASE \"{}\";", BASILIQ_DEFAULT_DATABASE.as_str()).as_str(),
-            )
-            .execute(&*BASILIQ_MANAGEMENT_POOL)
-            .await
-            .expect("to create a new database");
-            run_migrations(BASILIQ_DEFAULT_DATABASE.as_str()).await;
-            *init_bool = true;
+            if !*init_bool {
+                sqlx::query(
+                    format!("CREATE DATABASE \"{}\";", BASILIQ_DEFAULT_DATABASE.as_str()).as_str(),
+                )
+                .execute(&*BASILIQ_MANAGEMENT_POOL)
+                .await
+                .expect("to create a new database");
+                run_migrations(BASILIQ_DEFAULT_DATABASE.as_str()).await;
+                *init_bool = true;
+            }
         }
     }
     let db_name = format!("basiliq_test_{}", Uuid::new_v4());
-    println!("Gen name {}", db_name);
     sqlx::query(
         format!(
             "CREATE DATABASE \"{}\" WITH TEMPLATE \"{}\";",

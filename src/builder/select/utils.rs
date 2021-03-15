@@ -28,7 +28,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 buf.write_all(b" = ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(main_cte_table.id_name(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(
+                        main_cte_table.id().get_ident(),
+                        None,
+                        None,
+                    ),
                     &main_cte_table,
                     None,
                 )?;
@@ -37,7 +41,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 buf.write_all(b" ON ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(rel_table.id_name(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(rel_table.id().get_ident(), None, None),
                     rel_table,
                     None,
                 )?;
@@ -59,14 +63,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 buf.write_all(b" ON ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(main_table.id_name(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(
+                        main_table.id().get_ident(),
+                        None,
+                        None,
+                    ),
                     main_table,
                     None,
                 )?;
                 buf.write_all(b" = ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(main_cte_table.id_name(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(
+                        main_cte_table.id().get_ident(),
+                        None,
+                        None,
+                    ),
                     main_cte_table,
                     None,
                 )?;
@@ -75,7 +87,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 buf.write_all(b" ON ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(rel_table.id_name(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(rel_table.id().get_ident(), None, None),
                     rel_table,
                     None,
                 )?;
@@ -131,7 +143,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     self.buf.write_all(b" AS (SELECT ")?;
                     self.insert_ident(
                         &Ciboulette2PostgresTableField::new_ref(
-                            main_cte_data.id_name(),
+                            main_cte_data.id().get_ident(),
                             None,
                             None,
                         ),
@@ -193,7 +205,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // SELECT "schema"."mytable"."id"
         self.insert_ident(
             &Ciboulette2PostgresTableField::new_cow(
-                Cow::Borrowed(table.id_name()),
+                Cow::Borrowed(table.id().get_ident()),
                 Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("id")?)),
                 Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("TEXT")?)),
             ),
@@ -245,7 +257,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b" WHERE ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id"
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(table.id_name(), None, None),
+            &Ciboulette2PostgresTableField::new_ref(table.id().get_ident(), None, None),
             &table,
         )?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT

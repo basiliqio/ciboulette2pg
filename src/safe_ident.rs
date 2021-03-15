@@ -1,8 +1,25 @@
 use super::*;
 
+pub const UUID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+    Ciboulette2PostgresSafeIdent {
+        inner: Cow::Borrowed("UUID"),
+    }
+};
+pub const TEXT_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+    Ciboulette2PostgresSafeIdent {
+        inner: Cow::Borrowed("TEXT"),
+    }
+};
+
+pub const INTEGER_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+    Ciboulette2PostgresSafeIdent {
+        inner: Cow::Borrowed("INTEGER"),
+    }
+};
+
 #[derive(Clone, Debug, PartialEq, Eq, Ord, Default, PartialOrd)]
 pub struct Ciboulette2PostgresSafeIdent<'a> {
-    inner: Cow<'a, str>,
+    pub inner: Cow<'a, str>,
 }
 
 impl<'a> std::fmt::Display for Ciboulette2PostgresSafeIdent<'a> {

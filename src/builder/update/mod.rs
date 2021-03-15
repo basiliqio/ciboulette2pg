@@ -19,7 +19,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.gen_update_params(table, params)?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(table.id_name(), None, None),
+            &Ciboulette2PostgresTableField::new_ref(table.id().get_ident(), None, None),
             &table,
         )?;
         self.buf.write_all(b" = ")?;

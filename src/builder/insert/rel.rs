@@ -60,7 +60,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b" RETURNING ")?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id"
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(dest_table.id_name(), None, None),
+            &Ciboulette2PostgresTableField::new_ref(dest_table.id().get_ident(), None, None),
             dest_table,
         )?;
         // INSERT INTO "schema"."mytable" ("main_key", "rel_key") SELECT "schema"."main_table"."id" AS "main_key", "schema"."rel_table"."id" AS "rel_key" FROM "schema"."insert_table", "schema"."id_table" RETURNING "schema"."mytable"."id",
@@ -108,7 +108,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 // "cte_rel_myrel_id" AS (VALUES
                 self.buf.write_all(b" AS (VALUES ")?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)
-                self.gen_rel_values(rel_ids, &rel_table, rel_table.id_type())?;
+                self.gen_rel_values(rel_ids, &rel_table, rel_table.id())?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)),
                 self.buf.write_all(b"), ")?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert"

@@ -37,11 +37,35 @@ impl<'a> std::iter::FromIterator<(String, Ciboulette2PostgresTableSettings<'a>)>
     }
 }
 
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub enum Ciboulette2PostgresId<'a> {
+    Number(Ciboulette2PostgresSafeIdent<'a>),
+    Uuid(Ciboulette2PostgresSafeIdent<'a>),
+    Text(Ciboulette2PostgresSafeIdent<'a>),
+}
+
+impl<'a> Ciboulette2PostgresId<'a> {
+    pub fn get_ident(&self) -> &Ciboulette2PostgresSafeIdent<'a> {
+        match self {
+            Ciboulette2PostgresId::Number(x) => x,
+            Ciboulette2PostgresId::Uuid(x) => x,
+            Ciboulette2PostgresId::Text(x) => x,
+        }
+    }
+
+    pub fn get_type(&self) -> &Ciboulette2PostgresSafeIdent<'static> {
+        match self {
+            Ciboulette2PostgresId::Number(x) => &safe_ident::INTEGER_IDENT,
+            Ciboulette2PostgresId::Uuid(x) => &safe_ident::UUID_IDENT,
+            Ciboulette2PostgresId::Text(x) => &safe_ident::TEXT_IDENT,
+        }
+    }
+}
+
 #[derive(Getters, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresTableSettings<'a> {
-    id_name: Ciboulette2PostgresSafeIdent<'a>,
-    id_type: Ciboulette2PostgresSafeIdent<'a>,
+    id: Ciboulette2PostgresId<'a>,
     schema: Option<Ciboulette2PostgresSafeIdent<'a>>,
     ciboulette_type: &'a CibouletteResourceType<'a>,
     name: Ciboulette2PostgresSafeIdent<'a>,
@@ -49,15 +73,13 @@ pub struct Ciboulette2PostgresTableSettings<'a> {
 
 impl<'a> Ciboulette2PostgresTableSettings<'a> {
     pub fn new(
-        id_name: Ciboulette2PostgresSafeIdent<'a>,
-        id_type: Ciboulette2PostgresSafeIdent<'a>,
+        id: Ciboulette2PostgresId<'a>,
         schema: Option<Ciboulette2PostgresSafeIdent<'a>>,
         name: Ciboulette2PostgresSafeIdent<'a>,
         ciboulette_type: &'a CibouletteResourceType<'a>,
     ) -> Self {
         Ciboulette2PostgresTableSettings {
-            id_name,
-            id_type,
+            id,
             schema,
             name,
             ciboulette_type,
@@ -69,8 +91,7 @@ impl<'a> Ciboulette2PostgresTableSettings<'a> {
         name: Cow<'a, str>,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTableSettings {
-            id_name: self.id_name.clone(),
-            id_type: self.id_type.clone(),
+            id: self.id.clone(),
             ciboulette_type: self.ciboulette_type,
             schema: None,
             name: Ciboulette2PostgresSafeIdent::try_from(name)?,
@@ -78,14 +99,12 @@ impl<'a> Ciboulette2PostgresTableSettings<'a> {
     }
 
     pub fn new_cte(
-        id_name: Cow<'a, str>,
-        id_type: Cow<'a, str>,
+        id: Ciboulette2PostgresId<'a>,
         name: Cow<'a, str>,
         ciboulette_type: &'a CibouletteResourceType<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTableSettings {
-            id_name: Ciboulette2PostgresSafeIdent::try_from(id_name)?,
-            id_type: Ciboulette2PostgresSafeIdent::try_from(id_type)?,
+            id: id.clone(),
             schema: None,
             ciboulette_type,
             name: Ciboulette2PostgresSafeIdent::try_from(name)?,

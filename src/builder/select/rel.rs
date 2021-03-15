@@ -96,7 +96,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     None,
                 ),
                 &main_cte_data,
-                &Ciboulette2PostgresTableField::new_ref(main_cte_data.id_name(), None, None),
+                &Ciboulette2PostgresTableField::new_ref(main_cte_data.id().get_ident(), None, None),
             )?;
             // "cte_rel_myrel_rel_data" AS (select_stmt WHERE "schema"."my_rel_rel"."to" = "cte_main_data"."myid"),
             self.buf.write_all(b"), ")?;
@@ -117,7 +117,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_cte_rel_data,
                 &Ciboulette2PostgresTableField::new_ref(&additional_params[0].name(), None, None),
                 &rel_table,
-                &Ciboulette2PostgresTableField::new_ref(rel_table.id_name(), None, None),
+                &Ciboulette2PostgresTableField::new_ref(rel_table.id().get_ident(), None, None),
             )?;
             self.buf.write_all(b")")?;
             self.add_working_table(&rel_table, rel_cte_data);

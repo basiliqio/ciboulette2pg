@@ -10,9 +10,9 @@ expression: "serde_json::Value::Object(map)"
       "first-name": "Hello",
       "last-name": "World",
       "favorite_color": null,
-      "age": 19,
-      "gender": "M",
-      "twitter": "@myhandle"
+      "age": null,
+      "gender": null,
+      "twitter": null
     }
   ],
   "people-article": null,

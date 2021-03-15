@@ -12,7 +12,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.write_table_info(main_table)?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(main_table.id_name(), None, None),
+            &Ciboulette2PostgresTableField::new_ref(main_table.id().get_ident(), None, None),
             &main_table,
         )?;
         self.buf.write_all(b" = ")?;

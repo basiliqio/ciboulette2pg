@@ -23,7 +23,9 @@ use safe_ident::Ciboulette2PostgresSafeIdent;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
-pub use table_store::{Ciboulette2PostgresTableSettings, Ciboulette2PostgresTableStore};
+pub use table_store::{
+    Ciboulette2PostgresId, Ciboulette2PostgresTableSettings, Ciboulette2PostgresTableStore,
+};
 pub use value::Ciboulette2SqlValue;
 
 const POSTGRES_QUOTE: &[u8] = b"\"";

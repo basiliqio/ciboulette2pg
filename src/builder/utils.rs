@@ -5,18 +5,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         ids: Vec<value::Ciboulette2SqlValue<'a>>,
         table: &'a Ciboulette2PostgresTableSettings<'a>,
-        type_: &str,
+        id_param: &Ciboulette2PostgresId,
     ) -> Result<(), Ciboulette2SqlError> {
         // It's a logic error to have an empty id vector here
         if ids.is_empty() {
-            return Err(Ciboulette2SqlError::EmptyRelValue(type_.to_string()));
+            return Err(Ciboulette2SqlError::EmptyRelValue(
+                id_param.get_ident().to_string(),
+            ));
         }
         // ($x::type), ($x::type), ($x::type)
         self.write_list(ids, &table, false, |ref mut se, curr, t| {
             se.buf.write_all(b"(")?;
             se.insert_params(curr, t)?;
             se.buf.write_all(b"::")?;
-            se.buf.write_all(type_.as_bytes())?;
+            se.buf.write_all(id_param.get_type().as_bytes())?;
             se.buf.write_all(b")")?;
             Ok(())
         })?;

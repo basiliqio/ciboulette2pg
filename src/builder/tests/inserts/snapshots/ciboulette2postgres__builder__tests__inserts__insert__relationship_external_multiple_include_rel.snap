@@ -45,8 +45,8 @@ WITH "cte_peoples_insert" AS (
 ),
 "cte_rel_articles_id" AS (
   VALUES
-    ($11 :: uuid),
-    ($12 :: uuid)
+    ($11 :: UUID),
+    ($12 :: UUID)
 ),
 "cte_rel_articles_insert" AS (
   INSERT INTO

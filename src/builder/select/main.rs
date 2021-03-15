@@ -23,7 +23,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             | CiboulettePath::TypeIdRelationship(_, id, _) => {
                 se.buf.write_all(b" WHERE ")?;
                 se.insert_ident(
-                    &Ciboulette2PostgresTableField::new_ref(main_table.id_name(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(
+                        main_table.id().get_ident(),
+                        None,
+                        None,
+                    ),
                     &main_table,
                 )?;
                 se.buf.write_all(b" = ")?;

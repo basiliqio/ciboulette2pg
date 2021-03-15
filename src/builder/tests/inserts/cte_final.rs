@@ -5,8 +5,7 @@ fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
-        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap(),
@@ -32,8 +31,7 @@ fn sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
-        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap(),
@@ -59,8 +57,7 @@ fn empty_sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
-        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap(),
@@ -86,8 +83,7 @@ fn non_included() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PostgresTableSettings::new(
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap(),
-        Ciboulette2PostgresSafeIdent::try_from("uuid").unwrap(),
+        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap(),
