@@ -44,8 +44,4 @@ impl<'a> Ciboulette2SqlAdditonalField<'a> {
             type_,
         })
     }
-
-    pub fn to_string(&self) -> String {
-        format!("{}_{}", self.type_.as_str(), self.ident().name())
-    }
 }

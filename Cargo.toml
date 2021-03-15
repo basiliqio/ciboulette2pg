@@ -25,7 +25,7 @@ ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git", pa
 ciboulette2postgres_test_proc_macro = { path = "./ciboulette2postgres_test_proc_macro" }
 url = "2.2.0"
 tokio = { version = "1", features = ["full"] }
-insta = "1.7"
+insta = { version = "1.7", features = [ "redactions" ] }
 sqlformat = "0.1.6"
 refinery = { version = "0.5.0", features = ["tokio", "tokio-postgres"] }
 num_cpus = "1.13.0"

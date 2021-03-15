@@ -9,3 +9,6 @@ use url::Url;
 
 mod inserts_main;
 mod run_migrations;
+mod test_sql;
+
+use test_sql::snapshot_table;
