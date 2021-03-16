@@ -7,8 +7,10 @@ use run_migrations::*;
 use std::convert::TryFrom;
 use url::Url;
 
+mod init_values;
 mod inserts;
 mod run_migrations;
 mod test_sql;
+mod update;
 
 use test_sql::snapshot_table;
