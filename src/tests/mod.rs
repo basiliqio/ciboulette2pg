@@ -7,7 +7,7 @@ use run_migrations::*;
 use std::convert::TryFrom;
 use url::Url;
 
-mod inserts_main;
+mod inserts;
 mod run_migrations;
 mod test_sql;
 

@@ -11,14 +11,6 @@ mod embedded_migrations {
 lazy_static! {
     static ref BASILIQ_DATABASE_URL: String =
         std::env::var("BASILIQ_DATABASE_URL").expect("the database url to be set");
-    static ref BASILIQ_MANAGEMENT_POOL: sqlx::PgPool = {
-        let num = num_cpus::get();
-        sqlx::pool::PoolOptions::new()
-            .min_connections(1)
-            .max_connections(num as u32)
-            .connect_lazy(&BASILIQ_DATABASE_URL)
-            .expect("to initialize the management Postgres connection pool")
-    };
     static ref BASILIQ_DEFAULT_DATABASE: String = format!("basiliq_test_{}", Uuid::new_v4());
     static ref BASILIQ_DEFAULT_DATABASE_INIT: Mutex<bool> = Mutex::new(false);
 }
@@ -33,7 +25,17 @@ pub async fn run_migrations(db_name: &str) {
         .expect("to apply migrations");
 }
 
+fn connect_to_management_pool() -> sqlx::PgPool {
+    let num = num_cpus::get();
+
+    sqlx::pool::PoolOptions::new()
+        .min_connections(1)
+        .max_connections(num as u32)
+        .connect_lazy(&BASILIQ_DATABASE_URL)
+        .expect("to initialize the management Postgres connection pool")
+}
 pub async fn init_db() -> (String, sqlx::PgPool) {
+    let management_pool = connect_to_management_pool();
     {
         let mut init_bool = BASILIQ_DEFAULT_DATABASE_INIT
             .lock()
@@ -43,7 +45,7 @@ pub async fn init_db() -> (String, sqlx::PgPool) {
                 sqlx::query(
                     format!("CREATE DATABASE \"{}\";", BASILIQ_DEFAULT_DATABASE.as_str()).as_str(),
                 )
-                .execute(&*BASILIQ_MANAGEMENT_POOL)
+                .execute(&management_pool)
                 .await
                 .expect("to create a new database");
                 run_migrations(BASILIQ_DEFAULT_DATABASE.as_str()).await;
@@ -60,7 +62,7 @@ pub async fn init_db() -> (String, sqlx::PgPool) {
         )
         .as_str(),
     )
-    .execute(&*BASILIQ_MANAGEMENT_POOL)
+    .execute(&management_pool)
     .await
     .expect("to create a new database");
     let conn_opt = sqlx::postgres::PgConnectOptions::from_str(&BASILIQ_DATABASE_URL)
@@ -71,4 +73,12 @@ pub async fn init_db() -> (String, sqlx::PgPool) {
         .max_connections(3)
         .connect_lazy_with(conn_opt);
     (db_name, pool)
+}
+
+pub async fn deinit_db(db_id: String) {
+    let management_pool = connect_to_management_pool();
+    sqlx::query(format!("DROP DATABASE \"{}\"", db_id.as_str(),).as_str())
+        .execute(&management_pool)
+        .await
+        .expect("to create a new database");
 }

@@ -19,6 +19,8 @@ pub fn ciboulette2postgres_test(_metadata: TokenStream, input: TokenStream) -> T
 			
 			let mut tx = pool.begin().await.expect("to get a transaction");
             #new_function_name(tx).await;
+			pool.close().await;
+			deinit_db(db_id).await;
         }
 
         #input_fn
