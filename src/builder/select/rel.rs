@@ -8,7 +8,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         query: &'a CibouletteQueryParameters<'a>,
         main_type: &'a CibouletteResourceType<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
-        rels: &Ciboulette2SqlRelationships<'a>,
+        rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         for (rel_key, additional_fields) in rels
             .single_rels_keys()

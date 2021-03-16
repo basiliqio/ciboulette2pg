@@ -1,15 +1,14 @@
 use super::*;
-use select::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalFieldType};
 
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2SqlRelationships<'a> {
+pub struct Ciboulette2SqlQueryRels<'a> {
     multi_rels: Vec<Ciboulette2PostgresRelationships<'a>>,
     single_rels_keys: Vec<&'a str>,
     single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>>,
 }
 
-impl<'a> Ciboulette2SqlRelationships<'a> {
+impl<'a> Ciboulette2SqlQueryRels<'a> {
     pub fn new(
         single_rels_keys: Vec<&'a str>,
         multi_rels: Vec<Ciboulette2PostgresRelationships<'a>>,
@@ -26,7 +25,7 @@ impl<'a> Ciboulette2SqlRelationships<'a> {
                 Ciboulette2SqlAdditionalFieldType::Relationship,
             )?)
         }
-        Ok(Ciboulette2SqlRelationships {
+        Ok(Ciboulette2SqlQueryRels {
             single_rels_keys,
             multi_rels,
             single_rels_additional_fields,

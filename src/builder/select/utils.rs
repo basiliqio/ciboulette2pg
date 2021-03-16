@@ -326,7 +326,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn get_relationships(
         ciboulette_store: &'a CibouletteStore<'a>,
         main_type: &'a CibouletteResourceType<'a>,
-    ) -> Result<Ciboulette2SqlRelationships<'a>, Ciboulette2SqlError> {
+    ) -> Result<Ciboulette2SqlQueryRels<'a>, Ciboulette2SqlError> {
         let main_single_relationships =
             crate::graph_walker::main::get_fields_single_rel(&ciboulette_store, &main_type)?;
         let rels: Vec<Ciboulette2PostgresRelationships> =
@@ -334,6 +334,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &ciboulette_store,
                 &main_type,
             )?;
-        Ciboulette2SqlRelationships::new(main_single_relationships, rels)
+        Ciboulette2SqlQueryRels::new(main_single_relationships, rels)
     }
 }
