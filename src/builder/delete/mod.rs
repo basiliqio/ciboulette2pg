@@ -4,11 +4,11 @@ pub mod rel;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_delete(
-        &mut self,
         store: &'a CibouletteStore<'a>,
         table_store: &'a Ciboulette2PostgresTableStore<'a>,
         query: &'a CibouletteDeleteRequest<'a>,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<Self, Ciboulette2SqlError> {
+        let mut se = Ciboulette2PostgresBuilder::default();
         match query.related_type() {
             Some(related_type) => {
                 let alias = query
@@ -19,19 +19,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 match opt {
                     CibouletteRelationshipOption::One(opt) if *opt.optional() => {
                         // If it's an single optional value, go ahed
-                        self.gen_delete_rel(&table_store, query, opt)
+                        se.gen_delete_rel(&table_store, query, opt)
                     }
                     CibouletteRelationshipOption::One(opt) => {
                         // Fails if it's not optional
-                        Err(Ciboulette2SqlError::RequiredRelationship(
+                        return Err(Ciboulette2SqlError::RequiredRelationship(
                             query.resource_type().name().clone(),
                             opt.key().clone(),
-                        ))
+                        ));
                     }
-                    _ => Err(Ciboulette2SqlError::BulkRelationshipDelete), // Fails if it's a multi relationship
+                    _ => return Err(Ciboulette2SqlError::BulkRelationshipDelete), // Fails if it's a multi relationship
                 }
             }
-            None => self.gen_delete_normal(&table_store, query), // If we're not deleting a relationships but an object
-        }
+            None => se.gen_delete_normal(&table_store, query), // If we're not deleting a relationships but an object
+        }?;
+        Ok(se)
     }
 }

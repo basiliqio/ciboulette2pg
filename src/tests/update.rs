@@ -1,6 +1,6 @@
 use super::*;
 
-async fn test_insert<'a>(
+async fn test_update<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     body: &str,
@@ -40,7 +40,7 @@ async fn main_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;
     baseline_for_people!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
-    let raw_rows = test_insert(
+    let raw_rows = test_update(
         &mut transaction,
         format!("/peoples/{}", people_id).as_str(),
         json!({
@@ -66,7 +66,7 @@ async fn unsetting_a_field(mut transaction: sqlx::Transaction<'_, sqlx::Postgres
     let data = init_values::init_values(&mut transaction).await;
     baseline_for_people!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
-    let raw_rows = test_insert(
+    let raw_rows = test_update(
         &mut transaction,
         format!("/peoples/{}", people_id).as_str(),
         json!({

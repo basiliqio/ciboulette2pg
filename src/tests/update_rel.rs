@@ -1,6 +1,6 @@
 use super::*;
 
-async fn test_insert<'a>(
+async fn test_update<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     body: &str,
@@ -41,7 +41,7 @@ async fn set_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) 
     baseline_for_people!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let favorite_color = data.get("favorite_color").unwrap().last().unwrap();
-    let raw_rows = test_insert(
+    let raw_rows = test_update(
         &mut transaction,
         format!("/peoples/{}/relationships/favorite_color", people_id).as_str(),
         json!({
@@ -72,7 +72,7 @@ async fn unset_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>
     let data = init_values::init_values(&mut transaction).await;
     baseline_for_people!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
-    let raw_rows = test_insert(
+    let raw_rows = test_update(
         &mut transaction,
         format!("/peoples/{}/relationships/favorite_color", people_id).as_str(),
         json!({ "data": serde_json::Value::Null })

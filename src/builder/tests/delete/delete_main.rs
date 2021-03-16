@@ -11,10 +11,12 @@ fn simple() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
-    let mut builder = Ciboulette2PostgresBuilder::default();
-    builder
-        .gen_delete(&ciboulette_store, &table_store, &ciboulette_request)
-        .unwrap();
+    let builder = Ciboulette2PostgresBuilder::gen_delete(
+        &ciboulette_store,
+        &table_store,
+        &ciboulette_request,
+    )
+    .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);

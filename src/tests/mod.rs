@@ -7,6 +7,7 @@ use run_migrations::*;
 use serde_json::json;
 use std::convert::TryFrom;
 use url::Url;
+mod delete;
 mod init_values;
 mod inserts;
 mod run_migrations;

@@ -1,0 +1,34 @@
+---
+source: src/tests/test_sql.rs
+expression: "serde_json::Value::Object(map)"
+
+---
+{
+  "peoples": [
+    {
+      "id": "[uuid]",
+      "first-name": "Somebody",
+      "last-name": "Wuhu",
+      "favorite_color": "[favorite_color_uuid]",
+      "age": 34,
+      "gender": "F",
+      "twitter": "@randomhandle"
+    },
+    {
+      "id": "[uuid]",
+      "first-name": "AAAAAAAA",
+      "last-name": "BBBBBBBBB",
+      "favorite_color": "[favorite_color_uuid]",
+      "age": null,
+      "gender": null,
+      "twitter": null
+    }
+  ],
+  "people-article": [
+    {
+      "id": "[uuid]",
+      "people_id": "[uuid]",
+      "article_id": "[uuid]"
+    }
+  ]
+}

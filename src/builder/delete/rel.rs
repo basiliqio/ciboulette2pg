@@ -12,7 +12,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.buf.write_all(b"UPDATE ")?;
         self.write_table_info(main_table)?;
         self.buf.write_all(b" SET ")?;
-        self.insert_ident(
+        self.insert_ident_name(
             &Ciboulette2PostgresTableField::new_owned(
                 Ciboulette2PostgresSafeIdent::try_from(rel_opt.key().as_str())?,
                 None,
@@ -25,6 +25,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &Ciboulette2PostgresTableField::new_ref(main_table.id().get_ident(), None, None),
             &main_table,
         )?;
+        self.buf.write_all(b" = ")?;
         self.insert_params(Ciboulette2SqlValue::from(query.resource_id()), &main_table)?;
         Ok(())
     }
