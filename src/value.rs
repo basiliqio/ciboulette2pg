@@ -1,4 +1,5 @@
 use super::*;
+use bigdecimal::FromPrimitive;
 use serde_json::value::RawValue;
 use sqlx::types::chrono::{DateTime, NaiveDate, NaiveTime, Utc};
 use sqlx::types::BigDecimal;
@@ -38,6 +39,7 @@ impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
                 MessyJson::Number(_) => Ciboulette2SqlValue::Numeric(None),
                 MessyJson::String(_) => Ciboulette2SqlValue::Text(None),
                 MessyJson::Array(_) => Ciboulette2SqlValue::Array(None),
+                MessyJson::Uuid(_) => Ciboulette2SqlValue::Uuid(None),
                 MessyJson::Obj(_) => unimplemented!(),
             },
             MessyJsonValue::Number(val) => Ciboulette2SqlValue::Numeric(Some(
@@ -45,6 +47,7 @@ impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
                     .ok_or_else(|| Ciboulette2SqlError::BigDecimal(*val))?,
             )),
             MessyJsonValue::String(val) => Ciboulette2SqlValue::Text(Some(val.clone())),
+            MessyJsonValue::Uuid(val) => Ciboulette2SqlValue::Uuid(Some(**val)),
             MessyJsonValue::Array(arr) => {
                 let mut arr_res: Vec<Ciboulette2SqlValue<'_>> = Vec::with_capacity(arr.len());
                 for el in arr.iter() {
@@ -56,6 +59,16 @@ impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
                 unimplemented!() //TODO better
             }
         })
+    }
+}
+
+impl<'a> From<&CibouletteId<'a>> for Ciboulette2SqlValue<'a> {
+    fn from(val: &CibouletteId<'a>) -> Ciboulette2SqlValue<'a> {
+        match val {
+            CibouletteId::Number(x) => Ciboulette2SqlValue::Numeric(BigDecimal::from_u64(*x)),
+            CibouletteId::Text(x) => Ciboulette2SqlValue::Text(Some(x.clone())),
+            CibouletteId::Uuid(x) => Ciboulette2SqlValue::Uuid(Some(*x)),
+        }
     }
 }
 

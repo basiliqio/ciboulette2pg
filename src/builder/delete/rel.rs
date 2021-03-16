@@ -25,10 +25,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &Ciboulette2PostgresTableField::new_ref(main_table.id().get_ident(), None, None),
             &main_table,
         )?;
-        self.insert_params(
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed(query.resource_id().as_ref()))),
-            &main_table,
-        )?;
+        self.insert_params(Ciboulette2SqlValue::from(query.resource_id()), &main_table)?;
         Ok(())
     }
 }

@@ -20,12 +20,9 @@ fn check_single_relationships<'a>(
         .map(|x| x.data())
         .unwrap_or(&CibouletteOptionalData::Null(false))
     {
-        CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
-            Ok(Some((
-                opt.key().as_str(),
-                Ciboulette2SqlValue::Text(Some(Cow::Borrowed(rel_id.id()))),
-            )))
-        }
+        CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => Ok(
+            Some((opt.key().as_str(), Ciboulette2SqlValue::from(rel_id.id()))),
+        ),
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::Many(_)) => {
             return Err(Ciboulette2SqlError::RequiredSingleRelationship(
                 to_type_.name().to_string(),

@@ -50,6 +50,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             main_single_relationships,
         )?;
         se.gen_insert_rel_routine(&ciboulette_table_store, &request, &main_cte_data, rels)?;
+        se.buf.write_all(b" ")?;
         se.add_working_table(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(

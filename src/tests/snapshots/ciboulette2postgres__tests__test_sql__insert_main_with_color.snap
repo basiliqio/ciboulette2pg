@@ -9,12 +9,17 @@ expression: "serde_json::Value::Object(map)"
       "id": "[uuid]",
       "first-name": "Hello",
       "last-name": "World",
-      "favorite_color": "[favorite_color_null]",
+      "favorite_color": "[favorite_color_uuid]",
       "age": null,
       "gender": null,
       "twitter": null
     }
   ],
   "people-article": null,
-  "favorite_color": null
+  "favorite_color": [
+    {
+      "id": "[uuid]",
+      "color": "red"
+    }
+  ]
 }

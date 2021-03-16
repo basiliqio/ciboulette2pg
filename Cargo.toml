@@ -10,7 +10,7 @@ edition = "2018"
 ciboulette = { path = "../ciboulette", package = "ciboulette" }
 # ciboulette = { git = "https://gitlab.com/basiliq/ciboulette.git", package = "ciboulette" }
 thiserror = "1.0.17"
-messy_json = { git = "https://gitlab.com/basiliq/messy_json.git"}
+messy_json = { git = "https://gitlab.com/basiliq/messy_json.git", features = [ "uuid" ] }
 serde_json = { version = "1.0", default-features = false, features = ["raw_value"] }
 bigdecimal = "0.2"
 petgraph = { version = "0.5.1", default-features = false }

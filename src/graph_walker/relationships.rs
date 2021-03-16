@@ -24,7 +24,7 @@ fn extract_single_relationships_from_ressource_identifiers<'a>(
             Ok(Ciboulette2PostgresMain {
                 insert_values: vec![(
                     rel_opt.key().as_str(),
-                    Ciboulette2SqlValue::Text(Some(Cow::Borrowed(rel_id.id()))), //TODO, not always text
+                    Ciboulette2SqlValue::from(rel_id.id()),
                 )],
                 single_relationships: vec![rel_opt.key().as_str()],
             })
@@ -70,9 +70,7 @@ fn extract_relationships<'a>(
             buf.push(Ciboulette2PostgresRelationships {
                 type_,
                 bucket: opt,
-                values: Some(vec![Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
-                    rel_id.id(),
-                )))]),
+                values: Some(vec![Ciboulette2SqlValue::from(rel_id.id())]),
             });
         }
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::Many(rels_id)) => {
@@ -82,7 +80,7 @@ fn extract_relationships<'a>(
                 values: Some(
                     rels_id
                         .iter()
-                        .map(|x| Ciboulette2SqlValue::Text(Some(Cow::Borrowed(x.id()))))
+                        .map(|x| Ciboulette2SqlValue::from(x.id()))
                         .collect(),
                 ),
             });

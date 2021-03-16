@@ -57,6 +57,22 @@ pub async fn snapshot_table(
                 4
             );
             "[uuid]"
+        }),
+        ".*.*.favorite_color" => insta::dynamic_redaction(|value, _path| {
+            match value
+            .as_str()
+            {
+                Some(x) => {
+                    assert_eq!(x
+                        .chars()
+                        .filter(|&c| c == '-')
+                        .count(),
+                        4
+                    );
+                    "[favorite_color_uuid]"
+                },
+                    None => "[favorite_color_null]"
+            }
         })
     });
 }

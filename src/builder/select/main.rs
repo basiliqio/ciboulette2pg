@@ -31,10 +31,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     &main_table,
                 )?;
                 se.buf.write_all(b" = ")?;
-                se.insert_params(
-                    Ciboulette2SqlValue::Text(Some(Cow::Borrowed(id))),
-                    &main_table,
-                )?;
+                se.insert_params(Ciboulette2SqlValue::from(id), &main_table)?;
             }
             _ => (),
         }

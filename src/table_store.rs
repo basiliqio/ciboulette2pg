@@ -55,9 +55,9 @@ impl<'a> Ciboulette2PostgresId<'a> {
 
     pub fn get_type(&self) -> &Ciboulette2PostgresSafeIdent<'static> {
         match self {
-            Ciboulette2PostgresId::Number(x) => &safe_ident::INTEGER_IDENT,
-            Ciboulette2PostgresId::Uuid(x) => &safe_ident::UUID_IDENT,
-            Ciboulette2PostgresId::Text(x) => &safe_ident::TEXT_IDENT,
+            Ciboulette2PostgresId::Number(_) => &safe_ident::INTEGER_IDENT,
+            Ciboulette2PostgresId::Uuid(_) => &safe_ident::UUID_IDENT,
+            Ciboulette2PostgresId::Text(_) => &safe_ident::TEXT_IDENT,
         }
     }
 }
