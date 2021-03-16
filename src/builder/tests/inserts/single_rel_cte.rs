@@ -10,7 +10,7 @@ fn simple() {
         Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         store.get_type("favorite_color").unwrap(),
     );
-    let main_table = Ciboulette2PostgresTableSettings::new(
+    let main_cte_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
@@ -23,7 +23,7 @@ fn simple() {
             &rel_table,
             store.get_type("favorite_color").unwrap(),
             ciboulette_request.query(),
-            &main_table,
+            &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         )
         .unwrap();
@@ -42,7 +42,7 @@ fn sparse() {
         Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         store.get_type("favorite_color").unwrap(),
     );
-    let main_table = Ciboulette2PostgresTableSettings::new(
+    let main_cte_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
@@ -55,7 +55,7 @@ fn sparse() {
             &rel_table,
             store.get_type("favorite_color").unwrap(),
             ciboulette_request.query(),
-            &main_table,
+            &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         )
         .unwrap();
@@ -74,7 +74,7 @@ fn empty_sparse() {
         Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         store.get_type("favorite_color").unwrap(),
     );
-    let main_table = Ciboulette2PostgresTableSettings::new(
+    let main_cte_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
@@ -87,7 +87,7 @@ fn empty_sparse() {
             &rel_table,
             store.get_type("favorite_color").unwrap(),
             ciboulette_request.query(),
-            &main_table,
+            &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         )
         .unwrap();

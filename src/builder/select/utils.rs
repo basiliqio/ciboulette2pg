@@ -197,7 +197,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTableSettings<'a>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
-        additional_fields: &[Ciboulette2SqlAdditonalField<'a>],
+        additional_fields: &[Ciboulette2SqlAdditionalField<'a>],
         include: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         // SELECT
@@ -242,10 +242,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTableSettings<'a>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
-        main_table: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
         field_id: &Ciboulette2PostgresSafeIdent<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable"
         self.gen_select_cte_final(
             &table,
             &type_,
@@ -253,26 +252,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &[],
             query.include().contains(&type_),
         )?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE
-        self.buf.write_all(b" WHERE ")?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id"
+        self.buf.write_all(b" INNER JOIN ")?;
+        self.write_table_info(&main_cte_table)?;
+        self.buf.write_all(b" ON ")?;
         self.insert_ident(
             &Ciboulette2PostgresTableField::new_ref(table.id().get_ident(), None, None),
             &table,
         )?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT
-        self.buf.write_all(b" IN (SELECT ")?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id"
+        self.buf.write_all(b" = ")?;
         self.insert_ident(
             &Ciboulette2PostgresTableField::new_ref(&field_id, None, None),
-            &main_table,
+            &main_cte_table,
         )?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id" FROM
-        self.buf.write_all(b" FROM ")?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id" FROM "schema"."othertable"
-        self.write_table_info(&main_table)?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."mytable" WHERE "schema"."mytable"."id" IN (SELECT "schema"."othertable"."id" FROM "schema"."othertable")
-        self.buf.write_all(b")")?;
         Ok(())
     }
 
@@ -330,5 +321,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             }
         }
         Ok(())
+    }
+
+    pub(crate) fn get_relationships(
+        ciboulette_store: &'a CibouletteStore<'a>,
+        main_type: &'a CibouletteResourceType<'a>,
+    ) -> Result<Ciboulette2SqlRelationships<'a>, Ciboulette2SqlError> {
+        let main_single_relationships =
+            crate::graph_walker::main::get_fields_single_rel(&ciboulette_store, &main_type)?;
+        let rels: Vec<Ciboulette2PostgresRelationships> =
+            crate::graph_walker::relationships::get_fields_multi_rels(
+                &ciboulette_store,
+                &main_type,
+            )?;
+        Ciboulette2SqlRelationships::new(main_single_relationships, rels)
     }
 }

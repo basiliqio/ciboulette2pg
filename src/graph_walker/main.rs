@@ -108,7 +108,7 @@ pub fn extract_fields<'a>(
 }
 
 pub fn get_fields_single_rel<'a>(
-    store: &'a CibouletteStore,
+    store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
 ) -> Result<Vec<&'a str>, Ciboulette2SqlError> {
     let mut res: Vec<&'a str> = Vec::with_capacity(128);
@@ -120,11 +120,14 @@ pub fn get_fields_single_rel<'a>(
         .graph()
         .neighbors_directed(*main_type_index, petgraph::Direction::Outgoing)
         .detach(); // Create a graph walker
-    while let Some((_edge_index, node_index)) = walker.next(&store.graph()) {
+    while let Some((edge_index, node_index)) = walker.next(&store.graph()) {
         // For each connect edge outgoing from the original node
         let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
-        let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
-        res.push(alias.as_str());
+        if let CibouletteRelationshipOption::One(_) = store.graph().edge_weight(edge_index).unwrap()
+        {
+            let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
+            res.push(alias.as_str());
+        }
     }
     Ok(res)
 }

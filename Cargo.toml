@@ -12,6 +12,7 @@ ciboulette = { path = "../ciboulette", package = "ciboulette" }
 thiserror = "1.0.17"
 messy_json = { git = "https://gitlab.com/basiliq/messy_json.git", features = [ "uuid" ] }
 serde_json = { version = "1.0", default-features = false, features = ["raw_value"] }
+serde = { version = "1", features = [ "derive" ] }
 bigdecimal = "0.2"
 petgraph = { version = "0.5.1", default-features = false }
 sqlx = { version = "0.5", features = [ "postgres", "runtime-tokio-rustls", "json", "uuid", "chrono", "bigdecimal" ] }

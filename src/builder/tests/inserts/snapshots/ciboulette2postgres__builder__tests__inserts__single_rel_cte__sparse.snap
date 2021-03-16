@@ -9,10 +9,4 @@ SELECT
   NULL :: json AS "data"
 FROM
   "public"."favorite_color"
-WHERE
-  "public"."favorite_color"."id" IN (
-    SELECT
-      "public"."cte_peoples"."favorite_color"
-    FROM
-      "public"."cte_peoples"
-  );
+  INNER JOIN "public"."cte_peoples" ON "public"."favorite_color"."id" = "public"."cte_peoples"."favorite_color";

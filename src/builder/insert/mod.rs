@@ -26,11 +26,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             request.data().relationships(),
             false,
         )?;
-        let rels = crate::graph_walker::relationships::extract_fields(
+        let multi_rels = crate::graph_walker::relationships::extract_fields(
             &ciboulette_store,
             &request.path().main_type(),
             Some(request.data().relationships()),
         )?;
+        let rels = Ciboulette2SqlRelationships::new(main_single_relationships, multi_rels)?;
         se.buf.write_all(b"WITH \n")?;
         se.write_table_info(&main_cte_insert)?;
         se.buf.write_all(b" AS (")?;
@@ -38,7 +39,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b"),")?;
         se.write_table_info(&main_cte_data)?;
         se.buf.write_all(b" AS (")?;
-        se.gen_select_cte_final(&main_cte_insert, &main_type, &request.query(), &[], true)?;
+        se.gen_select_cte_final(
+            &main_cte_insert,
+            &main_type,
+            &request.query(),
+            &rels.single_rels_additional_fields(),
+            true,
+        )?;
         se.buf.write_all(b")")?;
 
         se.gen_select_single_rel_routine(
@@ -46,10 +53,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_table_store,
             request.query(),
             &main_type,
-            &main_cte_insert,
-            main_single_relationships,
+            &&main_cte_data,
+            &rels,
         )?;
-        se.gen_insert_rel_routine(&ciboulette_table_store, &request, &main_cte_data, rels)?;
+        se.gen_insert_rel_routine(
+            &ciboulette_table_store,
+            &request,
+            &main_cte_data,
+            rels.multi_rels(),
+        )?;
         se.buf.write_all(b" ")?;
         se.add_working_table(&main_table, main_cte_data);
         // Aggregate every table using UNION ALL

@@ -10,13 +10,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let main_table = ciboulette_table_store.get(main_type.name().as_str())?;
         let main_cte_data =
             main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
+        let rels = Self::get_relationships(&ciboulette_store, &main_type)?;
         // WITH
         se.buf.write_all(b"WITH \n")?;
         // WITH "cte_main_insert"
         se.write_table_info(&main_cte_data)?;
         // WITH "cte_main_insert" AS (
         se.buf.write_all(b" AS (")?;
-        se.gen_select_cte_final(&main_table, &main_type, &request.query(), &[], true)?;
+        se.gen_select_cte_final(
+            &main_table,
+            &main_type,
+            &request.query(),
+            &rels.single_rels_additional_fields(),
+            true,
+        )?;
         match request.path() {
             CiboulettePath::TypeId(_, id)
             | CiboulettePath::TypeIdRelated(_, id, _)
@@ -36,28 +43,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             _ => (),
         }
         se.buf.write_all(b")")?;
-        let main_single_relationships = crate::graph_walker::main::get_fields_single_rel(
-            &ciboulette_store,
-            request.path().main_type(),
-        )?;
 
-        let rels = crate::graph_walker::relationships::get_fields_multi_rels(
-            &ciboulette_store,
-            &request.path().main_type(),
-        )?;
         se.gen_select_single_rel_routine(
             &ciboulette_store,
             &ciboulette_table_store,
             request.query(),
             &main_type,
             &main_cte_data,
-            main_single_relationships,
+            &rels,
         )?;
         se.gen_select_multi_rel_routine(
             &ciboulette_table_store,
             request.query(),
             &main_cte_data,
-            rels,
+            &rels.multi_rels(),
         )?;
         se.gen_cte_for_sort(
             &ciboulette_store,

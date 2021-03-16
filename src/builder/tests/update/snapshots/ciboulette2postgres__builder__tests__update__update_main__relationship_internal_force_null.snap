@@ -28,7 +28,8 @@ WITH "cte_peoples_update" AS (
       "cte_peoples_update"."last-name",
       $10,
       "cte_peoples_update"."twitter"
-    ) AS "data"
+    ) AS "data",
+    "cte_peoples_update"."favorite_color" AS "rel_favorite_color"
   FROM
     "cte_peoples_update"
 ),
@@ -39,13 +40,7 @@ WITH "cte_peoples_update" AS (
     NULL :: json AS "data"
   FROM
     "public"."favorite_color"
-  WHERE
-    "public"."favorite_color"."id" IN (
-      SELECT
-        "cte_peoples_update"."favorite_color"
-      FROM
-        "cte_peoples_update"
-    )
+    INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
 ),
 "cte_rel_articles_rel_data" AS (
   SELECT

@@ -18,46 +18,26 @@ WITH "cte_peoples_data" AS (
       "public"."peoples"."last-name",
       $6,
       "public"."peoples"."twitter"
-    ) AS "data"
+    ) AS "data",
+    "public"."peoples"."favorite_color" AS "rel_favorite_color"
   FROM
     "public"."peoples"
   WHERE
     "public"."peoples"."id" = $7
 ),
-"cte_articles_data" AS (
-  SELECT
-    "public"."articles"."id" :: TEXT AS "id",
-    $8 :: TEXT AS "type",
-    NULL :: json AS "data"
-  FROM
-    "public"."articles"
-  WHERE
-    "public"."articles"."id" IN (
-      SELECT
-        "cte_peoples_data"."articles"
-      FROM
-        "cte_peoples_data"
-    )
-),
 "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
-    $9 :: TEXT AS "type",
+    $8 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."favorite_color"
-  WHERE
-    "public"."favorite_color"."id" IN (
-      SELECT
-        "cte_peoples_data"."favorite_color"
-      FROM
-        "cte_peoples_data"
-    )
+    INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
 ),
 "cte_rel_articles_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
-    $10 :: TEXT AS "type",
+    $9 :: TEXT AS "type",
     NULL :: json AS "data",
     "public"."people-article"."article_id" AS "rel_article_id",
     "public"."people-article"."people_id" AS "rel_people_id"
@@ -68,7 +48,7 @@ WITH "cte_peoples_data" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $11 :: TEXT AS "type",
+    $10 :: TEXT AS "type",
     NULL :: json AS "data"
   FROM
     "public"."articles"

@@ -85,16 +85,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         request: &'a CibouletteCreateRequest<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
-        mut rels: Vec<Ciboulette2PostgresRelationships<'a>>,
+        rels: &Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
-        let rel_iter = rels.iter_mut().peekable();
+        let rel_iter = rels.iter().peekable();
         for Ciboulette2PostgresRelationships {
             type_: rel_type,
             bucket,
             values: rel_ids,
         } in rel_iter
         {
-            if let Some(rel_ids) = rel_ids.take() {
+            if let Some(rel_ids) = rel_ids {
                 let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
                 let rel_rel_table =
                     ciboulette_table_store.get(bucket.resource().name().as_str())?;
@@ -108,8 +108,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 // "cte_rel_myrel_id" AS (VALUES
                 self.buf.write_all(b" AS (VALUES ")?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)
-                self.gen_rel_values(rel_ids, &rel_table, rel_table.id())?;
-                // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)),
+                self.gen_rel_values(rel_ids.clone(), &rel_table, rel_table.id())?; // FIXME The clone
+                                                                                   // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)),
                 self.buf.write_all(b"), ")?;
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert"
                 self.write_table_info(&rel_cte_insert)?;

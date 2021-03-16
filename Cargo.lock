@@ -231,6 +231,7 @@ dependencies = [
  "numtoa",
  "petgraph",
  "refinery",
+ "serde",
  "serde_json",
  "sqlformat",
  "sqlx",

@@ -11,6 +11,7 @@ mod delete;
 mod init_values;
 mod inserts;
 mod run_migrations;
+mod select;
 mod test_sql;
 mod update;
 

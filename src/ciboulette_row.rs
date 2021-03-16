@@ -1,8 +1,9 @@
 use getset::Getters;
+use serde::Serialize;
 use sqlx::FromRow;
 
 use crate::Ciboulette2SqlError;
-#[derive(Clone, Debug, Getters, sqlx::FromRow)]
+#[derive(Clone, Debug, Getters, sqlx::FromRow, Serialize)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresRow<'a> {
     id: &'a str,

@@ -6,6 +6,7 @@ use std::io::Write;
 mod delete;
 mod field_name;
 mod insert;
+mod relationships;
 mod select;
 mod update;
 mod utils;
@@ -30,6 +31,7 @@ pub mod tests;
 use crate::graph_walker::main::Ciboulette2PostgresMain;
 use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
 use field_name::Ciboulette2PostgresTableField;
+use relationships::Ciboulette2SqlRelationships;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 

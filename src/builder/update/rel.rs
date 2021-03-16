@@ -30,10 +30,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_type: &'a CibouletteResourceType<'a>,
         main_cte_update: &Ciboulette2PostgresTableSettings<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        rels: &Ciboulette2SqlRelationships<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(&main_cte_update, &main_type, &request.query(), &[], true)?;
+        self.gen_select_cte_final(
+            &main_cte_update,
+            &main_type,
+            &request.query(),
+            &rels.single_rels_additional_fields(),
+            true,
+        )?;
         self.buf.write_all(b")")?;
         Ok(())
     }
@@ -59,6 +66,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &request.resource_type(),
             &rels,
         )?;
+        let rels = Ciboulette2SqlRelationships::new(single_relationships, vec![])?;
         se.buf.write_all(b"WITH ")?;
         se.gen_update_rel_update(&request, &main_table, &main_cte_update, rel_values)?;
         se.gen_update_rel_data(
@@ -66,6 +74,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &request.resource_type(),
             &main_cte_update,
             &main_cte_data,
+            &rels,
         )?;
 
         se.gen_select_single_rel_routine(
@@ -73,8 +82,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_table_store,
             request.query(),
             &main_type,
-            &main_cte_update,
-            single_relationships,
+            &main_cte_data,
+            &rels,
         )?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(
