@@ -6,6 +6,6 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 UPDATE
   "public"."peoples"
 SET
-  "public"."peoples"."favorite_color" = NULL
+  "favorite_color" = NULL
 WHERE
-  "public"."peoples"."id" $1;
+  "public"."peoples"."id" = $1;

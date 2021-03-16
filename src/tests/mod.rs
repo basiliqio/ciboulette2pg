@@ -13,6 +13,5 @@ mod inserts;
 mod run_migrations;
 mod test_sql;
 mod update;
-mod update_rel;
 
 use test_sql::snapshot_table;
