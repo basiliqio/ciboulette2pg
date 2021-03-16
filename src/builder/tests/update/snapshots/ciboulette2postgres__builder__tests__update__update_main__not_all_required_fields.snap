@@ -7,7 +7,7 @@ WITH "cte_peoples_update" AS (
   UPDATE
     "public"."peoples"
   SET
-    "public"."peoples"."first-name" = $1
+    "first-name" = $1
   WHERE
     "public"."peoples"."id" = $2 RETURNING *
 ),

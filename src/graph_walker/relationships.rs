@@ -35,7 +35,11 @@ fn extract_single_relationships_from_ressource_identifiers<'a>(
         CibouletteOptionalData::Null(x) if *x => Ok(Ciboulette2PostgresMain {
             insert_values: vec![(
                 rel_opt.key().as_str(),
-                Ciboulette2SqlValue::Text(None), //TODO, not always text
+                match rel_opt.id_type() {
+                    CibouletteIdType::Text => Ciboulette2SqlValue::Text(None),
+                    CibouletteIdType::Number => Ciboulette2SqlValue::Numeric(None),
+                    CibouletteIdType::Uuid => Ciboulette2SqlValue::Uuid(None),
+                },
             )],
             single_relationships: vec![rel_opt.key().as_str()],
         }),

@@ -8,7 +8,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     ) -> Result<(), Ciboulette2SqlError> {
         let mut iter = params.into_iter().peekable();
         while let Some((n, v)) = iter.next() {
-            self.insert_ident(
+            self.insert_ident_name(
                 &Ciboulette2PostgresTableField::new_owned(
                     Ciboulette2PostgresSafeIdent::try_from(n)?,
                     None,

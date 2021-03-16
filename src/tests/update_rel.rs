@@ -14,7 +14,7 @@ async fn test_insert<'a>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+    let builder = Ciboulette2PostgresBuilder::gen_update_rel(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,
@@ -36,52 +36,50 @@ macro_rules! baseline_for_people {
 }
 
 #[ciboulette2postgres_test]
-async fn main_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+async fn set_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;
     baseline_for_people!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
+    let favorite_color = data.get("favorite_color").unwrap().last().unwrap();
     let raw_rows = test_insert(
         &mut transaction,
-        format!("/peoples/{}", people_id).as_str(),
+        format!("/peoples/{}/relationships/favorite_color", people_id).as_str(),
         json!({
             "data": json!({
-                "type": "peoples",
-                "id": people_id,
-                "attributes": json!({
-                    "first-name": "New first",
-                    "last-name": "New last name",
-                })
+                "type": "favorite_color",
+                "id": favorite_color
             })
         })
         .to_string()
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
-    snapshot_table(&mut transaction, "update_main_fields", &["peoples"]).await;
+    let rows =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    snapshot_table(&mut transaction, "update_one_to_one", &["peoples"]).await;
+    for row in rows.into_iter() {
+        if row.type_() != &"favorite_color" {
+            continue;
+        }
+        assert_eq!(row.id(), &favorite_color.to_string().as_str());
+        return;
+    }
+    panic!("The relation hasn't been returned");
 }
 
 #[ciboulette2postgres_test]
-async fn unsetting_a_field(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+async fn unset_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;
     baseline_for_people!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_insert(
         &mut transaction,
-        format!("/peoples/{}", people_id).as_str(),
-        json!({
-            "data": json!({
-                "type": "peoples",
-                "id": people_id,
-                "attributes": json!({
-                    "gender": serde_json::Value::Null
-                })
-            })
-        })
-        .to_string()
-        .as_str(),
+        format!("/peoples/{}/relationships/favorite_color", people_id).as_str(),
+        json!({ "data": serde_json::Value::Null })
+            .to_string()
+            .as_str(),
     )
     .await;
     Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
-    snapshot_table(&mut transaction, "unsetting_main_field", &["peoples"]).await;
+    snapshot_table(&mut transaction, "update_unset_one_to_one", &["peoples"]).await;
 }

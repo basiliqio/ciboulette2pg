@@ -1,5 +1,4 @@
 use super::*;
-use serde_json::json;
 
 async fn test_insert<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,

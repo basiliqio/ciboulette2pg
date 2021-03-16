@@ -1,10 +1,6 @@
 use super::*;
 use uuid::Uuid;
 
-struct InitValueRes {
-    id: Uuid,
-}
-
 const FAVORITE_COLOR_INIT_FILES: [&str; 3] = [
     include_str!("init_values_sql/init_favorite_color_1.sql"),
     include_str!("init_values_sql/init_favorite_color_2.sql"),
@@ -119,7 +115,7 @@ pub async fn init_values(
     let comment_id = init_comments(&mut *transaction, &peoples_id, &article_id).await;
     let people_article = init_link_article_author(transaction, &peoples_id, &article_id).await;
 
-    res.insert("favorite_colors".to_string(), favorite_color_id);
+    res.insert("favorite_color".to_string(), favorite_color_id);
     res.insert("peoples".to_string(), peoples_id);
     res.insert("articles".to_string(), article_id);
     res.insert("comments".to_string(), comment_id);
