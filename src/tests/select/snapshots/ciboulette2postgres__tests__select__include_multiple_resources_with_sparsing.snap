@@ -1,0 +1,49 @@
+---
+source: src/tests/select/mod.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type_": "articles",
+    "data": {
+      "title": "How to dead"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "articles",
+    "data": {
+      "title": "Oh my g**"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "favorite_color",
+    "data": null
+  },
+  {
+    "id": "[uuid]",
+    "type_": "people-article",
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "people-article",
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "last-name": "Le Roy"
+    }
+  }
+]

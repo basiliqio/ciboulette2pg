@@ -1,3 +1,4 @@
+use super::*;
 pub async fn snapshot_table(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     name: &str,
@@ -25,39 +26,9 @@ pub async fn snapshot_table(
     insta::assert_json_snapshot!(name,
         serde_json::Value::Object(map),
     {
-        ".*.*.id" => insta::dynamic_redaction(|value, _path| {
-            assert_eq!(value
-                .as_str()
-                .unwrap()
-                .chars()
-                .filter(|&c| c == '-')
-                .count(),
-                4
-            );
-            "[uuid]"
-        }),
-        ".*.*.people_id" => insta::dynamic_redaction(|value, _path| {
-            assert_eq!(value
-                .as_str()
-                .unwrap()
-                .chars()
-                .filter(|&c| c == '-')
-                .count(),
-                4
-            );
-            "[uuid]"
-        }),
-        ".*.*.article_id" => insta::dynamic_redaction(|value, _path| {
-            assert_eq!(value
-                .as_str()
-                .unwrap()
-                .chars()
-                .filter(|&c| c == '-')
-                .count(),
-                4
-            );
-            "[uuid]"
-        }),
+        ".*.*.id" => insta::dynamic_redaction(check_uuid),
+        ".*.*.people_id" => insta::dynamic_redaction(check_uuid),
+        ".*.*.article_id" => insta::dynamic_redaction(check_uuid),
         ".*.*.favorite_color" => insta::dynamic_redaction(|value, _path| {
             match value
             .as_str()

@@ -21,7 +21,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_table,
             &main_type,
             &request.query(),
-            &rels.single_rels_additional_fields(),
+            rels.single_rels_additional_fields(),
             true,
         )?;
         match request.path() {

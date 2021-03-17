@@ -61,34 +61,38 @@ WITH "cte_peoples_update" AS (
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
+) (
+  SELECT
+    "cte_rel_articles_data"."id",
+    "cte_rel_articles_data"."type",
+    "cte_rel_articles_data"."data"
+  FROM
+    "cte_rel_articles_data"
 )
-SELECT
-  "cte_rel_articles_data"."id",
-  "cte_rel_articles_data"."type",
-  "cte_rel_articles_data"."data"
-FROM
-  "cte_rel_articles_data"
 UNION
-ALL
-SELECT
-  "cte_favorite_color_data"."id",
-  "cte_favorite_color_data"."type",
-  "cte_favorite_color_data"."data"
-FROM
-  "cte_favorite_color_data"
+ALL (
+  SELECT
+    "cte_favorite_color_data"."id",
+    "cte_favorite_color_data"."type",
+    "cte_favorite_color_data"."data"
+  FROM
+    "cte_favorite_color_data"
+)
 UNION
-ALL
-SELECT
-  "cte_rel_articles_rel_data"."id",
-  "cte_rel_articles_rel_data"."type",
-  "cte_rel_articles_rel_data"."data"
-FROM
-  "cte_rel_articles_rel_data"
+ALL (
+  SELECT
+    "cte_rel_articles_rel_data"."id",
+    "cte_rel_articles_rel_data"."type",
+    "cte_rel_articles_rel_data"."data"
+  FROM
+    "cte_rel_articles_rel_data"
+)
 UNION
-ALL
-SELECT
-  "cte_peoples_data"."id",
-  "cte_peoples_data"."type",
-  "cte_peoples_data"."data"
-FROM
-  "cte_peoples_data";
+ALL (
+  SELECT
+    "cte_peoples_data"."id",
+    "cte_peoples_data"."type",
+    "cte_peoples_data"."data"
+  FROM
+    "cte_peoples_data"
+);

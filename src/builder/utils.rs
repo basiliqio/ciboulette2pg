@@ -144,7 +144,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
         for el in query.sorting() {
             if el.type_() == main_table.ciboulette_type() {
-                included_tables.push(main_table);
+                included_tables.push(main_cte_table);
                 continue;
             }
             let (_, opt) = ciboulette_store.get_rel(
@@ -184,6 +184,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 table,
                 None,
             )?;
+            match el.direction() {
+                CibouletteSortingDirection::Asc => buf.write_all(b" ASC")?,
+                CibouletteSortingDirection::Desc => buf.write_all(b" DESC")?,
+            }
             if iter.peek().is_some() {
                 buf.write_all(b", ")?;
             }

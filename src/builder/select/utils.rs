@@ -224,12 +224,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.gen_json_builder(table, type_, query, include)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM
         self.buf.write_all(b" AS \"data\"")?;
-        for field in additional_fields.iter() {
+        // if let Some(additional_fields) = additional_fields {
+        for field in additional_fields {
             self.buf.write_all(b", ")?;
             self.insert_ident(&field.ident(), table)?;
             self.buf
                 .write_all(format!(" AS \"{}\"", field.name()).as_bytes())?;
         }
+        // }
         self.gen_sorting_keys(&table, &type_, &query)?;
         self.buf.write_all(b" FROM ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."other_table"
@@ -280,7 +282,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let mut iter = self.working_tables.values().peekable();
         while let Some(v) = iter.next() {
             // SELECT * FROM
-            self.buf.write_all(b"SELECT ")?;
+            self.buf.write_all(b"(SELECT ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
                 &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_ID_IDENT, None, None),
@@ -314,6 +316,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 v,
                 &self.working_tables,
             )?;
+            self.buf.write_all(b")")?;
             if iter.peek().is_some() {
                 // If there's more :
                 // SELECT * FROM "schema"."mytable" UNION ALL ...

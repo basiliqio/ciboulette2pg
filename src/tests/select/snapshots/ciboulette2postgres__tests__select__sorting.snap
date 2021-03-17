@@ -1,6 +1,6 @@
 ---
 source: src/tests/select/mod.rs
-expression: rows
+expression: value
 
 ---
 [
@@ -52,16 +52,34 @@ expression: rows
   {
     "id": "[uuid]",
     "type_": "peoples",
-    "data": {"age" : 22, "first-name" : "Francis", "gender" : "M", "last-name" : "Le Roy", "twitter" : null}
+    "data": {
+      "age": null,
+      "first-name": "AAAAAAAA",
+      "gender": null,
+      "last-name": "BBBBBBBBB",
+      "twitter": null
+    }
   },
   {
     "id": "[uuid]",
     "type_": "peoples",
-    "data": {"age" : 34, "first-name" : "Somebody", "gender" : "F", "last-name" : "Wuhu", "twitter" : "@randomhandle"}
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    }
   },
   {
     "id": "[uuid]",
     "type_": "peoples",
-    "data": {"age" : null, "first-name" : "AAAAAAAA", "gender" : null, "last-name" : "BBBBBBBBB", "twitter" : null}
+    "data": {
+      "age": 34,
+      "first-name": "Somebody",
+      "gender": "F",
+      "last-name": "Wuhu",
+      "twitter": "@randomhandle"
+    }
   }
 ]

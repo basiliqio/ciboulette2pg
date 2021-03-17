@@ -13,7 +13,7 @@ impl<'a> Ciboulette2SqlQueryRels<'a> {
         single_rels_keys: Vec<&'a str>,
         multi_rels: Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<Self, Ciboulette2SqlError> {
-        let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField> =
+        let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>> =
             Vec::with_capacity(single_rels_keys.len());
         for single_rel in single_rels_keys.iter() {
             single_rels_additional_fields.push(Ciboulette2SqlAdditionalField::new(

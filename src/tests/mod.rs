@@ -16,3 +16,19 @@ mod test_sql;
 mod update;
 
 use test_sql::snapshot_table;
+
+fn check_uuid<'a, 'b>(
+    value: insta::internals::Content,
+    _path: insta::internals::ContentPath<'a>,
+) -> &'b str {
+    assert_eq!(
+        value
+            .as_str()
+            .unwrap()
+            .chars()
+            .filter(|&c| c == '-')
+            .count(),
+        4
+    );
+    "[uuid]"
+}
