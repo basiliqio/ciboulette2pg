@@ -17,7 +17,7 @@ fn simple() {
             &dest_table,
             store.get_type("peoples").unwrap(),
             ciboulette_request.query(),
-            &[],
+            [].iter(),
             true,
         )
         .unwrap();
@@ -43,7 +43,7 @@ fn sparse() {
             &dest_table,
             store.get_type("peoples").unwrap(),
             ciboulette_request.query(),
-            &[],
+            [].iter(),
             true,
         )
         .unwrap();
@@ -69,7 +69,7 @@ fn empty_sparse() {
             &dest_table,
             store.get_type("peoples").unwrap(),
             ciboulette_request.query(),
-            &[],
+            [].iter(),
             true,
         )
         .unwrap();
@@ -95,7 +95,7 @@ fn non_included() {
             &dest_table,
             store.get_type("peoples").unwrap(),
             ciboulette_request.query(),
-            &[],
+            [].iter(),
             false,
         )
         .unwrap();

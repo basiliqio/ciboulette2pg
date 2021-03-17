@@ -1,4 +1,6 @@
 use super::*;
+use std::convert::TryFrom;
+
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_select_normal(
         ciboulette_store: &'a CibouletteStore<'a>,
@@ -11,6 +13,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let main_cte_data =
             main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
         let rels = Self::get_relationships(&ciboulette_store, &main_type)?;
+
         // WITH
         se.buf.write_all(b"WITH \n")?;
         // WITH "cte_main_insert"
@@ -21,7 +24,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_table,
             &main_type,
             &request.query(),
-            rels.single_rels_additional_fields(),
+            rels.single_rels_additional_fields().iter(),
             true,
         )?;
         match request.path() {

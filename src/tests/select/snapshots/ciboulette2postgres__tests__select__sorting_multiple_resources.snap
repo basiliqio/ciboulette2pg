@@ -1,0 +1,40 @@
+---
+source: src/tests/select/mod.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "age": 34,
+      "first-name": "Somebody",
+      "gender": "F",
+      "last-name": "Wuhu",
+      "twitter": "@randomhandle"
+    }
+  }
+]

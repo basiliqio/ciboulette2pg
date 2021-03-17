@@ -86,7 +86,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_rel_table,
                 &bucket.resource(),
                 &query,
-                &additional_params,
+                additional_params.iter(),
                 query.include().contains(&bucket.resource()),
             )?;
 
@@ -110,7 +110,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &rel_table,
                 &rel_type,
                 &query,
-                &[],
+                [].iter(),
                 query.include().contains(rel_type),
             )?;
             self.buf.write_all(b" INNER JOIN ")?;

@@ -1,14 +1,17 @@
 use super::*;
+use std::convert::TryFrom;
 
 #[derive(Clone, Debug)]
 pub enum Ciboulette2SqlAdditionalFieldType {
     Relationship,
+    MainIdentifier,
 }
 
 impl Ciboulette2SqlAdditionalFieldType {
-    pub fn as_str(&self) -> &str {
+    pub(crate) fn to_sql_prefix(&self) -> &str {
         match self {
             Ciboulette2SqlAdditionalFieldType::Relationship => "rel",
+            Ciboulette2SqlAdditionalFieldType::MainIdentifier => "",
         }
     }
 }
@@ -29,11 +32,22 @@ impl<'a> Ciboulette2SqlAdditionalField<'a> {
         Ok(Ciboulette2SqlAdditionalField {
             name: Ciboulette2PostgresSafeIdent::try_from(format!(
                 "{}_{}",
-                type_.as_str(),
+                type_.to_sql_prefix(),
                 ident.name()
             ))?,
             ident,
             type_,
         })
+    }
+}
+
+impl<'a> TryFrom<&Ciboulette2PostgresTableSettings<'a>> for Ciboulette2SqlAdditionalField<'a> {
+    type Error = Ciboulette2SqlError;
+
+    fn try_from(table: &Ciboulette2PostgresTableSettings<'a>) -> Result<Self, Self::Error> {
+        Ciboulette2SqlAdditionalField::new(
+            Ciboulette2PostgresTableField::from(table.id()),
+            Ciboulette2SqlAdditionalFieldType::MainIdentifier,
+        )
     }
 }

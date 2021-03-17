@@ -41,3 +41,15 @@ impl<'a> Ciboulette2PostgresTableField<'a> {
         Ciboulette2PostgresTableField { name, alias, cast }
     }
 }
+
+impl<'a> From<&Ciboulette2PostgresId<'a>> for Ciboulette2PostgresTableField<'a> {
+    fn from(id: &Ciboulette2PostgresId<'a>) -> Self {
+        Ciboulette2PostgresTableField {
+            name: Cow::Owned(Ciboulette2PostgresSafeIdent::from(id.get_ident())),
+            alias: None,
+            cast: Some(Cow::Owned(Ciboulette2PostgresSafeIdent::from(
+                id.get_type(),
+            ))),
+        }
+    }
+}

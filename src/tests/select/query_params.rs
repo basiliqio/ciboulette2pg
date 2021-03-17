@@ -130,5 +130,9 @@ async fn sorting_multiple_resources(mut transaction: sqlx::Transaction<'_, sqlx:
     .await;
     let res =
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = res
+        .into_iter()
+        .filter(|x| x.type_() == &"peoples")
+        .collect(); // FIXME don't
     check_rows(&res);
 }

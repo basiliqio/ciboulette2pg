@@ -83,3 +83,11 @@ impl<'a> std::convert::TryFrom<Cow<'a, str>> for Ciboulette2PostgresSafeIdent<'a
         })
     }
 }
+
+impl<'a> From<&Ciboulette2PostgresSafeIdent<'a>> for Ciboulette2PostgresSafeIdent<'a> {
+    fn from(value: &Ciboulette2PostgresSafeIdent<'a>) -> Self {
+        Ciboulette2PostgresSafeIdent {
+            inner: value.inner.clone(),
+        }
+    }
+}

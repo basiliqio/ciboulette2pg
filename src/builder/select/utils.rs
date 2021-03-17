@@ -12,6 +12,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         match opt {
             CibouletteRelationshipOption::ManyDirect(opt) => {
                 let rel_rel_table = ciboulette_table_store.get(opt.resource().name())?;
+                let main_cte_table_id = Ciboulette2SqlAdditionalField::new(
+                    Ciboulette2PostgresTableField::from(main_table.id()),
+                    Ciboulette2SqlAdditionalFieldType::MainIdentifier,
+                )?;
+                let rel_cte_table_id = Ciboulette2SqlAdditionalField::new(
+                    Ciboulette2PostgresTableField::from(rel_table.id()),
+                    Ciboulette2SqlAdditionalFieldType::MainIdentifier,
+                )?;
                 buf.write_all(b" INNER JOIN ")?;
                 Self::write_table_info_inner(&mut buf, &rel_rel_table)?;
                 buf.write_all(b" ON ")?;
@@ -28,11 +36,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 buf.write_all(b" = ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(
-                        main_cte_table.id().get_ident(),
-                        None,
-                        None,
-                    ),
+                    &Ciboulette2PostgresTableField::new_ref(main_cte_table_id.name(), None, None),
                     &main_cte_table,
                     None,
                 )?;
@@ -41,7 +45,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 buf.write_all(b" ON ")?;
                 Self::insert_ident_inner(
                     buf,
-                    &Ciboulette2PostgresTableField::new_ref(rel_table.id().get_ident(), None, None),
+                    &Ciboulette2PostgresTableField::new_ref(rel_cte_table_id.name(), None, None),
                     rel_table,
                     None,
                 )?;
@@ -192,50 +196,77 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(crate) fn gen_select_cte_final(
+    fn handle_additionnal_params<'b, I>(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings<'a>,
+        main_table: &Ciboulette2PostgresTableSettings<'a>,
+        query: &'a CibouletteQueryParameters<'a>,
+        additional_fields: I,
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        'a: 'b,
+        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'a>>,
+    {
+        if !query.sorting().is_empty() {
+            let id_as_additional = Ciboulette2SqlAdditionalField::try_from(main_table)?;
+            self.buf.write_all(b", ")?;
+            self.insert_ident(&id_as_additional.ident(), main_table)?;
+            self.buf
+                .write_all(format!(" AS \"{}\"", id_as_additional.name()).as_bytes())?;
+        }
+        {
+            for field in additional_fields {
+                self.buf.write_all(b", ")?;
+                self.insert_ident(&field.ident(), main_table)?;
+                self.buf
+                    .write_all(format!(" AS \"{}\"", field.name()).as_bytes())?;
+            }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn gen_select_cte_final<'b, I>(
+        &mut self,
+        main_table: &Ciboulette2PostgresTableSettings<'a>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
-        additional_fields: &[Ciboulette2SqlAdditionalField<'a>],
+        additional_fields: I,
         include: bool,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        'a: 'b,
+        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'a>>,
+    {
         // SELECT
         self.buf.write_all(b"SELECT ")?;
         // SELECT "schema"."mytable"."id"
         self.insert_ident(
             &Ciboulette2PostgresTableField::new_cow(
-                Cow::Borrowed(table.id().get_ident()),
+                Cow::Borrowed(main_table.id().get_ident()),
                 Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("id")?)),
                 Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("TEXT")?)),
             ),
-            table,
+            main_table,
         )?;
         // SELECT "schema"."mytable"."id",
         self.buf.write_all(b", ")?;
         // SELECT "schema"."mytable"."id", $0
         self.insert_params(
             Ciboulette2SqlValue::Text(Some(Cow::Borrowed(type_.name().as_ref()))), // TODO do better
-            table,
+            main_table,
         )?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type",
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..)
-        self.gen_json_builder(table, type_, query, include)?;
+        self.gen_json_builder(main_table, type_, query, include)?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM
         self.buf.write_all(b" AS \"data\"")?;
         // if let Some(additional_fields) = additional_fields {
-        for field in additional_fields {
-            self.buf.write_all(b", ")?;
-            self.insert_ident(&field.ident(), table)?;
-            self.buf
-                .write_all(format!(" AS \"{}\"", field.name()).as_bytes())?;
-        }
+        self.handle_additionnal_params(main_table, query, additional_fields)?;
         // }
-        self.gen_sorting_keys(&table, &type_, &query)?;
+        self.gen_sorting_keys(&main_table, &type_, &query)?;
         self.buf.write_all(b" FROM ")?;
         // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."other_table"
-        self.write_table_info(table)?;
+        self.write_table_info(main_table)?;
         Ok(())
     }
 
@@ -251,7 +282,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &table,
             &type_,
             &query,
-            &[],
+            [].iter(),
             query.include().contains(&type_),
         )?;
         self.buf.write_all(b" INNER JOIN ")?;

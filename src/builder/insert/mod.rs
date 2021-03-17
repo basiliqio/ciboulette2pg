@@ -43,7 +43,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_cte_insert,
             &main_type,
             &request.query(),
-            rels.single_rels_additional_fields(),
+            rels.single_rels_additional_fields().iter(),
             true,
         )?;
         se.buf.write_all(b")")?;

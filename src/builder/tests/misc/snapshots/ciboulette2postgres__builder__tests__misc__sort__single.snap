@@ -19,6 +19,7 @@ WITH "cte_peoples_data" AS (
       $6,
       "public"."peoples"."twitter"
     ) AS "data",
+    "public"."peoples"."id" :: UUID AS "_id",
     "public"."peoples"."favorite_color" AS "rel_favorite_color"
   FROM
     "public"."peoples"
@@ -28,6 +29,7 @@ WITH "cte_peoples_data" AS (
     "public"."favorite_color"."id" :: TEXT AS "id",
     $7 :: TEXT AS "type",
     NULL :: json AS "data",
+    "public"."favorite_color"."id" :: UUID AS "_id",
     "public"."favorite_color"."color" AS "sort_color"
   FROM
     "public"."favorite_color"
@@ -38,6 +40,7 @@ WITH "cte_peoples_data" AS (
     "public"."people-article"."id" :: TEXT AS "id",
     $8 :: TEXT AS "type",
     NULL :: json AS "data",
+    "public"."people-article"."id" :: UUID AS "_id",
     "public"."people-article"."article_id" AS "rel_article_id",
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
@@ -48,7 +51,8 @@ WITH "cte_peoples_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
     $9 :: TEXT AS "type",
-    NULL :: json AS "data"
+    NULL :: json AS "data",
+    "public"."articles"."id" :: UUID AS "_id"
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
