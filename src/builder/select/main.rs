@@ -1,5 +1,4 @@
 use super::*;
-use std::convert::TryFrom;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_select_normal(
@@ -8,11 +7,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteReadRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
-        let main_type = request.path().main_type();
-        let main_table = ciboulette_table_store.get(main_type.name().as_str())?;
-        let main_cte_data =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
-        let rels = Self::get_relationships(&ciboulette_store, &main_type)?;
+        let state = Ciboulette2PostgresBuilderState::new(
+            ciboulette_store,
+            ciboulette_table_store,
+            request.path(),
+            request.query(),
+        )?;
+        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_data",
+            state.main_table().name()
+        )))?;
+        let rels = Self::get_relationships(&ciboulette_store, &state.main_type())?;
 
         // WITH
         se.buf.write_all(b"WITH \n")?;
@@ -21,8 +26,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // WITH "cte_main_insert" AS (
         se.buf.write_all(b" AS (")?;
         se.gen_select_cte_final(
-            &main_table,
-            &main_type,
+            &state.main_table(),
+            &state.main_type(),
             &request.query(),
             rels.single_rels_additional_fields().iter(),
             true,
@@ -34,14 +39,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 se.buf.write_all(b" WHERE ")?;
                 se.insert_ident(
                     &Ciboulette2PostgresTableField::new_ref(
-                        main_table.id().get_ident(),
+                        state.main_table().id().get_ident(),
                         None,
                         None,
                     ),
-                    &main_table,
+                    &state.main_table(),
                 )?;
                 se.buf.write_all(b" = ")?;
-                se.insert_params(Ciboulette2SqlValue::from(id), &main_table)?;
+                se.insert_params(Ciboulette2SqlValue::from(id), &state.main_table())?;
             }
             _ => (),
         }
@@ -51,7 +56,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             request.query(),
-            &main_type,
+            &state.main_type(),
             &main_cte_data,
             &rels,
         )?;
@@ -65,17 +70,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             &request.query(),
-            &main_type,
-            &main_table,
+            &state.main_type(),
+            &state.main_table(),
             &main_cte_data,
         )?;
-        se.add_working_table(&main_table, main_cte_data);
+        se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(
             &ciboulette_store,
             &ciboulette_table_store,
             &request.query(),
-            &main_table,
+            &state.main_table(),
         )?;
         Ok(se)
     }

@@ -51,13 +51,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteUpdateRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
+        let state = Ciboulette2PostgresBuilderState::new(
+            ciboulette_store,
+            ciboulette_table_store,
+            request.path(),
+            request.query(),
+        )?;
+
         let rels = extract_rels(&request)?;
-        let main_type = request.resource_type();
-        let main_table = ciboulette_table_store.get(main_type.name().as_str())?;
-        let main_cte_update =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_update", main_table.name())))?;
-        let main_cte_data =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
+        let main_cte_update = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_update",
+            state.main_table().name()
+        )))?;
+        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_data",
+            state.main_table().name()
+        )))?;
         let Ciboulette2PostgresMain {
             insert_values: rel_values,
             single_relationships,
@@ -68,7 +77,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         let rels = Ciboulette2SqlQueryRels::new(single_relationships, vec![])?;
         se.buf.write_all(b"WITH ")?;
-        se.gen_update_rel_update(&request, &main_table, &main_cte_update, rel_values)?;
+        se.gen_update_rel_update(&request, &state.main_table(), &main_cte_update, rel_values)?;
         se.gen_update_rel_data(
             &request,
             &request.resource_type(),
@@ -81,7 +90,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             request.query(),
-            &main_type,
+            &state.main_type(),
             &main_cte_data,
             &rels,
         )?;
@@ -90,17 +99,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             &request.query(),
-            &main_type,
-            &main_table,
+            &state.main_type(),
+            &state.main_table(),
             &main_cte_data,
         )?;
-        se.add_working_table(&main_table, main_cte_data);
+        se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(
             &ciboulette_store,
             &ciboulette_table_store,
             &request.query(),
-            &main_table,
+            &state.main_table(),
         )?;
         Ok(se)
     }

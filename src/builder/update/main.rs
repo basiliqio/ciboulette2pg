@@ -91,33 +91,46 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         request: &'a CibouletteUpdateRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
+        let state = Ciboulette2PostgresBuilderState::new(
+            ciboulette_store,
+            ciboulette_table_store,
+            request.path(),
+            request.query(),
+        )?;
         let mut se = Self::default();
         let main_attrs = extract_data(&request)?;
-        let main_type = request.resource_type();
-        let main_table = ciboulette_table_store.get(main_type.name().as_str())?;
-        let main_cte_update =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_update", main_table.name())))?;
-        let main_cte_data =
-            main_table.to_cte(Cow::Owned(format!("cte_{}_data", main_table.name())))?;
+        let main_cte_update = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_update",
+            state.main_table().name()
+        )))?;
+        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_data",
+            state.main_table().name()
+        )))?;
         let Ciboulette2PostgresMain {
             insert_values: main_update_values,
             single_relationships: main_single_relationships,
         } = crate::graph_walker::main::extract_fields(
             &ciboulette_store,
-            main_type,
+            state.main_type(),
             main_attrs.attributes(),
             main_attrs.relationships(),
             true,
         )?;
         let main_multi_relationships = crate::graph_walker::relationships::extract_fields(
             &ciboulette_store,
-            main_type,
+            state.main_type(),
             Some(main_attrs.relationships()),
         )?;
         let rels =
             Ciboulette2SqlQueryRels::new(main_single_relationships, main_multi_relationships)?;
         se.buf.write_all(b"WITH ")?;
-        se.gen_update_main_update(&request, &main_table, &main_cte_update, main_update_values)?;
+        se.gen_update_main_update(
+            &request,
+            &state.main_table(),
+            &main_cte_update,
+            main_update_values,
+        )?;
         se.gen_update_main_update_data(&request, &main_cte_update, &main_cte_data, &rels)?;
         se.gen_update_rel_data_single(
             &ciboulette_store,
@@ -137,17 +150,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &ciboulette_store,
             &ciboulette_table_store,
             &request.query(),
-            &main_type,
-            &main_table,
+            &state.main_type(),
+            &state.main_table(),
             &main_cte_data,
         )?;
-        se.add_working_table(&main_table, main_cte_data);
+        se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL
         se.gen_union_select_all(
             &ciboulette_store,
             &ciboulette_table_store,
             &request.query(),
-            &main_table,
+            &state.main_table(),
         )?;
         Ok(se)
     }

@@ -266,4 +266,29 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         //FIXME Make a better id type management system
         Ok(())
     }
+
+    // pub(crate) fn should_include_type(
+    //     ciboulette_store: &'a CibouletteStore<'a>,
+    //     query: &CibouletteQueryParameters<'a>,
+    //     path: &CiboulettePath<'a>,
+    //     type_: &CibouletteResourceType<'a>,
+    // ) -> bool {
+    //     query.include().contains(type_)
+    //         || query.sorting_map().contains_key(type_)
+    //         || match path {
+    //             CiboulettePath::Type(x) => x == &type_,
+    //             CiboulettePath::TypeId(x, _) => x == &type_,
+    //             CiboulettePath::TypeIdRelated(x, y, z) => x == &type_ || z == &type_,
+    //             CiboulettePath::TypeIdRelationship(x, y, z) => {
+    //                 x == &type_
+    //                     || ciboulette_store
+    //                         .get_rel(x.name().as_str(), y.name().as_str())
+    //                         .and_then(|(_, opt)| match opt {
+    //                             CibouletteRelationshipOption::One(opt) => z == &type_,
+    //                             CibouletteRelationshipOption::Many(opt) => z == &type_,
+    // 							_ => false
+    //                         })
+    //             }
+    //         }
+    // }
 }

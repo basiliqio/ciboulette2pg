@@ -15,13 +15,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             .iter()
             .zip(rels.single_rels_additional_fields().iter())
         {
-            self.buf.write_all(b", ")?;
             let rel_table: &Ciboulette2PostgresTableSettings =
                 ciboulette_table_store.get(rel_key)?;
             let rel_table_cte: Ciboulette2PostgresTableSettings =
                 rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
             let rel_type: &CibouletteResourceType =
                 main_type.get_relationship(&ciboulette_store, rel_key)?;
+            // if !Self::should_include_type(&query, rel_type)
+            // {
+            // 	continue ;
+            // }
+            self.buf.write_all(b", ")?;
             self.write_table_info(&rel_table_cte)?;
             self.buf.write_all(b" AS (")?;
             self.gen_select_cte_single_rel(
