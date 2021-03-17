@@ -26,8 +26,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub fn gen_update_rel_data(
         &mut self,
-        request: &'a CibouletteUpdateRequest<'a>,
-        main_type: &'a CibouletteResourceType<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
+        type_: &'a CibouletteResourceType<'a>,
         main_cte_update: &Ciboulette2PostgresTableSettings<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
@@ -35,9 +35,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
         self.gen_select_cte_final(
+            &state,
             &main_cte_update,
-            &main_type,
-            &request.query(),
+            &type_,
             rels.single_rels_additional_fields().iter(),
             true,
         )?;
@@ -79,21 +79,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b"WITH ")?;
         se.gen_update_rel_update(&request, &state.main_table(), &main_cte_update, rel_values)?;
         se.gen_update_rel_data(
-            &request,
+            &state,
             &request.resource_type(),
             &main_cte_update,
             &main_cte_data,
             &rels,
         )?;
 
-        se.gen_select_single_rel_routine(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            request.query(),
-            &state.main_type(),
-            &main_cte_data,
-            &rels,
-        )?;
+        se.gen_select_single_rel_routine(&state, &main_cte_data, &rels)?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(
             &ciboulette_store,
@@ -105,12 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL
-        se.gen_union_select_all(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            &request.query(),
-            &state.main_table(),
-        )?;
+        se.finish_request(state)?;
         Ok(se)
     }
 }

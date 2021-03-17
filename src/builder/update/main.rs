@@ -31,6 +31,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     fn gen_update_main_update_data(
         &mut self,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         request: &'a CibouletteUpdateRequest<'a>,
         main_update_cte: &Ciboulette2PostgresTableSettings<'a>,
         main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
@@ -39,9 +40,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.write_table_info(&main_data_cte)?;
         self.buf.write_all(b" AS (")?;
         self.gen_select_cte_final(
+            &state,
             &main_update_cte,
             &request.resource_type(),
-            &request.query(),
             rels.single_rels_additional_fields().iter(),
             true,
         )?;
@@ -52,37 +53,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     fn gen_update_rel_data_single(
         &mut self,
-        ciboulette_store: &'a CibouletteStore<'a>,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        request: &'a CibouletteUpdateRequest<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.gen_select_single_rel_routine(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            request.query(),
-            &request.resource_type(),
-            &main_data_cte,
-            rels,
-        )?;
+        self.gen_select_single_rel_routine(&state, &main_data_cte, rels)?;
         Ok(())
     }
 
     #[inline]
     fn gen_update_rel_data_multi(
         &mut self,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        request: &'a CibouletteUpdateRequest<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
         multi_relationships: &Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.gen_select_multi_rel_routine(
-            &ciboulette_table_store,
-            &request.query(),
-            &main_data_cte,
-            &multi_relationships,
-        )?;
+        self.gen_select_multi_rel_routine(&state, &main_data_cte, &multi_relationships)?;
         Ok(())
     }
 
@@ -131,20 +117,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_cte_update,
             main_update_values,
         )?;
-        se.gen_update_main_update_data(&request, &main_cte_update, &main_cte_data, &rels)?;
-        se.gen_update_rel_data_single(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            &request,
-            &main_cte_data,
-            &rels,
-        )?;
-        se.gen_update_rel_data_multi(
-            &ciboulette_table_store,
-            &request,
-            &main_cte_data,
-            &rels.multi_rels(),
-        )?;
+        se.gen_update_main_update_data(&state, &request, &main_cte_update, &main_cte_data, &rels)?;
+        se.gen_update_rel_data_single(&state, &main_cte_data, &rels)?;
+        se.gen_update_rel_data_multi(&state, &main_cte_data, &rels.multi_rels())?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(
             &ciboulette_store,
@@ -156,12 +131,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL
-        se.gen_union_select_all(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            &request.query(),
-            &state.main_table(),
-        )?;
+        se.finish_request(state)?;
         Ok(se)
     }
 }

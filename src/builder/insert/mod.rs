@@ -48,37 +48,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.write_table_info(&main_cte_data)?;
         se.buf.write_all(b" AS (")?;
         se.gen_select_cte_final(
+            &state,
             &main_cte_insert,
             &state.main_type(),
-            &request.query(),
             rels.single_rels_additional_fields().iter(),
             true,
         )?;
         se.buf.write_all(b")")?;
 
-        se.gen_select_single_rel_routine(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            request.query(),
-            &state.main_type(),
-            &&main_cte_data,
-            &rels,
-        )?;
-        se.gen_insert_rel_routine(
-            &ciboulette_table_store,
-            &request,
-            &main_cte_data,
-            rels.multi_rels(),
-        )?;
+        se.gen_select_single_rel_routine(&state, &&main_cte_data, &rels)?;
+        se.gen_insert_rel_routine(&state, &main_cte_data, rels.multi_rels())?;
         se.buf.write_all(b" ")?;
         se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL
-        se.gen_union_select_all(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            &request.query(),
-            &state.main_table(),
-        )?;
+        se.finish_request(state)?;
         Ok(se)
     }
 }

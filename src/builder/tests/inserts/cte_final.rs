@@ -4,6 +4,7 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
+    let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
@@ -12,11 +13,18 @@ fn simple() {
     );
     let url = Url::parse("http://localhost/peoples").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
+    let state = Ciboulette2PostgresBuilderState::new(
+        &store,
+        &table_store,
+        ciboulette_request.path(),
+        ciboulette_request.query(),
+    )
+    .unwrap();
     builder
         .gen_select_cte_final(
+            &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
-            ciboulette_request.query(),
             [].iter(),
             true,
         )
@@ -30,6 +38,7 @@ fn simple() {
 fn sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
+    let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
@@ -38,11 +47,19 @@ fn sparse() {
     );
     let url = Url::parse("http://localhost/peoples?fields[peoples]=first-name").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
+    let state = Ciboulette2PostgresBuilderState::new(
+        &store,
+        &table_store,
+        ciboulette_request.path(),
+        ciboulette_request.query(),
+    )
+    .unwrap();
+
     builder
         .gen_select_cte_final(
+            &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
-            ciboulette_request.query(),
             [].iter(),
             true,
         )
@@ -56,6 +73,7 @@ fn sparse() {
 fn empty_sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
+    let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
@@ -64,11 +82,18 @@ fn empty_sparse() {
     );
     let url = Url::parse("http://localhost/peoples?fields[peoples]=").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
+    let state = Ciboulette2PostgresBuilderState::new(
+        &store,
+        &table_store,
+        ciboulette_request.path(),
+        ciboulette_request.query(),
+    )
+    .unwrap();
     builder
         .gen_select_cte_final(
+            &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
-            ciboulette_request.query(),
             [].iter(),
             true,
         )
@@ -82,6 +107,7 @@ fn empty_sparse() {
 fn non_included() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
+    let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PostgresTableSettings::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
@@ -90,11 +116,18 @@ fn non_included() {
     );
     let url = Url::parse("http://localhost/peoples").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
+    let state = Ciboulette2PostgresBuilderState::new(
+        &store,
+        &table_store,
+        ciboulette_request.path(),
+        ciboulette_request.query(),
+    )
+    .unwrap();
     builder
         .gen_select_cte_final(
+            &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
-            ciboulette_request.query(),
             [].iter(),
             false,
         )

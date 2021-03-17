@@ -125,10 +125,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn handle_sorting_routine(
         mut buf: &mut Ciboulette2PostgresBuf,
-        ciboulette_store: &'a CibouletteStore<'a>,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        query: &CibouletteQueryParameters<'a>,
-        main_table: &Ciboulette2PostgresTableSettings<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
         table: &Ciboulette2PostgresTableSettings<'a>,
         included_tables_map: &BTreeMap<
@@ -140,34 +137,39 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             return Ok(());
         }
         let mut included_tables: Vec<&Ciboulette2PostgresTableSettings<'a>> =
-            Vec::with_capacity(query.sorting_map().len());
+            Vec::with_capacity(state.query().sorting_map().len());
 
-        for el in query.sorting() {
-            if el.type_() == main_table.ciboulette_type() {
+        for el in state.query().sorting() {
+            if el.type_() == state.main_type() {
                 included_tables.push(main_cte_table);
                 continue;
             }
-            let (_, opt) = ciboulette_store.get_rel(
-                main_table.ciboulette_type().name().as_str(),
+            let (_, opt) = state.store().get_rel(
+                state.main_type().name().as_str(),
                 el.type_().name().as_str(),
             )?;
             let included_table = included_tables_map
-                .get(ciboulette_table_store.get(el.type_().name().as_str())?)
+                .get(state.table_store().get(el.type_().name().as_str())?)
                 .ok_or_else(|| {
                     Ciboulette2SqlError::MissingRelationForOrdering(table.name().to_string())
                 })?;
             Self::gen_sort_inner_joins(
                 buf,
-                &ciboulette_table_store,
+                &state.table_store(),
                 &included_table,
-                &main_table,
+                &state.main_table(),
                 &main_cte_table,
                 &opt,
             )?;
             included_tables.push(included_table);
         }
 
-        let mut iter = query.sorting().iter().zip(included_tables).peekable();
+        let mut iter = state
+            .query()
+            .sorting()
+            .iter()
+            .zip(included_tables)
+            .peekable();
         if iter.peek().is_some() {
             buf.write_all(b" ORDER BY ")?;
         }

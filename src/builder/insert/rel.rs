@@ -82,8 +82,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     pub(super) fn gen_insert_rel_routine(
         &mut self,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        request: &'a CibouletteCreateRequest<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: &Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -95,9 +94,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         } in rel_iter
         {
             if let Some(rel_ids) = rel_ids {
-                let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
-                let rel_rel_table =
-                    ciboulette_table_store.get(bucket.resource().name().as_str())?;
+                let rel_table = state.table_store().get(rel_type.name().as_str())?;
+                let rel_rel_table = state.table_store().get(bucket.resource().name().as_str())?;
                 self.buf.write_all(b", ")?;
                 let rel_cte_id =
                     rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_id", rel_table.name())))?;
@@ -126,12 +124,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.buf.write_all(b")")?;
             }
         }
-        self.gen_select_multi_rel_routine(
-            ciboulette_table_store,
-            request.query(),
-            main_cte_data,
-            rels,
-        )?;
+        self.gen_select_multi_rel_routine(state, main_cte_data, rels)?;
         Ok(())
     }
 }

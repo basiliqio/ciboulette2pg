@@ -3,10 +3,7 @@ use super::*;
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_select_single_rel_routine(
         &mut self,
-        ciboulette_store: &'a CibouletteStore<'a>,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        query: &'a CibouletteQueryParameters<'a>,
-        main_type: &'a CibouletteResourceType<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -15,12 +12,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             .iter()
             .zip(rels.single_rels_additional_fields().iter())
         {
-            let rel_table: &Ciboulette2PostgresTableSettings =
-                ciboulette_table_store.get(rel_key)?;
+            let rel_table: &Ciboulette2PostgresTableSettings = state.table_store().get(rel_key)?;
             let rel_table_cte: Ciboulette2PostgresTableSettings =
                 rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
-            let rel_type: &CibouletteResourceType =
-                main_type.get_relationship(&ciboulette_store, rel_key)?;
+            let rel_type: &CibouletteResourceType = state
+                .main_type()
+                .get_relationship(&state.store(), rel_key)?;
             // if !Self::should_include_type(&query, rel_type)
             // {
             // 	continue ;
@@ -29,9 +26,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.write_table_info(&rel_table_cte)?;
             self.buf.write_all(b" AS (")?;
             self.gen_select_cte_single_rel(
+                &state,
                 &rel_table,
                 &rel_type,
-                &query,
                 &main_cte_data,
                 &additional_fields.name(),
             )?;
@@ -64,8 +61,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
     pub(crate) fn gen_select_multi_rel_routine(
         &mut self,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        query: &'a CibouletteQueryParameters<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
         rels: &Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -78,8 +74,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         {
             self.buf.write_all(b", ")?;
             let additional_params = Self::gen_rel_additional_params(&bucket)?;
-            let rel_table = ciboulette_table_store.get(rel_type.name().as_str())?;
-            let rel_rel_table = ciboulette_table_store.get(bucket.resource().name().as_str())?;
+            let rel_table = state.table_store().get(rel_type.name().as_str())?;
+            let rel_rel_table = state.table_store().get(bucket.resource().name().as_str())?;
             let rel_cte_rel_data = rel_rel_table
                 .to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
             let rel_cte_data =
@@ -87,11 +83,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.write_table_info(&rel_cte_rel_data)?;
             self.buf.write_all(b" AS (")?;
             self.gen_select_cte_final(
+                &state,
                 &rel_rel_table,
                 &bucket.resource(),
-                &query,
                 additional_params.iter(),
-                query.include().contains(&bucket.resource()),
+                state.query().include().contains(&bucket.resource()),
             )?;
 
             self.buf.write_all(b" INNER JOIN ")?;
@@ -111,11 +107,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.write_table_info(&rel_cte_data)?;
             self.buf.write_all(b" AS (")?;
             self.gen_select_cte_final(
+                &state,
                 &rel_table,
                 &rel_type,
-                &query,
                 [].iter(),
-                query.include().contains(rel_type),
+                state.query().include().contains(rel_type),
             )?;
             self.buf.write_all(b" INNER JOIN ")?;
             self.write_table_info(&rel_cte_rel_data)?;

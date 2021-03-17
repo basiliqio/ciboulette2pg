@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresBuilderState<'a> {
+pub struct Ciboulette2PostgresBuilderState<'a> {
     store: &'a CibouletteStore<'a>,
     table_store: &'a Ciboulette2PostgresTableStore<'a>,
     path: &'a CiboulettePath<'a>,
