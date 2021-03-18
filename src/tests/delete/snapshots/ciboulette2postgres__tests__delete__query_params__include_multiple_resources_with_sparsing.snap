@@ -1,0 +1,6 @@
+---
+source: src/tests/delete/query_params.rs
+expression: value
+
+---
+[]
