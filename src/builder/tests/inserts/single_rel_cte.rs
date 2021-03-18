@@ -24,6 +24,7 @@ fn simple() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
 
@@ -34,6 +35,7 @@ fn simple() {
             store.get_type("favorite_color").unwrap(),
             &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
+            &CibouletteResponseRequiredType::Object,
         )
         .unwrap();
 
@@ -65,6 +67,7 @@ fn sparse() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
 
@@ -75,6 +78,7 @@ fn sparse() {
             store.get_type("favorite_color").unwrap(),
             &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
+            &CibouletteResponseRequiredType::Object,
         )
         .unwrap();
 
@@ -106,6 +110,7 @@ fn empty_sparse() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
 
@@ -116,6 +121,7 @@ fn empty_sparse() {
             store.get_type("favorite_color").unwrap(),
             &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
+            &CibouletteResponseRequiredType::Object,
         )
         .unwrap();
 

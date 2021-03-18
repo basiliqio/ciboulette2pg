@@ -57,7 +57,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.gen_select_single_rel_routine(&state, &main_data_cte, rels)?;
+        self.select_single_rels_routine(&state, &main_data_cte, rels)?;
         Ok(())
     }
 
@@ -68,7 +68,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
         multi_relationships: &Vec<Ciboulette2PostgresRelationships<'a>>,
     ) -> Result<(), Ciboulette2SqlError> {
-        self.gen_select_multi_rel_routine(&state, &main_data_cte, &multi_relationships)?;
+        self.select_multi_rels_routine(&state, &main_data_cte, &multi_relationships)?;
         Ok(())
     }
 
@@ -82,6 +82,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             ciboulette_table_store,
             request.path(),
             request.query(),
+            request.expected_response_type(),
         )?;
         let mut se = Self::default();
         let main_attrs = extract_data(&request)?;

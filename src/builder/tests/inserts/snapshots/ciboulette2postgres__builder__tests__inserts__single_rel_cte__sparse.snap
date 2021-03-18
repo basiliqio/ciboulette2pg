@@ -6,7 +6,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 SELECT
   "public"."favorite_color"."id" :: TEXT AS "id",
   $1 :: TEXT AS "type",
-  NULL :: json AS "data"
+  JSON_BUILD_OBJECT($2, "public"."favorite_color"."color") AS "data"
 FROM
   "public"."favorite_color"
   INNER JOIN "public"."cte_peoples" ON "public"."favorite_color"."id" = "public"."cte_peoples"."favorite_color";

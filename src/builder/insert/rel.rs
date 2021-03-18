@@ -80,7 +80,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(super) fn gen_insert_rel_routine(
+    pub(super) fn inserts_handle_muli_rels(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
@@ -124,7 +124,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.buf.write_all(b")")?;
             }
         }
-        self.gen_select_multi_rel_routine(state, main_cte_data, rels)?;
+        self.select_multi_rels_routine(state, main_cte_data, rels)?;
         Ok(())
     }
 }

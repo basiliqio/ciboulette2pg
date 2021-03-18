@@ -12,6 +12,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             ciboulette_table_store,
             request.path(),
             request.query(),
+            request.expected_response_type(),
         )?;
         let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
             "cte_{}_data",
@@ -52,8 +53,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         se.buf.write_all(b")")?;
 
-        se.gen_select_single_rel_routine(&state, &main_cte_data, &rels)?;
-        se.gen_select_multi_rel_routine(&state, &main_cte_data, &rels.multi_rels())?;
+        se.select_single_rels_routine(&state, &main_cte_data, &rels)?;
+        se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels())?;
         se.gen_cte_for_sort(
             &ciboulette_store,
             &ciboulette_table_store,

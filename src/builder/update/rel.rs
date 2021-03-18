@@ -56,6 +56,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             ciboulette_table_store,
             request.path(),
             request.query(),
+            request.expected_response_type(),
         )?;
 
         let rels = extract_rels(&request)?;
@@ -86,7 +87,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &rels,
         )?;
 
-        se.gen_select_single_rel_routine(&state, &main_cte_data, &rels)?;
+        se.select_single_rels_routine(&state, &main_cte_data, &rels)?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(
             &ciboulette_store,

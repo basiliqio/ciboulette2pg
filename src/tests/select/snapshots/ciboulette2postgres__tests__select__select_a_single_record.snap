@@ -6,31 +6,6 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type_": "articles",
-    "data": null
-  },
-  {
-    "id": "[uuid]",
-    "type_": "articles",
-    "data": null
-  },
-  {
-    "id": "[uuid]",
-    "type_": "favorite_color",
-    "data": null
-  },
-  {
-    "id": "[uuid]",
-    "type_": "people-article",
-    "data": null
-  },
-  {
-    "id": "[uuid]",
-    "type_": "people-article",
-    "data": null
-  },
-  {
-    "id": "[uuid]",
     "type_": "peoples",
     "data": {
       "age": 22,

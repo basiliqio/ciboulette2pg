@@ -277,13 +277,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         type_: &'a CibouletteResourceType<'a>,
         main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
         field_id: &Ciboulette2PostgresSafeIdent<'a>,
+        requirement_type: &CibouletteResponseRequiredType,
     ) -> Result<(), Ciboulette2SqlError> {
         self.gen_select_cte_final(
             &state,
             &table,
             &type_,
             [].iter(),
-            state.query().include().contains(&type_),
+            matches!(requirement_type, CibouletteResponseRequiredType::Object),
         )?;
         self.buf.write_all(b" INNER JOIN ")?;
         self.write_table_info(&main_cte_table)?;

@@ -24,63 +24,7 @@ WITH "cte_peoples_data" AS (
     "public"."peoples"
   WHERE
     "public"."peoples"."id" = $7
-),
-"cte_favorite_color_data" AS (
-  SELECT
-    "public"."favorite_color"."id" :: TEXT AS "id",
-    $8 :: TEXT AS "type",
-    NULL :: json AS "data"
-  FROM
-    "public"."favorite_color"
-    INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
-),
-"cte_rel_articles_rel_data" AS (
-  SELECT
-    "public"."people-article"."id" :: TEXT AS "id",
-    $9 :: TEXT AS "type",
-    NULL :: json AS "data",
-    "public"."people-article"."article_id" AS "rel_article_id",
-    "public"."people-article"."people_id" AS "rel_people_id"
-  FROM
-    "public"."people-article"
-    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" :: TEXT = "cte_peoples_data"."id" :: TEXT
-),
-"cte_rel_articles_data" AS (
-  SELECT
-    "public"."articles"."id" :: TEXT AS "id",
-    $10 :: TEXT AS "type",
-    NULL :: json AS "data"
-  FROM
-    "public"."articles"
-    INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
 )(
-  SELECT
-    "cte_rel_articles_data"."id",
-    "cte_rel_articles_data"."type",
-    "cte_rel_articles_data"."data"
-  FROM
-    "cte_rel_articles_data"
-)
-UNION
-ALL (
-  SELECT
-    "cte_favorite_color_data"."id",
-    "cte_favorite_color_data"."type",
-    "cte_favorite_color_data"."data"
-  FROM
-    "cte_favorite_color_data"
-)
-UNION
-ALL (
-  SELECT
-    "cte_rel_articles_rel_data"."id",
-    "cte_rel_articles_rel_data"."type",
-    "cte_rel_articles_rel_data"."data"
-  FROM
-    "cte_rel_articles_rel_data"
-)
-UNION
-ALL (
   SELECT
     "cte_peoples_data"."id",
     "cte_peoples_data"."type",

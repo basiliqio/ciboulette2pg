@@ -14,6 +14,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             ciboulette_table_store,
             request.path(),
             request.query(),
+            request.expected_response_type(),
         )?;
         let main_cte_insert = state.main_table().to_cte(Cow::Owned(format!(
             "cte_{}_insert",
@@ -56,8 +57,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         se.buf.write_all(b")")?;
 
-        se.gen_select_single_rel_routine(&state, &&main_cte_data, &rels)?;
-        se.gen_insert_rel_routine(&state, &main_cte_data, rels.multi_rels())?;
+        se.select_single_rels_routine(&state, &&main_cte_data, &rels)?;
+        se.inserts_handle_muli_rels(&state, &main_cte_data, rels.multi_rels())?;
         se.buf.write_all(b" ")?;
         se.add_working_table(&state.main_table(), main_cte_data);
         // Aggregate every table using UNION ALL

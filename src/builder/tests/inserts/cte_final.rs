@@ -18,6 +18,7 @@ fn simple() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
     builder
@@ -52,6 +53,7 @@ fn sparse() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
 
@@ -87,6 +89,7 @@ fn empty_sparse() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
     builder
@@ -121,6 +124,7 @@ fn non_included() {
         &table_store,
         ciboulette_request.path(),
         ciboulette_request.query(),
+        ciboulette_request.expected_response_type(),
     )
     .unwrap();
     builder
