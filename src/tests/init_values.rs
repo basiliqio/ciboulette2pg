@@ -43,7 +43,7 @@ async fn init_favorite_colors(
 
 async fn init_peoples(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    favorite_colors: &Vec<Uuid>,
+    favorite_colors: &[Uuid],
 ) -> Vec<Uuid> {
     let mut peoples_id: Vec<Uuid> = Vec::with_capacity(3);
     for (files, favorite_color_id) in PEOPLES_INIT_FILES.iter().zip(favorite_colors) {
@@ -71,8 +71,8 @@ async fn init_articles(transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>) 
 
 async fn init_comments(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    peoples_id: &Vec<Uuid>,
-    articles_id: &Vec<Uuid>,
+    peoples_id: &[Uuid],
+    articles_id: &[Uuid],
 ) -> Vec<Uuid> {
     let mut comment_id: Vec<Uuid> = Vec::with_capacity(3);
     for (i, (files, article_id)) in COMMENT_INIT_FILES.iter().zip(articles_id).enumerate() {
@@ -89,8 +89,8 @@ async fn init_comments(
 
 async fn init_link_article_author(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    peoples_id: &Vec<Uuid>,
-    articles_id: &Vec<Uuid>,
+    peoples_id: &[Uuid],
+    articles_id: &[Uuid],
 ) -> Vec<Uuid> {
     let mut article_author_id: Vec<Uuid> = Vec::with_capacity(3);
     for (i, article_id) in articles_id.iter().enumerate() {
