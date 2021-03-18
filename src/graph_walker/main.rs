@@ -35,7 +35,18 @@ fn check_single_relationships<'a>(
                     to_type_.name().to_string(),
                 ));
             }
-            Ok(Some((opt.key().as_str(), Ciboulette2SqlValue::Text(None))))
+            match opt.id_type() {
+                CibouletteIdType::Number => Ok(Some((
+                    opt.key().as_str(),
+                    Ciboulette2SqlValue::Numeric(None),
+                ))),
+                CibouletteIdType::Uuid => {
+                    Ok(Some((opt.key().as_str(), Ciboulette2SqlValue::Uuid(None))))
+                }
+                CibouletteIdType::Text => {
+                    Ok(Some((opt.key().as_str(), Ciboulette2SqlValue::Text(None))))
+                }
+            }
         }
         CibouletteOptionalData::Null(_) => {
             if !opt.optional() {

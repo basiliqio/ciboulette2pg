@@ -6,7 +6,7 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type_": "peoples",
+    "type": "peoples",
     "data": {
       "first-name": "Francis"
     }

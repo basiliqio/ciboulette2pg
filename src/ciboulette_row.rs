@@ -8,6 +8,7 @@ use crate::Ciboulette2SqlError;
 pub struct Ciboulette2PostgresRow<'a> {
     id: &'a str,
     #[sqlx(rename = "type")]
+    #[serde(rename = "type")]
     type_: &'a str,
     data: Option<&'a serde_json::value::RawValue>,
 }

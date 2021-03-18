@@ -6,7 +6,7 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type_": "articles",
+    "type": "articles",
     "data": {
       "body": "Yes",
       "title": "How to dead"
@@ -14,7 +14,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type_": "articles",
+    "type": "articles",
     "data": {
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
@@ -22,7 +22,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type_": "people-article",
+    "type": "people-article",
     "data": {
       "article_id": "[uuid]",
       "people_id": "[uuid]"
@@ -30,7 +30,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type_": "people-article",
+    "type": "people-article",
     "data": {
       "article_id": "[uuid]",
       "people_id": "[uuid]"
@@ -38,7 +38,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type_": "peoples",
+    "type": "peoples",
     "data": {
       "age": 22,
       "first-name": "Francis",

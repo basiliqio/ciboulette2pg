@@ -21,7 +21,6 @@ async fn test_update<'a>(
     )
     .unwrap();
     let (query, args) = builder.build().unwrap();
-
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut *transaction)
         .await
@@ -59,6 +58,81 @@ async fn main_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     .await;
     Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_main_fields", &["peoples"]).await;
+}
+
+#[ciboulette2postgres_test]
+async fn single_rel(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    baseline_for_people!(transaction);
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_update(
+        &mut transaction,
+        format!("/peoples/{}", people_id).as_str(),
+        json!({
+            "data": json!({
+                "type": "peoples",
+                "id": people_id,
+                "attributes": json!({
+                    "first-name": "New first",
+                    "last-name": "New last name",
+                }),
+                "relationships": json!({
+                    "favorite_color": json!({
+                        "data": json!({
+                            "id": data.get("favorite_color").unwrap().last().unwrap(),
+                            "type": "favorite_color"
+                        })
+                    }),
+                }),
+            })
+        })
+        .to_string()
+        .as_str(),
+    )
+    .await;
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    snapshot_table(
+        &mut transaction,
+        "update_single_rel_with_fields",
+        &["peoples"],
+    )
+    .await;
+}
+
+#[ciboulette2postgres_test]
+async fn single_rel_unset(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    baseline_for_people!(transaction);
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_update(
+        &mut transaction,
+        format!("/peoples/{}", people_id).as_str(),
+        json!({
+            "data": json!({
+                "type": "peoples",
+                "id": people_id,
+                "attributes": json!({
+                    "first-name": "New first",
+                    "last-name": "New last name",
+                }),
+                "relationships": json!({
+                    "favorite_color": json!({
+                        "data": serde_json::Value::Null
+                    }),
+                }),
+            })
+        })
+        .to_string()
+        .as_str(),
+    )
+    .await;
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    snapshot_table(
+        &mut transaction,
+        "update_single_rel_unset_with_fields",
+        &["peoples"],
+    )
+    .await;
 }
 
 #[ciboulette2postgres_test]

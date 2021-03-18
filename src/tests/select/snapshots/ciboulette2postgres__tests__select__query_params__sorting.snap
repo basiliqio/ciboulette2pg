@@ -6,7 +6,7 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type_": "peoples",
+    "type": "peoples",
     "data": {
       "age": null,
       "first-name": "AAAAAAAA",
@@ -17,7 +17,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type_": "peoples",
+    "type": "peoples",
     "data": {
       "age": 22,
       "first-name": "Francis",
@@ -28,7 +28,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type_": "peoples",
+    "type": "peoples",
     "data": {
       "age": 34,
       "first-name": "Somebody",
