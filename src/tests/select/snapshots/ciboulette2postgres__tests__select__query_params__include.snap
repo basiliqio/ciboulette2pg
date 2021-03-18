@@ -1,5 +1,5 @@
 ---
-source: src/tests/select/mod.rs
+source: src/tests/select/query_params.rs
 expression: value
 
 ---
@@ -8,6 +8,7 @@ expression: value
     "id": "[uuid]",
     "type_": "articles",
     "data": {
+      "body": "Yes",
       "title": "How to dead"
     }
   },
@@ -15,6 +16,7 @@ expression: value
     "id": "[uuid]",
     "type_": "articles",
     "data": {
+      "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
     }
   },
@@ -38,7 +40,11 @@ expression: value
     "id": "[uuid]",
     "type_": "peoples",
     "data": {
-      "last-name": "Le Roy"
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
     }
   }
 ]

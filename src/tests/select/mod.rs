@@ -3,17 +3,6 @@ use super::*;
 mod query_params;
 mod select_success;
 
-pub fn check_rows(rows: &Vec<Ciboulette2PostgresRow>) {
-    let value = serde_json::to_value(rows).unwrap();
-
-    insta::assert_json_snapshot!(value,
-    {
-        "[].id" => insta::dynamic_redaction(check_uuid),
-        "[].data.article_id" => insta::dynamic_redaction(check_uuid),
-        "[].data.people_id" => insta::dynamic_redaction(check_uuid)
-    });
-}
-
 async fn test_select<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,

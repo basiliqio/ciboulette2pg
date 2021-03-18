@@ -10,6 +10,7 @@ use url::Url;
 mod delete;
 mod init_values;
 mod inserts;
+mod query_params;
 mod run_migrations;
 mod select;
 mod test_sql;
@@ -31,4 +32,18 @@ fn check_uuid<'a, 'b>(
         4
     );
     "[uuid]"
+}
+
+#[macro_export]
+macro_rules! check_rows {
+	($rows:ident) => {
+		let value = serde_json::to_value($rows).unwrap();
+
+    	insta::assert_json_snapshot!(value,
+    	{
+    	    "[].id" => insta::dynamic_redaction(check_uuid),
+    	    "[].data.article_id" => insta::dynamic_redaction(check_uuid),
+    	    "[].data.people_id" => insta::dynamic_redaction(check_uuid)
+    	});
+	};
 }

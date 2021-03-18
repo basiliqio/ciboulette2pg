@@ -1,9 +1,20 @@
 ---
-source: src/tests/select/mod.rs
+source: src/tests/select/query_params.rs
 expression: value
 
 ---
 [
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    }
+  },
   {
     "id": "[uuid]",
     "type_": "peoples",
@@ -24,17 +35,6 @@ expression: value
       "gender": "F",
       "last-name": "Wuhu",
       "twitter": "@randomhandle"
-    }
-  },
-  {
-    "id": "[uuid]",
-    "type_": "peoples",
-    "data": {
-      "age": null,
-      "first-name": "AAAAAAAA",
-      "gender": null,
-      "last-name": "BBBBBBBBB",
-      "twitter": null
     }
   }
 ]

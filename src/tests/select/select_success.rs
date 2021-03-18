@@ -6,7 +6,7 @@ async fn select_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres
     let raw_rows = test_select(&mut transaction, "/peoples").await;
     let res =
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
-    check_rows(&res);
+    check_rows!(res);
 }
 
 #[ciboulette2postgres_test]
@@ -16,5 +16,5 @@ async fn select_a_single_record(mut transaction: sqlx::Transaction<'_, sqlx::Pos
     let raw_rows = test_select(&mut transaction, format!("/peoples/{}", people_id).as_str()).await;
     let res =
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
-    check_rows(&res);
+    check_rows!(res);
 }

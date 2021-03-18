@@ -1,5 +1,5 @@
 ---
-source: src/tests/select/mod.rs
+source: src/tests/select/select_success.rs
 expression: value
 
 ---
