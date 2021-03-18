@@ -32,7 +32,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     &requirement_type,
                 )?;
                 self.buf.write_all(b")")?;
-                self.add_working_table(&rel_table, rel_table_cte);
+                self.add_working_table(&rel_table, (rel_table_cte, requirement_type));
             }
         }
         Ok(())
@@ -72,7 +72,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             values: _rel_ids,
         } in rel_iter
         {
-            if let Some(requirement_type) = state.is_type_needed(&rel_type) {
+            if let Some(rel_requirement_type) = state.is_type_needed(&rel_type) {
                 self.buf.write_all(b", ")?;
                 let additional_params = Self::gen_rel_additional_params(&bucket)?;
                 let rel_table = state.table_store().get(rel_type.name().as_str())?;
@@ -88,7 +88,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     &rel_rel_table,
                     &bucket.resource(),
                     additional_params.iter(),
-                    !matches!(requirement_type, CibouletteResponseRequiredType::None),
+                    matches!(rel_requirement_type, CibouletteResponseRequiredType::Object),
                 )?;
 
                 self.buf.write_all(b" INNER JOIN ")?;
@@ -116,7 +116,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     &rel_table,
                     &rel_type,
                     [].iter(),
-                    matches!(requirement_type, CibouletteResponseRequiredType::Object),
+                    matches!(rel_requirement_type, CibouletteResponseRequiredType::Object),
                 )?;
                 self.buf.write_all(b" INNER JOIN ")?;
                 self.write_table_info(&rel_cte_rel_data)?;
@@ -132,8 +132,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     &Ciboulette2PostgresTableField::new_ref(rel_table.id().get_ident(), None, None),
                 )?;
                 self.buf.write_all(b")")?;
-                self.add_working_table(&rel_table, rel_cte_data);
-                self.add_working_table(&rel_rel_table, rel_cte_rel_data);
+                self.add_working_table(&rel_table, (rel_cte_data, rel_requirement_type));
+                self.add_working_table(&rel_rel_table, (rel_cte_rel_data, rel_requirement_type));
             }
         }
         Ok(())

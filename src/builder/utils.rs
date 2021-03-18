@@ -129,7 +129,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTableSettings<'a>,
         included_tables_map: &BTreeMap<
             &'a Ciboulette2PostgresTableSettings<'a>,
-            Ciboulette2PostgresTableSettings<'a>,
+            (
+                Ciboulette2PostgresTableSettings<'a>,
+                CibouletteResponseRequiredType,
+            ),
         >,
     ) -> Result<(), Ciboulette2SqlError> {
         if main_cte_table != table {
@@ -147,7 +150,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 state.main_type().name().as_str(),
                 el.type_().name().as_str(),
             )?;
-            let included_table = included_tables_map
+            let (included_table, _) = included_tables_map
                 .get(state.table_store().get(el.type_().name().as_str())?)
                 .ok_or_else(|| {
                     Ciboulette2SqlError::MissingRelationForOrdering(table.name().to_string())

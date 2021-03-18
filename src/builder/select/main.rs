@@ -63,7 +63,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &state.main_table(),
             &main_cte_data,
         )?;
-        se.add_working_table(&state.main_table(), main_cte_data);
+        se.add_working_table(
+            &state.main_table(),
+            (main_cte_data, CibouletteResponseRequiredType::Object),
+        );
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;
         Ok(se)

@@ -13,6 +13,27 @@ pub struct Ciboulette2PostgresBuilderState<'a> {
 }
 
 impl<'a> Ciboulette2PostgresBuilderState<'a> {
+    fn check_if_rel_is_needed(
+        &self,
+        other: &CibouletteResourceType<'a>,
+        x: &CibouletteResourceType<'a>,
+        y: &CibouletteResourceType<'a>,
+    ) -> Option<CibouletteResponseRequiredType> {
+        self.store()
+            .get_rel(x.name(), y.name())
+            .ok()
+            .and_then(|(_rel_other_type, edge_weight)| match edge_weight {
+                CibouletteRelationshipOption::Many(opt) => {
+                    if opt.resource() == other {
+                        Some(CibouletteResponseRequiredType::Object)
+                    } else {
+                        None
+                    }
+                }
+                CibouletteRelationshipOption::One(_) => None,
+                _ => None,
+            })
+    }
     pub fn is_type_needed(
         &self,
         other: &CibouletteResourceType<'a>,
@@ -21,23 +42,34 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
             true => Some(**self.expected_response_type()),
             false => None,
         }
-        .or_else(|| match self.path() {
-            CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x == &other {
-                true => Some(CibouletteResponseRequiredType::Object),
-                false => None,
-            },
-            CiboulettePath::TypeIdRelated(x, _, y) => match x == &other || y == &other {
-                true => Some(CibouletteResponseRequiredType::Object),
-                false => None,
-            },
-            CiboulettePath::TypeIdRelationship(x, _, y) => match x == &other || y == &other {
-                true => Some(CibouletteResponseRequiredType::Id),
-                false => None,
-            },
-        })
         .or_else(|| match self.query().include().contains(other) {
             true => Some(CibouletteResponseRequiredType::Object),
             false => None,
+        })
+        .or_else(|| match self.path() {
+            CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x == &other {
+                true => Some(CibouletteResponseRequiredType::Object),
+                // false => None
+                false => self.check_if_rel_is_needed(other, x, other),
+            },
+            CiboulettePath::TypeIdRelated(x, _, y) => {
+                if x == &other {
+                    Some(CibouletteResponseRequiredType::None)
+                } else if y == &other {
+                    Some(CibouletteResponseRequiredType::Object)
+                } else {
+                    self.check_if_rel_is_needed(other, x, y)
+                }
+            }
+            CiboulettePath::TypeIdRelationship(x, _, y) => {
+                if x == &other {
+                    Some(CibouletteResponseRequiredType::None)
+                } else if y == &other {
+                    Some(CibouletteResponseRequiredType::Id)
+                } else {
+                    self.check_if_rel_is_needed(other, x, y)
+                }
+            }
         })
         .or_else(|| match self.query().sorting_map().contains_key(other) {
             true => Some(CibouletteResponseRequiredType::None),

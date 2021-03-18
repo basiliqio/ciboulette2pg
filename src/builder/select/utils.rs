@@ -305,41 +305,44 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         state: Ciboulette2PostgresBuilderState<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
-        let main_cte_table = self.working_tables.get(state.main_table()).ok_or_else(|| {
+        let (main_cte_table, _) = self.working_tables.get(state.main_table()).ok_or_else(|| {
             CibouletteError::UnknownError("Can't find the main_cte_table".to_string())
         })?;
         let mut iter = self.working_tables.values().peekable();
-        while let Some(v) = iter.next() {
+        while let Some((table, is_needed)) = iter.next() {
+            if matches!(is_needed, CibouletteResponseRequiredType::None) {
+                continue;
+            }
             // SELECT * FROM
             self.buf.write_all(b"(SELECT ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
                 &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_ID_IDENT, None, None),
-                v,
+                table,
                 None,
             )?;
             self.buf.write_all(b", ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
                 &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_TYPE_IDENT, None, None),
-                v,
+                table,
                 None,
             )?;
             self.buf.write_all(b", ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
                 &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_DATA_IDENT, None, None),
-                v,
+                table,
                 None,
             )?;
             self.buf.write_all(b" FROM ")?;
             // SELECT * FROM "schema"."mytable"
-            Self::write_table_info_inner(&mut self.buf, v)?;
+            Self::write_table_info_inner(&mut self.buf, table)?;
             Self::handle_sorting_routine(
                 &mut self.buf,
                 &state,
                 &main_cte_table,
-                v,
+                table,
                 &self.working_tables,
             )?;
             self.buf.write_all(b")")?;
