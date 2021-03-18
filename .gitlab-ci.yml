@@ -9,6 +9,16 @@ stages:
 
 build_and_test_rust:
   stage: test
+  services:
+    - name: postgres:latest
+      alias: postgres
+  variables:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
+    DATABASE_URL: postgres://postgres:postgres@postgres/postgres
+    BASILIQ_DATABASE_URL: postgres://postgres:postgres@postgres/postgres
   before_script:
     - mkdir -p .git/hooks
     - export NAME=ciboulette2postgres
