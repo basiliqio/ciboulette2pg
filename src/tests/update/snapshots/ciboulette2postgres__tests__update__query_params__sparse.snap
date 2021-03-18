@@ -1,0 +1,14 @@
+---
+source: src/tests/update/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "first-name": "Sicnarf"
+    }
+  }
+]

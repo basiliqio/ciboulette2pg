@@ -6,7 +6,8 @@ mod query_params;
 async fn test_insert<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
-    test_name: &str,
+    _test_name: &str,
+    _data: &BTreeMap<String, Vec<Uuid>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
@@ -44,7 +45,7 @@ async fn test_insert<'a>(
         .unwrap();
     snapshot_table(
         &mut *transaction,
-        format!("db_snapshot_{}", test_name).as_str(),
+        "db_snapshot_insert_while_testing_query_params",
         &["peoples", "people-article", "favorite_color"],
     )
     .await;

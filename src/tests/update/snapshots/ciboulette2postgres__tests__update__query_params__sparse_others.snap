@@ -1,0 +1,48 @@
+---
+source: src/tests/update/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type_": "articles",
+    "data": {
+      "title": "How to dead"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "articles",
+    "data": {
+      "title": "Oh my g**"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "people-article",
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "people-article",
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Sicnarf",
+      "gender": "M",
+      "last-name": "Yor el",
+      "twitter": null
+    }
+  }
+]

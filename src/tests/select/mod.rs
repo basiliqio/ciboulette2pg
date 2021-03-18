@@ -7,6 +7,7 @@ async fn test_select<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     _name: &str,
+    _data: &BTreeMap<String, Vec<Uuid>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
@@ -23,14 +24,6 @@ async fn test_select<'a>(
     )
     .unwrap();
     let (query, args) = builder.build().unwrap();
-    println!(
-        "{}",
-        sqlformat::format(
-            query.as_str(),
-            &sqlformat::QueryParams::None,
-            sqlformat::FormatOptions::default()
-        )
-    );
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut *transaction)
         .await

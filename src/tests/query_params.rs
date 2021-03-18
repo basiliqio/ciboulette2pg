@@ -3,9 +3,10 @@ macro_rules! ciboulette_query_test_routine {
     ($name:ident, $transform_function:ident, $query_string:literal) => {
         #[ciboulette2postgres_test]
         async fn $name(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
-            init_values::init_values(&mut transaction).await;
+            let data = init_values::init_values(&mut transaction).await;
             let raw_rows =
-                $transform_function(&mut transaction, $query_string, stringify!($name)).await;
+                $transform_function(&mut transaction, $query_string, stringify!($name), &data)
+                    .await;
             let res = Ciboulette2PostgresRow::from_raw(&raw_rows)
                 .expect("to deserialize the returned rows");
             check_rows!(res);
@@ -21,6 +22,7 @@ macro_rules! ciboulette_query_test_routine {
                 &mut transaction,
                 format!($query_string, obj_id).as_str(),
                 stringify!($name),
+                &data,
             )
             .await;
             let res = Ciboulette2PostgresRow::from_raw(&raw_rows)

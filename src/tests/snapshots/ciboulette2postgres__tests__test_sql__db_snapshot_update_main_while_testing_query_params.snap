@@ -7,15 +7,6 @@ expression: "serde_json::Value::Object(map)"
   "peoples": [
     {
       "id": "[uuid]",
-      "first-name": "Francis",
-      "last-name": "Le Roy",
-      "favorite_color": "[favorite_color_uuid]",
-      "age": 22,
-      "gender": "M",
-      "twitter": null
-    },
-    {
-      "id": "[uuid]",
       "first-name": "Somebody",
       "last-name": "Wuhu",
       "favorite_color": "[favorite_color_uuid]",
@@ -34,12 +25,12 @@ expression: "serde_json::Value::Object(map)"
     },
     {
       "id": "[uuid]",
-      "first-name": "Hello",
-      "last-name": "World",
-      "favorite_color": "[favorite_color_null]",
-      "age": 19,
+      "first-name": "Sicnarf",
+      "last-name": "Yor el",
+      "favorite_color": "[favorite_color_uuid]",
+      "age": 22,
       "gender": "M",
-      "twitter": "@myhandle"
+      "twitter": null
     }
   ],
   "people-article": [
