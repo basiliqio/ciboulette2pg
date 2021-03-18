@@ -155,9 +155,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 .ok_or_else(|| {
                     Ciboulette2SqlError::MissingRelationForOrdering(table.name().to_string())
                 })?;
-            Self::gen_sort_inner_joins(
+            Self::gen_sort_joins(
                 buf,
-                &state.table_store(),
                 &included_table,
                 &state.main_table(),
                 &main_cte_table,

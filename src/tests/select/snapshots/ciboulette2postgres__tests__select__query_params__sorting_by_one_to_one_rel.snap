@@ -19,10 +19,10 @@ expression: value
     "id": "[uuid]",
     "type_": "peoples",
     "data": {
-      "age": 22,
-      "first-name": "Francis",
-      "gender": "M",
-      "last-name": "Le Roy",
+      "age": null,
+      "first-name": "AAAAAAAA",
+      "gender": null,
+      "last-name": "BBBBBBBBB",
       "twitter": null
     }
   },

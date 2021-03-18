@@ -32,6 +32,8 @@ pub enum Ciboulette2SqlError {
     RequiredRelationship(String, String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
+    #[error("Trying to sort type `{0}` using its one-to-many relationships to `{1}`")]
+    SortingByMultiRel(String, String),
     #[error(transparent)]
     CibouletteError(#[from] ciboulette::CibouletteError),
     #[error(transparent)]

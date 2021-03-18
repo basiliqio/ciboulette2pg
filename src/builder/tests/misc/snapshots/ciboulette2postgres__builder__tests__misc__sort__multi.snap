@@ -53,8 +53,8 @@ WITH "cte_peoples_data" AS (
     "cte_peoples_data"."data"
   FROM
     "cte_peoples_data"
-    INNER JOIN "public"."people-article" ON "public"."people-article"."people_id" = "cte_peoples_data"."_id"
-    INNER JOIN "cte_rel_articles_data" ON "cte_rel_articles_data"."_id" = "public"."people-article"."article_id"
+    LEFT JOIN "public"."people-article" ON "public"."people-article"."people_id" = "cte_peoples_data"."_id"
+    LEFT JOIN "cte_rel_articles_data" ON "cte_rel_articles_data"."_id" = "public"."people-article"."article_id"
   ORDER BY
     "cte_rel_articles_data"."sort_title" ASC
 );

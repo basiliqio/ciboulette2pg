@@ -4,7 +4,8 @@ macro_rules! ciboulette_query_test_routine {
         #[ciboulette2postgres_test]
         async fn $name(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
             init_values::init_values(&mut transaction).await;
-            let raw_rows = $transform_function(&mut transaction, $query_string).await;
+            let raw_rows =
+                $transform_function(&mut transaction, $query_string, stringify!($name)).await;
             let res = Ciboulette2PostgresRow::from_raw(&raw_rows)
                 .expect("to deserialize the returned rows");
             check_rows!(res);
@@ -16,9 +17,12 @@ macro_rules! ciboulette_query_test_routine {
         async fn $name(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
             let data = init_values::init_values(&mut transaction).await;
             let obj_id = data.get($type_to_join).unwrap().first().unwrap();
-            let raw_rows =
-                $transform_function(&mut transaction, format!($query_string, obj_id).as_str())
-                    .await;
+            let raw_rows = $transform_function(
+                &mut transaction,
+                format!($query_string, obj_id).as_str(),
+                stringify!($name),
+            )
+            .await;
             let res = Ciboulette2PostgresRow::from_raw(&raw_rows)
                 .expect("to deserialize the returned rows");
             check_rows!(res);
@@ -42,9 +46,9 @@ macro_rules! ciboulette_query_test_multi {
             "/peoples?sort=age,-first-name"
         );
         ciboulette_query_test_routine!(
-            sorting_multiple_resources,
+            sorting_by_one_to_one_rel,
             $transform_function,
-            "/peoples?sort=articles.title,first-name"
+            "/peoples?sort=-favorite_color.color,first-name"
         );
     };
 }

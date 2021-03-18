@@ -66,7 +66,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
-        multi_relationships: &Vec<Ciboulette2PostgresRelationships<'a>>,
+        multi_relationships: &[Ciboulette2PostgresRelationships<'a>],
     ) -> Result<(), Ciboulette2SqlError> {
         self.select_multi_rels_routine(&state, &main_data_cte, &multi_relationships)?;
         Ok(())

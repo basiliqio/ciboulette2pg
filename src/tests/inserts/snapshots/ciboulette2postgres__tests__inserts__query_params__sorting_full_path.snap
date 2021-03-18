@@ -1,0 +1,18 @@
+---
+source: src/tests/inserts/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type_": "peoples",
+    "data": {
+      "age": 19,
+      "first-name": "Hello",
+      "gender": "M",
+      "last-name": "World",
+      "twitter": "@myhandle"
+    }
+  }
+]

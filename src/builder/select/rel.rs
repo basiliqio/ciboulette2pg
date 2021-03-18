@@ -63,9 +63,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
-        rels: &Vec<Ciboulette2PostgresRelationships<'a>>,
+        rels: &[Ciboulette2PostgresRelationships<'a>],
     ) -> Result<(), Ciboulette2SqlError> {
-        let rel_iter = rels.into_iter().peekable();
+        let rel_iter = rels.iter().peekable();
         for Ciboulette2PostgresRelationships {
             type_: rel_type,
             bucket,

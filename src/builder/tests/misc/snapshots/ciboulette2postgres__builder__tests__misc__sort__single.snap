@@ -41,8 +41,8 @@ WITH "cte_peoples_data" AS (
     "cte_peoples_data"."data"
   FROM
     "cte_peoples_data"
-    INNER JOIN "public"."peoples" ON "public"."peoples"."id" = "cte_peoples_data"."id"
-    INNER JOIN "cte_favorite_color_data" ON "cte_favorite_color_data"."id" = "public"."peoples"."favorite_color"
+    LEFT JOIN "public"."peoples" ON "public"."peoples"."id" = "cte_peoples_data"."_id"
+    LEFT JOIN "cte_favorite_color_data" ON "cte_favorite_color_data"."_id" = "public"."peoples"."favorite_color"
   ORDER BY
     "cte_favorite_color_data"."sort_color" ASC
 );
