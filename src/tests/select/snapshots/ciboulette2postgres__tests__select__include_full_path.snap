@@ -23,12 +23,18 @@ expression: value
   {
     "id": "[uuid]",
     "type_": "people-article",
-    "data": null
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    }
   },
   {
     "id": "[uuid]",
     "type_": "people-article",
-    "data": null
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    }
   },
   {
     "id": "[uuid]",

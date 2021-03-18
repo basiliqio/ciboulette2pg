@@ -88,10 +88,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     &rel_rel_table,
                     &bucket.resource(),
                     additional_params.iter(),
-                    state
-                        .is_type_needed(&bucket.resource())
-                        .map(|x| matches!(x, CibouletteResponseRequiredType::Object))
-                        .unwrap_or(false),
+                    !matches!(requirement_type, CibouletteResponseRequiredType::None),
                 )?;
 
                 self.buf.write_all(b" INNER JOIN ")?;

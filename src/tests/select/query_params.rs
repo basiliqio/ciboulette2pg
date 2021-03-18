@@ -29,6 +29,24 @@ async fn include(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
 }
 
 #[ciboulette2postgres_test]
+async fn sparse_others(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!(
+            "/peoples/{}?include=articles&fields[articles]=title",
+            people_id
+        )
+        .as_str(),
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows(&res);
+}
+
+#[ciboulette2postgres_test]
 async fn include_full_path(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();

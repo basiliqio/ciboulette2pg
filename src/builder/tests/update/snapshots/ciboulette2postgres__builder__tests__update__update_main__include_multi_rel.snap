@@ -36,7 +36,12 @@ WITH "cte_peoples_update" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
     $10 :: TEXT AS "type",
-    NULL :: json AS "data",
+    JSON_BUILD_OBJECT(
+      $11,
+      "public"."people-article"."article_id",
+      $12,
+      "public"."people-article"."people_id"
+    ) AS "data",
     "public"."people-article"."article_id" AS "rel_article_id",
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
@@ -46,11 +51,11 @@ WITH "cte_peoples_update" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $11 :: TEXT AS "type",
+    $13 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $12,
+      $14,
       "public"."articles"."body",
-      $13,
+      $15,
       "public"."articles"."title"
     ) AS "data"
   FROM

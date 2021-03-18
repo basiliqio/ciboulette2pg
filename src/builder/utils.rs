@@ -13,7 +13,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 id_param.get_ident().to_string(),
             ));
         }
-        // ($x::type), ($x::type), ($x::type)
         self.write_list(ids, &table, false, |ref mut se, curr, t| {
             se.buf.write_all(b"(")?;
             se.insert_params(curr, t)?;
