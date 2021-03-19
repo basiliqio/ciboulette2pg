@@ -1,6 +1,8 @@
 use super::*;
 
 mod query_params;
+mod update_main_fails;
+mod update_rel_fails;
 mod update_rel_success;
 mod update_success;
 
