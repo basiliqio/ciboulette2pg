@@ -3,34 +3,16 @@ pub mod main;
 pub mod rel;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate a SQL query to handle a `POST` request
     pub fn gen_insert(
         ciboulette_store: &'a CibouletteStore<'a>,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         request: &'a CibouletteCreateRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
-        if request.data().identifier().id().is_some() {
-            return Err(Ciboulette2SqlError::ProvidedIdOnInserts);
-        }
-
-        if request.data().attributes().is_none() {
-            return Err(Ciboulette2SqlError::MissingAttributes);
-        }
-        let state = Ciboulette2PostgresBuilderState::new(
-            ciboulette_store,
-            ciboulette_table_store,
-            request.path(),
-            request.query(),
-            request.expected_response_type(),
-        )?;
-        let main_cte_insert = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_insert",
-            state.main_table().name()
-        )))?;
-        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_data",
-            state.main_table().name()
-        )))?;
+        check_insert_request(&request)?;
+        let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
+        let (main_cte_insert, main_cte_data) = gen_insert_cte_tables(&state)?;
 
         let Ciboulette2PostgresMain {
             insert_values: main_inserts_values,
@@ -48,24 +30,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             Some(request.data().relationships()),
         )?;
         let rels = Ciboulette2SqlQueryRels::new(main_single_relationships, multi_rels)?;
-        se.buf.write_all(b"WITH \n")?;
-        se.write_table_info(&main_cte_insert)?;
-        se.buf.write_all(b" AS (")?;
-        se.gen_insert_normal(state.main_table(), main_inserts_values, true)?;
-        se.buf.write_all(b"),")?;
-        se.write_table_info(&main_cte_data)?;
-        se.buf.write_all(b" AS (")?;
-        se.gen_select_cte_final(
-            &state,
-            &main_cte_insert,
-            &state.main_type(),
-            rels.single_rels_additional_fields().iter(),
-            true,
-        )?;
-        se.buf.write_all(b")")?;
-
+        se.buf.write_all(b"WITH ")?;
+        se.write_main_table_inserts(&main_cte_insert, &state, main_inserts_values)?;
+        se.write_main_table_select(&main_cte_data, &state, main_cte_insert, &rels)?;
         se.select_single_rels_routine(&state, &&main_cte_data, &rels)?;
-        se.inserts_handle_muli_rels(&state, &main_cte_data, rels.multi_rels())?;
+        se.inserts_handle_multi_rels(&state, &main_cte_data, rels.multi_rels())?;
         se.buf.write_all(b" ")?;
         se.add_working_table(
             &state.main_table(),
@@ -74,5 +43,72 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;
         Ok(se)
+    }
+
+    /// Write the main table `SELECT` after having inserted it
+    fn write_main_table_select(
+        &mut self,
+        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
+        main_cte_insert: Ciboulette2PostgresTableSettings<'a>,
+        rels: &Ciboulette2SqlQueryRels<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        self.write_table_info(main_cte_data)?;
+        self.buf.write_all(b" AS (")?;
+        self.gen_select_cte_final(
+            state,
+            &main_cte_insert,
+            &state.main_type(),
+            rels.single_rels_additional_fields().iter(),
+            true,
+        )?;
+        self.buf.write_all(b")")?;
+        Ok(())
+    }
+
+    /// Write the main table `INSERT`
+    fn write_main_table_inserts(
+        &mut self,
+        main_cte_insert: &Ciboulette2PostgresTableSettings<'a>,
+        state: &Ciboulette2PostgresBuilderState<'a>,
+        main_inserts_values: Vec<(&str, Ciboulette2SqlValue<'a>)>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        self.write_table_info(main_cte_insert)?;
+        self.buf.write_all(b" AS (")?;
+        self.gen_insert_normal(state.main_table(), main_inserts_values, true)?;
+        self.buf.write_all(b"),")?;
+        Ok(())
+    }
+}
+
+/// Gen the insert and data table for the query
+fn gen_insert_cte_tables<'a>(
+    state: &Ciboulette2PostgresBuilderState<'a>
+) -> Result<
+    (
+        Ciboulette2PostgresTableSettings<'a>,
+        Ciboulette2PostgresTableSettings<'a>,
+    ),
+    Ciboulette2SqlError,
+> {
+    let main_cte_insert = state.main_table().to_cte(Cow::Owned(format!(
+        "cte_{}_insert",
+        state.main_table().name()
+    )))?;
+    let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
+        "cte_{}_data",
+        state.main_table().name()
+    )))?;
+    Ok((main_cte_insert, main_cte_data))
+}
+
+/// Check that the insert request is correct
+fn check_insert_request(request: &CibouletteCreateRequest) -> Result<(), Ciboulette2SqlError> {
+    if request.data().identifier().id().is_some() {
+        Err(Ciboulette2SqlError::ProvidedIdOnInserts)
+    } else if request.data().attributes().is_none() {
+        Err(Ciboulette2SqlError::MissingAttributes)
+    } else {
+        Ok(())
     }
 }

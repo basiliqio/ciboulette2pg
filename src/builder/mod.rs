@@ -13,6 +13,19 @@ mod select;
 mod update;
 mod utils;
 
+#[macro_export]
+macro_rules! get_state {
+    ($ciboulette_store:expr, $ciboulette_table_store:expr, $req:expr) => {
+        Ciboulette2PostgresBuilderState::new(
+            $ciboulette_store,
+            $ciboulette_table_store,
+            $req.path(),
+            $req.query(),
+            $req.expected_response_type(),
+        )
+    };
+}
+
 lazy_static::lazy_static! {
     static ref CIBOULETTE_ID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
         Ciboulette2PostgresSafeIdent::try_from("id").unwrap()

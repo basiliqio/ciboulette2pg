@@ -1,6 +1,9 @@
 use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate a SQL query to delete a single object from the database
+    ///
+    /// Generated when receiving a request like `DELETE /peoples/{id}`
     pub(super) fn gen_delete_normal(
         &mut self,
         table_store: &'a Ciboulette2PostgresTableStore<'a>,

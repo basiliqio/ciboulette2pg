@@ -17,7 +17,7 @@ async fn test_select<'a>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_select_normal(
+    let builder = Ciboulette2PostgresBuilder::gen_select(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,

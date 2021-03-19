@@ -89,14 +89,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
         se.select_single_rels_routine(&state, &main_cte_data, &rels)?;
         se.buf.write_all(b" ")?;
-        se.gen_cte_for_sort(
-            &ciboulette_store,
-            &ciboulette_table_store,
-            &request.query(),
-            &state.main_type(),
-            &state.main_table(),
-            &main_cte_data,
-        )?;
+        se.gen_cte_for_sort(&state, &main_cte_data)?;
         se.add_working_table(
             &state.main_table(),
             (main_cte_data, CibouletteResponseRequiredType::Object),

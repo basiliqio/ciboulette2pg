@@ -1,6 +1,8 @@
 use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Recursive function that walks a [MessyJsonObject](messy_json::MessyJsonObject) and create the final
+    /// `JSON_BUILD_OBJECT` in the query
     pub(crate) fn gen_json_builder_routine<'b, I>(
         &mut self,
         table: &Ciboulette2PostgresTableSettings<'_>,
@@ -50,6 +52,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Generate the function that'll create the final object JSON returned by the database
     pub(crate) fn gen_json_builder(
         &mut self,
         table: &Ciboulette2PostgresTableSettings<'_>,

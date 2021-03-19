@@ -1,6 +1,9 @@
 use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate a SQL query to delete a one-to-one relationship from the database
+    ///
+    /// Generated when receiving a request like `DELETE /peoples/{id}/relationships/favorite_color`
     pub(super) fn gen_delete_rel(
         &mut self,
         table_store: &'a Ciboulette2PostgresTableStore<'a>,

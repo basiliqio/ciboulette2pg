@@ -9,9 +9,9 @@ pub async fn snapshot_table(
     for table in tables.iter() {
         let snap: (Option<serde_json::Value>,) = sqlx::query_as(
             format!(
-				"SELECT ARRAY_TO_JSON(ARRAY_AGG(result)) AS data FROM (SELECT * FROM \"{}\") result;",
-				table
-			)
+                "SELECT ARRAY_TO_JSON(ARRAY_AGG(result)) AS data FROM (SELECT * FROM \"{}\") result;",
+                table
+            )
             .as_str(),
         )
         .fetch_one(&mut *transaction)

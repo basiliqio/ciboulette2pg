@@ -5,7 +5,8 @@ fn simple() {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
-        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
+        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color")
+            .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
     const BODY: Option<&str> = Some(
         r#"
@@ -37,7 +38,8 @@ fn forced_null() {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
-        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
+        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color")
+            .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
     const BODY: Option<&str> = Some(
         r#"
@@ -66,7 +68,8 @@ fn forbidden_multi_ids() {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
     let parsed_url =
-        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color").unwrap();
+        Url::parse("http://localhost/peoples/6720877a-e27e-4e9e-9ac0-3fff4deb55f2/relationships/favorite_color")
+            .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
     const BODY: Option<&str> = Some(
         r#"

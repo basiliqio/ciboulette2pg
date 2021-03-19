@@ -3,6 +3,10 @@ pub mod main;
 pub mod rel;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate a SQL query to handle a `DELETE` request
+    ///
+    /// Fails if trying to delete an one-to-many relationships.
+    /// Fails if trying to delete a non optional one-to-one relationships.
     pub fn gen_delete(
         store: &'a CibouletteStore<'a>,
         table_store: &'a Ciboulette2PostgresTableStore<'a>,
