@@ -32,6 +32,8 @@ pub enum Ciboulette2SqlError {
     NonAsciiCharInIdent(String),
     #[error("Client provided `id`s are forbidden for inserts")]
     ProvidedIdOnInserts,
+    #[error("The object attributes are required and missing")]
+    MissingAttributes,
     #[error("Trying to sort type `{0}` using its one-to-many relationships to `{1}`")]
     SortingByMultiRel(String, String),
     #[error(transparent)]

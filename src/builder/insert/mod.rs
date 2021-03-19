@@ -12,6 +12,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         if request.data().identifier().id().is_some() {
             return Err(Ciboulette2SqlError::ProvidedIdOnInserts);
         }
+
+        if request.data().attributes().is_none() {
+            return Err(Ciboulette2SqlError::MissingAttributes);
+        }
         let state = Ciboulette2PostgresBuilderState::new(
             ciboulette_store,
             ciboulette_table_store,
