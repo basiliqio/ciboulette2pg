@@ -57,6 +57,11 @@ expression: "serde_json::Value::Object(map)"
       "id": "[uuid]",
       "people_id": "[uuid]",
       "article_id": "[uuid]"
+    },
+    {
+      "id": "[uuid]",
+      "people_id": "[uuid]",
+      "article_id": "[uuid]"
     }
   ],
   "favorite_color": [

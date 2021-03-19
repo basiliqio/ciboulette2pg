@@ -24,7 +24,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
             .ok()
             .and_then(|(_rel_other_type, edge_weight)| match edge_weight {
                 CibouletteRelationshipOption::Many(opt) => {
-                    if opt.resource() == other {
+                    if opt.bucket_resource() == other {
                         Some(CibouletteResponseRequiredType::Object)
                     } else {
                         None

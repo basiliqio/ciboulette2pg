@@ -29,7 +29,7 @@ WITH "cte_articles_data" AS (
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
     "public"."people-article"
-    INNER JOIN "cte_articles_data" ON "public"."people-article"."people_id" :: TEXT = "cte_articles_data"."id" :: TEXT
+    INNER JOIN "cte_articles_data" ON "public"."people-article"."article_id" :: TEXT = "cte_articles_data"."id" :: TEXT
 ),
 "cte_rel_peoples_data" AS (
   SELECT
@@ -46,6 +46,4 @@ WITH "cte_articles_data" AS (
     "cte_articles_data"."data"
   FROM
     "cte_articles_data"
-)
-UNION
-ALL;
+);

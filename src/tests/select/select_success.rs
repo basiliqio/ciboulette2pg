@@ -24,3 +24,53 @@ async fn select_a_single_record(mut transaction: sqlx::Transaction<'_, sqlx::Pos
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
+
+#[ciboulette2postgres_test]
+async fn select_related_record_single_rels(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!("/peoples/{}/favorite_color", people_id).as_str(),
+        "",
+        &data,
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows!(res);
+}
+
+#[ciboulette2postgres_test]
+async fn select_related_record_multi_rels(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!("/peoples/{}/articles", people_id).as_str(),
+        "",
+        &data,
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows!(res);
+}
+
+#[ciboulette2postgres_test]
+async fn select_related_record_multi_rels_reverse(
+    mut transaction: sqlx::Transaction<'_, sqlx::Postgres>
+) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("articles").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!("/articles/{}/author", people_id).as_str(),
+        "",
+        &data,
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows!(res);
+}

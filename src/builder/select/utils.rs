@@ -9,9 +9,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     ) -> Result<(), Ciboulette2SqlError> {
         let left_type = left_table.ciboulette_type();
         let right_type = right_table.ciboulette_type();
+        let right_type_alias = left_type.get_alias(right_type.name().as_str())?;
         let (_, opt) = state
             .store()
-            .get_rel(left_type.name().as_str(), right_type.name().as_str())?;
+            .get_rel(left_type.name().as_str(), right_type_alias)?;
         match opt {
             CibouletteRelationshipOption::One(opt) => {
                 buf.write_all(b" INNER JOIN ")?;
@@ -40,14 +41,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 )?;
             }
             CibouletteRelationshipOption::ManyDirect(opt) => {
-                let bucket_table = state.table_store().get(opt.resource().name().as_str())?;
+                let bucket_table = state
+                    .table_store()
+                    .get(opt.bucket_resource().name().as_str())?;
                 buf.write_all(b" INNER JOIN ")?;
                 Self::write_table_info_inner(buf, bucket_table)?;
                 buf.write_all(b" ON ")?;
                 Self::insert_ident_inner(
                     buf,
                     &Ciboulette2PostgresTableField::new_owned(
-                        Ciboulette2PostgresSafeIdent::try_from(opt.from().as_str())?,
+                        Ciboulette2PostgresSafeIdent::try_from(opt.keys_for_type(&right_type)?)?,
                         None,
                         None,
                     ),
@@ -82,7 +85,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 Self::insert_ident_inner(
                     buf,
                     &Ciboulette2PostgresTableField::new_owned(
-                        Ciboulette2PostgresSafeIdent::try_from(opt.to().as_str())?,
+                        Ciboulette2PostgresSafeIdent::try_from(opt.keys_for_type(&left_type)?)?,
                         None,
                         None,
                     ),
@@ -351,10 +354,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let (main_cte_table, _) = self.working_tables.get(state.main_table()).ok_or_else(|| {
             CibouletteError::UnknownError("Can't find the main_cte_table".to_string())
         })?;
-        let mut iter = self.working_tables.values().peekable();
-        while let Some((table, is_needed)) = iter.next() {
+        let mut first_one = true;
+        for (table, is_needed) in self.working_tables.values() {
             if matches!(is_needed, CibouletteResponseRequiredType::None) {
                 continue;
+            } else if !first_one {
+                self.buf.write_all(b" UNION ALL ")?;
+            } else {
+                first_one = false;
             }
             // SELECT * FROM
             self.buf.write_all(b"(SELECT ")?;
@@ -389,11 +396,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &self.working_tables,
             )?;
             self.buf.write_all(b")")?;
-            if iter.peek().is_some() {
-                // If there's more :
-                // SELECT * FROM "schema"."mytable" UNION ALL ...
-                self.buf.write_all(b" UNION ALL ")?;
-            }
         }
         Ok(())
     }

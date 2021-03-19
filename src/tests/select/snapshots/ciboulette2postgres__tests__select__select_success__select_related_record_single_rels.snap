@@ -1,0 +1,14 @@
+---
+source: src/tests/select/select_success.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type": "favorite_color",
+    "data": {
+      "color": "red"
+    }
+  }
+]

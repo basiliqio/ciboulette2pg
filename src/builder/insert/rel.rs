@@ -95,7 +95,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         {
             if let Some(rel_ids) = rel_ids {
                 let rel_table = state.table_store().get(rel_type.name().as_str())?;
-                let rel_rel_table = state.table_store().get(bucket.resource().name().as_str())?;
+                let rel_rel_table = state
+                    .table_store()
+                    .get(bucket.bucket_resource().name().as_str())?;
                 self.buf.write_all(b", ")?;
                 let rel_cte_id =
                     rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_id", rel_table.name())))?;
@@ -116,8 +118,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 // "cte_rel_myrel_id" AS (VALUES ($0::type), ($1::type)), "cte_rel_myrel_insert" AS (insert_stmt)
                 self.gen_rel_insert(
                     &rel_rel_table,
-                    &Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
-                    &Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
+                    &Ciboulette2PostgresSafeIdent::try_from(bucket.keys_for_type(rel_type)?)?,
+                    &Ciboulette2PostgresSafeIdent::try_from(
+                        bucket.keys_for_type(state.main_type())?,
+                    )?,
                     &main_cte_data,
                     &rel_cte_id,
                 )?;

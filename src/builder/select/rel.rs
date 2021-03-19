@@ -43,7 +43,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok([
             Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new_owned(
-                    Ciboulette2PostgresSafeIdent::try_from(bucket.from().as_str())?,
+                    Ciboulette2PostgresSafeIdent::try_from(bucket.keys()[0].1.as_str())?,
                     None,
                     None,
                 ),
@@ -51,7 +51,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             )?,
             Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new_owned(
-                    Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
+                    Ciboulette2PostgresSafeIdent::try_from(bucket.keys()[1].1.as_str())?,
                     None,
                     None,
                 ),
@@ -76,7 +76,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.buf.write_all(b", ")?;
                 let additional_params = Self::gen_rel_additional_params(&bucket)?;
                 let rel_table = state.table_store().get(rel_type.name().as_str())?;
-                let rel_rel_table = state.table_store().get(bucket.resource().name().as_str())?;
+                let rel_rel_table = state
+                    .table_store()
+                    .get(bucket.bucket_resource().name().as_str())?;
                 let rel_cte_rel_data = rel_rel_table
                     .to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
                 let rel_cte_data =
@@ -86,7 +88,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.gen_select_cte_final(
                     &state,
                     &rel_rel_table,
-                    &bucket.resource(),
+                    &bucket.bucket_resource(),
                     additional_params.iter(),
                     matches!(rel_requirement_type, CibouletteResponseRequiredType::Object),
                 )?;
@@ -97,7 +99,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.compare_fields(
                     &rel_rel_table,
                     &Ciboulette2PostgresTableField::new_owned(
-                        Ciboulette2PostgresSafeIdent::try_from(bucket.to().as_str())?,
+                        Ciboulette2PostgresSafeIdent::try_from(
+                            bucket.keys_for_type(state.main_type())?,
+                        )?,
                         None,
                         None,
                     ),

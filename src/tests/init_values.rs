@@ -102,6 +102,13 @@ async fn init_link_article_author(
             .unwrap();
         article_author_id.push(id.0);
     }
+    let id: (Uuid,) = sqlx::query_as(PEOPLE_ARTICLE)
+        .bind(peoples_id[1])
+        .bind(articles_id[0])
+        .fetch_one(&mut *transaction)
+        .await
+        .unwrap();
+    article_author_id.push(id.0);
     article_author_id
 }
 
