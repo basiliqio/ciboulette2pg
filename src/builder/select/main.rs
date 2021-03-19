@@ -34,9 +34,24 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             true,
         )?;
         match request.path() {
-            CiboulettePath::TypeId(_, id)
-            | CiboulettePath::TypeIdRelated(_, id, _)
-            | CiboulettePath::TypeIdRelationship(_, id, _) => {
+            CiboulettePath::TypeIdRelated(left_type, id, right_type) => {
+                let left_table = ciboulette_table_store.get(left_type.name().as_str())?;
+                let right_table = ciboulette_table_store.get(right_type.name().as_str())?;
+
+                Self::gen_inner_join(&mut se.buf, &state, &left_table, &right_table)?;
+                se.buf.write_all(b" WHERE ")?;
+                se.insert_ident(
+                    &Ciboulette2PostgresTableField::new_ref(
+                        left_table.id().get_ident(),
+                        None,
+                        None,
+                    ),
+                    &left_table,
+                )?;
+                se.buf.write_all(b" = ")?;
+                se.insert_params(Ciboulette2SqlValue::from(id), &left_table)?;
+            }
+            CiboulettePath::TypeId(_, id) | CiboulettePath::TypeIdRelationship(_, id, _) => {
                 se.buf.write_all(b" WHERE ")?;
                 se.insert_ident(
                     &Ciboulette2PostgresTableField::new_ref(

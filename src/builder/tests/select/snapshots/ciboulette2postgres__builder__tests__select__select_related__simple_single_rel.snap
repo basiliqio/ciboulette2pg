@@ -1,0 +1,23 @@
+---
+source: src/builder/tests/select/select_related.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_favorite_color_data" AS (
+  SELECT
+    "public"."favorite_color"."id" :: TEXT AS "id",
+    $1 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($2, "public"."favorite_color"."color") AS "data"
+  FROM
+    "public"."favorite_color"
+    INNER JOIN "public"."peoples" ON "public"."peoples"."favorite_color" = "public"."favorite_color"."id"
+  WHERE
+    "public"."peoples"."id" = $3
+)(
+  SELECT
+    "cte_favorite_color_data"."id",
+    "cte_favorite_color_data"."type",
+    "cte_favorite_color_data"."data"
+  FROM
+    "cte_favorite_color_data"
+);

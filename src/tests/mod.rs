@@ -12,6 +12,7 @@ mod delete;
 mod init_values;
 mod inserts;
 mod query_params;
+#[allow(clippy::mutex_atomic)]
 mod run_migrations;
 mod select;
 mod test_sql;
