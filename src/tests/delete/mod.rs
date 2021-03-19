@@ -1,5 +1,6 @@
 use super::*;
 
+mod delete_fails;
 mod delete_success;
 mod query_params;
 
