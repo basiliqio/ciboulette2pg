@@ -92,7 +92,7 @@ fn extract_relationships<'a>(
         CibouletteOptionalData::Null(x) if *x => buf.push(Ciboulette2PostgresRelationships {
             type_,
             bucket: opt,
-            values: Some(vec![Ciboulette2SqlValue::Text(None)]),
+            values: Some(vec![Ciboulette2SqlValue::Text(None)]), // FIXME Not always TEXT
         }),
         CibouletteOptionalData::Null(_) => buf.push(Ciboulette2PostgresRelationships {
             type_,

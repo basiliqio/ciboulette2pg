@@ -9,6 +9,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteCreateRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
+        if request.data().identifier().id().is_some() {
+            return Err(Ciboulette2SqlError::ProvidedIdOnInserts);
+        }
         let state = Ciboulette2PostgresBuilderState::new(
             ciboulette_store,
             ciboulette_table_store,

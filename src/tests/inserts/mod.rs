@@ -1,5 +1,6 @@
 use super::*;
 
+mod inserts_fails;
 mod inserts_success;
 mod query_params;
 

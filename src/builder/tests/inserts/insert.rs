@@ -11,7 +11,6 @@ fn simple() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -49,7 +48,6 @@ fn relationship_external_single() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -97,7 +95,6 @@ fn relationship_external_multiple() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -151,7 +148,6 @@ fn relationship_external_multiple_include() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -207,7 +203,6 @@ fn relationship_external_multiple_include_rel() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -261,7 +256,6 @@ fn relationship_internal_single() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -309,7 +303,6 @@ fn relationship_internal_single_include() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{
@@ -359,7 +352,6 @@ fn relationship_internal_single_include_all() {
 	{
 		"data":
 		{
-			"id": "6720877a-e27e-4e9e-9ac0-3fff4deb55f2",
 			"type": "peoples",
 			"attributes":
 			{

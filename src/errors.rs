@@ -2,8 +2,6 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Ciboulette2SqlError {
-    // #[error("The json:api type `{0}` is unknown.")]
-    // Mi(String),
     #[error("Cannot represent `{0}`")]
     BigDecimal(u128),
     #[error("Missing relationship `{1}` for type `{0}`")]
@@ -32,6 +30,8 @@ pub enum Ciboulette2SqlError {
     RequiredRelationship(String, String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
+    #[error("Client provided `id`s are forbidden for inserts")]
+    ProvidedIdOnInserts,
     #[error("Trying to sort type `{0}` using its one-to-many relationships to `{1}`")]
     SortingByMultiRel(String, String),
     #[error(transparent)]
