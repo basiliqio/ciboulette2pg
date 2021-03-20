@@ -6,6 +6,7 @@ pub mod rel;
 pub mod utils;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate a normal update with a simple `WHERE` selecting a single id
     pub fn gen_update_normal(
         &mut self,
         table: &Ciboulette2PostgresTableSettings,

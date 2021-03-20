@@ -85,7 +85,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     .table_store()
                     .get(bucket.bucket_resource().name().as_str())?;
                 let (rel_cte_rel_data, rel_cte_data) =
-                    gen_rel_select_tables(rel_rel_table, rel_table)?;
+                    Self::gen_rel_select_tables(rel_rel_table, rel_table)?;
                 self.write_table_info(&rel_cte_rel_data)?;
                 self.buf.write_all(b" AS (")?;
                 self.gen_select_multi_rels_data(
@@ -176,22 +176,54 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         Ok(())
     }
-}
 
-/// Generate the table that'll be used to in the query to select one-to-many relationships
-fn gen_rel_select_tables<'a>(
-    rel_rel_table: &'a Ciboulette2PostgresTableSettings<'a>,
-    rel_table: &'a Ciboulette2PostgresTableSettings<'a>,
-) -> Result<
-    (
-        Ciboulette2PostgresTableSettings<'a>,
-        Ciboulette2PostgresTableSettings<'a>,
-    ),
-    Ciboulette2SqlError,
-> {
-    let rel_cte_rel_data =
-        rel_rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
-    let rel_cte_data =
-        rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())))?;
-    Ok((rel_cte_rel_data, rel_cte_data))
+    /// Generate a one-to-one relationship
+    pub(crate) fn gen_select_cte_single_rel(
+        &mut self,
+        state: &Ciboulette2PostgresBuilderState<'a>,
+        table: &Ciboulette2PostgresTableSettings<'a>,
+        type_: &'a CibouletteResourceType<'a>,
+        main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
+        field_id: &Ciboulette2PostgresSafeIdent<'a>,
+        requirement_type: &CibouletteResponseRequiredType,
+    ) -> Result<(), Ciboulette2SqlError> {
+        self.gen_select_cte_final(
+            &state,
+            &table,
+            &type_,
+            [].iter(),
+            matches!(requirement_type, CibouletteResponseRequiredType::Object),
+        )?;
+        self.buf.write_all(b" INNER JOIN ")?;
+        self.write_table_info(&main_cte_table)?;
+        self.buf.write_all(b" ON ")?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(table.id().get_ident(), None, None),
+            &table,
+        )?;
+        self.buf.write_all(b" = ")?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_ref(&field_id, None, None),
+            &main_cte_table,
+        )?;
+        Ok(())
+    }
+
+    /// Generate the table that'll be used to in the query to select one-to-many relationships
+    fn gen_rel_select_tables(
+        rel_rel_table: &'a Ciboulette2PostgresTableSettings<'a>,
+        rel_table: &'a Ciboulette2PostgresTableSettings<'a>,
+    ) -> Result<
+        (
+            Ciboulette2PostgresTableSettings<'a>,
+            Ciboulette2PostgresTableSettings<'a>,
+        ),
+        Ciboulette2SqlError,
+    > {
+        let rel_cte_rel_data =
+            rel_rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
+        let rel_cte_data =
+            rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_data", rel_table.name())))?;
+        Ok((rel_cte_rel_data, rel_cte_data))
+    }
 }

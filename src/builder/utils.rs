@@ -177,12 +177,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         while let Some((el, table)) = iter.next() {
             Self::insert_ident_inner(
                 &mut buf,
-                &Ciboulette2PostgresTableField::new_owned(
-                    Ciboulette2PostgresSafeIdent::try_from(
-                        format!("sort_{}", el.field().as_ref()).as_str(),
-                    )?,
-                    None,
-                    None,
+                &Ciboulette2PostgresTableField::from_additional_field_with_cast(
+                    Ciboulette2SqlAdditionalField::try_from(el)?,
                 ),
                 table,
                 None,

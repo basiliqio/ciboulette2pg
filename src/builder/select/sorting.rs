@@ -18,45 +18,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     Ciboulette2PostgresTableField::from(rel_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
                 )?;
-                buf.write_all(b" LEFT JOIN ")?;
-                Self::write_table_info_inner(buf, &main_table)?;
-                buf.write_all(b" ON ")?;
-                Self::insert_ident_inner(
-                    buf,
-                    &Ciboulette2PostgresTableField::new_ref(
-                        main_table.id().get_ident(),
-                        None,
-                        None,
-                    ),
+                Self::gen_left_join_single_main_table(
+                    &mut *buf,
                     main_table,
-                    None,
-                )?;
-                buf.write_all(b" = ")?;
-                Self::insert_ident_inner(
-                    buf,
-                    &Ciboulette2PostgresTableField::new_ref(main_cte_table_id.name(), None, None),
+                    main_cte_table_id,
                     main_cte_table,
-                    None,
                 )?;
-                buf.write_all(b" LEFT JOIN ")?;
-                Self::write_table_info_inner(buf, &rel_table)?;
-                buf.write_all(b" ON ")?;
-                Self::insert_ident_inner(
-                    buf,
-                    &Ciboulette2PostgresTableField::new_ref(rel_cte_table_id.name(), None, None),
+                Self::gen_left_join_single_rel_table(
+                    &mut *buf,
                     rel_table,
-                    None,
-                )?;
-                buf.write_all(b" = ")?;
-                Self::insert_ident_inner(
-                    buf,
-                    &Ciboulette2PostgresTableField::new_owned(
-                        Ciboulette2PostgresSafeIdent::try_from(opt.key().as_str())?,
-                        None,
-                        None,
-                    ),
+                    rel_cte_table_id,
+                    opt,
                     main_table,
-                    None,
                 )?;
             }
             _ => {
@@ -133,17 +106,73 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             for el in sorting_arr {
                 self.buf.write_all(b", ")?;
                 self.insert_ident(
-                    &Ciboulette2PostgresTableField::new_owned(
-                        Ciboulette2PostgresSafeIdent::try_from(el.field().as_ref())?,
-                        Some(Ciboulette2PostgresSafeIdent::try_from(
-                            format!("sort_{}", el.field().as_ref()).as_str(),
-                        )?),
-                        None,
+                    &Ciboulette2PostgresTableField::from_additional_field(
+                        Ciboulette2SqlAdditionalField::new(
+                            Ciboulette2PostgresTableField::try_from(el)?,
+                            Ciboulette2SqlAdditionalFieldType::Sorting,
+                        )?,
                     ),
                     table,
                 )?;
             }
         }
+        Ok(())
+    }
+
+    /// Generate the left join between the CTE table and the main table
+    fn gen_left_join_single_main_table(
+        buf: &mut Ciboulette2PostgresBuf,
+        main_table: &Ciboulette2PostgresTableSettings,
+        main_cte_table_id: Ciboulette2SqlAdditionalField,
+        main_cte_table: &Ciboulette2PostgresTableSettings,
+    ) -> Result<(), Ciboulette2SqlError> {
+        buf.write_all(b" LEFT JOIN ")?;
+        Self::write_table_info_inner(&mut *buf, &main_table)?;
+        buf.write_all(b" ON ")?;
+        Self::insert_ident_inner(
+            &mut *buf,
+            &Ciboulette2PostgresTableField::new_ref(main_table.id().get_ident(), None, None),
+            main_table,
+            None,
+        )?;
+        buf.write_all(b" = ")?;
+        Self::insert_ident_inner(
+            &mut *buf,
+            &Ciboulette2PostgresTableField::new_ref(main_cte_table_id.name(), None, None),
+            main_cte_table,
+            None,
+        )?;
+        Ok(())
+    }
+
+    /// Generate the left join between the main table and the single rel table
+    fn gen_left_join_single_rel_table(
+        buf: &mut Ciboulette2PostgresBuf,
+        rel_table: &Ciboulette2PostgresTableSettings,
+        rel_cte_table_id: Ciboulette2SqlAdditionalField,
+        opt: &CibouletteRelationshipOneToOneOption,
+        main_table: &Ciboulette2PostgresTableSettings,
+    ) -> Result<(), Ciboulette2SqlError> {
+        buf.write_all(b" LEFT JOIN ")?;
+        Self::write_table_info_inner(buf, &rel_table)?;
+        buf.write_all(b" ON ")?;
+        Self::insert_ident_inner(
+            buf,
+            &Ciboulette2PostgresTableField::new_ref(rel_cte_table_id.name(), None, None),
+            rel_table,
+            None,
+        )?;
+        buf.write_all(b" = ")?;
+        Self::insert_ident_inner(
+            buf,
+            &Ciboulette2PostgresTableField::new_owned(
+                Ciboulette2PostgresSafeIdent::try_from(opt.key().as_str())?,
+                None,
+                None,
+            ),
+            main_table,
+            None,
+        )?;
         Ok(())
     }
 }

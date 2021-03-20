@@ -1,6 +1,7 @@
 use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Add additional fields to a final CTE select
     pub(super) fn handle_additionnal_params<'b, I>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
@@ -29,37 +30,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    pub(crate) fn gen_select_cte_single_rel(
-        &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        table: &Ciboulette2PostgresTableSettings<'a>,
-        type_: &'a CibouletteResourceType<'a>,
-        main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
-        field_id: &Ciboulette2PostgresSafeIdent<'a>,
-        requirement_type: &CibouletteResponseRequiredType,
-    ) -> Result<(), Ciboulette2SqlError> {
-        self.gen_select_cte_final(
-            &state,
-            &table,
-            &type_,
-            [].iter(),
-            matches!(requirement_type, CibouletteResponseRequiredType::Object),
-        )?;
-        self.buf.write_all(b" INNER JOIN ")?;
-        self.write_table_info(&main_cte_table)?;
-        self.buf.write_all(b" ON ")?;
-        self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(table.id().get_ident(), None, None),
-            &table,
-        )?;
-        self.buf.write_all(b" = ")?;
-        self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(&field_id, None, None),
-            &main_cte_table,
-        )?;
-        Ok(())
-    }
-
+    /// Get the relationships data for the main type
     pub(crate) fn get_relationships(
         ciboulette_store: &'a CibouletteStore<'a>,
         main_type: &'a CibouletteResourceType<'a>,

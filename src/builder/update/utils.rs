@@ -1,6 +1,7 @@
 use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate the update params in the form of `"column_1" = $0, "column_2" = $2`
     pub(super) fn gen_update_params(
         &mut self,
         table: &Ciboulette2PostgresTableSettings,

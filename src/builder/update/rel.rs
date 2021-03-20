@@ -1,5 +1,6 @@
 use super::*;
 
+//// Extract the relationships object from a request, fails if the request contains a main type
 fn extract_rels<'a>(
     request: &'a CibouletteUpdateRequest<'a>
 ) -> Result<&'a CibouletteUpdateRelationship<'a>, Ciboulette2SqlError> {
@@ -10,6 +11,7 @@ fn extract_rels<'a>(
 }
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Generate the relationship update CTE
     pub fn gen_update_rel_update(
         &mut self,
         request: &'a CibouletteUpdateRequest<'a>,
@@ -24,6 +26,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Generate the relationship data select from the relationship update CTE
     pub fn gen_update_rel_data(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
@@ -45,29 +48,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Generate a SQL query to handle a `PATCH` request
+    ///
+    /// Update the relationships (one-to-one only) of an object
+    /// Fails if trying to update one-to-many relationships
     pub fn gen_update_rel(
         ciboulette_store: &'a CibouletteStore<'a>,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         request: &'a CibouletteUpdateRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Self::default();
-        let state = Ciboulette2PostgresBuilderState::new(
-            ciboulette_store,
-            ciboulette_table_store,
-            request.path(),
-            request.query(),
-            request.expected_response_type(),
-        )?;
-
+        let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let rels = extract_rels(&request)?;
-        let main_cte_update = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_update",
-            state.main_table().name()
-        )))?;
-        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_data",
-            state.main_table().name()
-        )))?;
+        let (main_cte_update, main_cte_data) = Self::gen_update_rel_cte_tables(&state)?;
         let Ciboulette2PostgresMain {
             insert_values: rel_values,
             single_relationships,
@@ -97,5 +90,26 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;
         Ok(se)
+    }
+
+    /// Generate the CTE table for updating a main object's relationships
+    fn gen_update_rel_cte_tables(
+        state: &Ciboulette2PostgresBuilderState<'a>
+    ) -> Result<
+        (
+            Ciboulette2PostgresTableSettings<'a>,
+            Ciboulette2PostgresTableSettings<'a>,
+        ),
+        Ciboulette2SqlError,
+    > {
+        let main_cte_update = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_update",
+            state.main_table().name()
+        )))?;
+        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
+            "cte_{}_data",
+            state.main_table().name()
+        )))?;
+        Ok((main_cte_update, main_cte_data))
     }
 }
