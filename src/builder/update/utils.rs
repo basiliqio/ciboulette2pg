@@ -4,7 +4,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the update params in the form of `"column_1" = $0, "column_2" = $2`
     pub(super) fn gen_update_params(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
         params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut iter = params.into_iter().peekable();

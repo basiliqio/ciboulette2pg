@@ -1,5 +1,5 @@
 use super::*;
-use crate::graph_walker::main::Ciboulette2PostgresMain;
+use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
 
 pub mod main;
 pub mod rel;
@@ -9,7 +9,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate a normal update with a simple `WHERE` selecting a single id
     pub fn gen_update_normal(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
         params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
         query: &'a CibouletteUpdateRequest<'a>,
         returning: bool,

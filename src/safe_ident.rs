@@ -17,6 +17,7 @@ pub const INTEGER_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
     }
 };
 
+/// An identifier that is safe to be wrapped in quote
 #[derive(Clone, Debug, PartialEq, Eq, Ord, Default, PartialOrd)]
 pub struct Ciboulette2PostgresSafeIdent<'a> {
     pub inner: Cow<'a, str>,
@@ -32,6 +33,7 @@ impl<'a> std::fmt::Display for Ciboulette2PostgresSafeIdent<'a> {
 }
 
 impl<'a> Ciboulette2PostgresSafeIdent<'a> {
+    /// Check that the identifier is safe
     pub fn check(val: Cow<'a, str>) -> Result<Cow<'a, str>, Ciboulette2SqlError> {
         if val.as_ref().find('\0').is_some() {
             return Err(Ciboulette2SqlError::NullCharIdent(val.to_string()));

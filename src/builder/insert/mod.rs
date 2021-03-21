@@ -14,10 +14,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let (main_cte_insert, main_cte_data) = gen_insert_cte_tables(&state)?;
 
-        let Ciboulette2PostgresMain {
+        let Ciboulette2PostgresMainResourceInformations {
             insert_values: main_inserts_values,
             single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::extract_fields(
+        } = crate::graph_walker::main::extract_fields_and_values(
             &ciboulette_store,
             request.path().main_type(),
             request.data().attributes(),
@@ -48,9 +48,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Write the main table `SELECT` after having inserted it
     fn write_main_table_select(
         &mut self,
-        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_data: &Ciboulette2PostgresTable<'a>,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_insert: Ciboulette2PostgresTableSettings<'a>,
+        main_cte_insert: Ciboulette2PostgresTable<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(main_cte_data)?;
@@ -69,7 +69,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Write the main table `INSERT`
     fn write_main_table_inserts(
         &mut self,
-        main_cte_insert: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_insert: &Ciboulette2PostgresTable<'a>,
         state: &Ciboulette2PostgresBuilderState<'a>,
         main_inserts_values: Vec<(&str, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -84,13 +84,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 /// Gen the insert and data table for the query
 fn gen_insert_cte_tables<'a>(
     state: &Ciboulette2PostgresBuilderState<'a>
-) -> Result<
-    (
-        Ciboulette2PostgresTableSettings<'a>,
-        Ciboulette2PostgresTableSettings<'a>,
-    ),
-    Ciboulette2SqlError,
-> {
+) -> Result<(Ciboulette2PostgresTable<'a>, Ciboulette2PostgresTable<'a>), Ciboulette2SqlError> {
     let main_cte_insert = state.main_table().to_cte(Cow::Owned(format!(
         "cte_{}_insert",
         state.main_table().name()

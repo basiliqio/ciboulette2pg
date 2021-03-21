@@ -3,9 +3,9 @@ use super::*;
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_sort_joins(
         buf: &mut Ciboulette2PostgresBuf,
-        rel_table: &Ciboulette2PostgresTableSettings<'a>,
-        main_table: &Ciboulette2PostgresTableSettings<'a>,
-        main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
+        rel_table: &Ciboulette2PostgresTable<'a>,
+        main_table: &Ciboulette2PostgresTable<'a>,
+        main_cte_table: &Ciboulette2PostgresTable<'a>,
         opt: &CibouletteRelationshipOption<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         match opt {
@@ -44,7 +44,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_cte_for_sort(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_data: &Ciboulette2PostgresTable<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         for (type_, sorting_elements) in state.query().sorting_map().iter() {
             let table = state.table_store().get(type_.name())?;
@@ -98,7 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
     pub(crate) fn gen_sorting_keys(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings<'a>,
+        table: &Ciboulette2PostgresTable<'a>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -122,9 +122,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the left join between the CTE table and the main table
     fn gen_left_join_single_main_table(
         buf: &mut Ciboulette2PostgresBuf,
-        main_table: &Ciboulette2PostgresTableSettings,
+        main_table: &Ciboulette2PostgresTable,
         main_cte_table_id: Ciboulette2SqlAdditionalField,
-        main_cte_table: &Ciboulette2PostgresTableSettings,
+        main_cte_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
         Self::write_table_info_inner(&mut *buf, &main_table)?;
@@ -148,10 +148,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the left join between the main table and the single rel table
     fn gen_left_join_single_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
-        rel_table: &Ciboulette2PostgresTableSettings,
+        rel_table: &Ciboulette2PostgresTable,
         rel_cte_table_id: Ciboulette2SqlAdditionalField,
         opt: &CibouletteRelationshipOneToOneOption,
-        main_table: &Ciboulette2PostgresTableSettings,
+        main_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
         Self::write_table_info_inner(buf, &rel_table)?;

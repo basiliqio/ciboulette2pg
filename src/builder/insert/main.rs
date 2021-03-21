@@ -4,7 +4,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate a insert query for `POST` requests
     pub(crate) fn gen_insert_normal(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
         params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -29,7 +29,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_normal_insert_values(
         &mut self,
         params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut param_ident: Vec<Ciboulette2PostgresTableField> = Vec::with_capacity(params.len());
         let mut param_value: Vec<Ciboulette2SqlValue<'_>> = Vec::with_capacity(params.len());

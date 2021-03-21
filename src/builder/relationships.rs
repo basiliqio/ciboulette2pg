@@ -1,9 +1,12 @@
 use super::*;
 
+/// Represents relationships of a resource type.
+/// The values of the relationships to create/update extracted from the request will
+/// also be present
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2SqlQueryRels<'a> {
-    multi_rels: Vec<Ciboulette2PostgresRelationships<'a>>,
+pub(crate) struct Ciboulette2SqlQueryRels<'a> {
+    multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
     single_rels_keys: Vec<&'a str>,
     single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>>,
 }
@@ -11,7 +14,7 @@ pub struct Ciboulette2SqlQueryRels<'a> {
 impl<'a> Ciboulette2SqlQueryRels<'a> {
     pub fn new(
         single_rels_keys: Vec<&'a str>,
-        multi_rels: Vec<Ciboulette2PostgresRelationships<'a>>,
+        multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>> =
             Vec::with_capacity(single_rels_keys.len());

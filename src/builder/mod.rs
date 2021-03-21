@@ -47,8 +47,8 @@ lazy_static::lazy_static! {
 #[cfg(test)]
 pub mod tests;
 
-use crate::graph_walker::main::Ciboulette2PostgresMain;
-use crate::graph_walker::relationships::Ciboulette2PostgresRelationships;
+use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
+use crate::graph_walker::relationships::Ciboulette2PostgresMainResourceRelationships;
 use additional_fields::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalFieldType};
 use builder_state::Ciboulette2PostgresBuilderState;
 use field_name::Ciboulette2PostgresTableField;
@@ -95,11 +95,8 @@ pub struct Ciboulette2PostgresBuilder<'a> {
     params: Ciboulette2SqlArguments<'a>,
     #[getset(get_mut = "pub")]
     working_tables: BTreeMap<
-        &'a Ciboulette2PostgresTableSettings<'a>,
-        (
-            Ciboulette2PostgresTableSettings<'a>,
-            CibouletteResponseRequiredType,
-        ),
+        &'a Ciboulette2PostgresTable<'a>,
+        (Ciboulette2PostgresTable<'a>, CibouletteResponseRequiredType),
     >,
 }
 
@@ -118,11 +115,8 @@ impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn add_working_table(
         &mut self,
-        main_table: &'a Ciboulette2PostgresTableSettings<'a>,
-        val: (
-            Ciboulette2PostgresTableSettings<'a>,
-            CibouletteResponseRequiredType,
-        ),
+        main_table: &'a Ciboulette2PostgresTable<'a>,
+        val: (Ciboulette2PostgresTable<'a>, CibouletteResponseRequiredType),
     ) {
         self.working_tables.insert(main_table, val);
     }

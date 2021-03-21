@@ -8,6 +8,7 @@ use sqlx::Arguments;
 use sqlx::Type;
 use std::convert::TryFrom;
 
+/// An [SQLx](sqlx) compatible value that'll contains the parameters of the queries
 #[derive(Clone, Debug)]
 pub enum Ciboulette2SqlValue<'a> {
     Integer(Option<i64>),

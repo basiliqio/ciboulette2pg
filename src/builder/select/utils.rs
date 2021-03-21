@@ -5,7 +5,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(super) fn handle_additionnal_params<'b, I>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        table: &Ciboulette2PostgresTableSettings<'a>,
+        table: &Ciboulette2PostgresTable<'a>,
         additional_fields: I,
     ) -> Result<(), Ciboulette2SqlError>
     where
@@ -36,9 +36,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_type: &'a CibouletteResourceType<'a>,
     ) -> Result<Ciboulette2SqlQueryRels<'a>, Ciboulette2SqlError> {
         let main_single_relationships =
-            crate::graph_walker::main::get_fields_single_rel(&ciboulette_store, &main_type)?;
-        let rels: Vec<Ciboulette2PostgresRelationships> =
-            crate::graph_walker::relationships::get_fields_multi_rels(
+            crate::graph_walker::main::get_resource_single_rel(&ciboulette_store, &main_type)?;
+        let rels: Vec<Ciboulette2PostgresMainResourceRelationships> =
+            crate::graph_walker::relationships::get_resource_multi_rels(
                 &ciboulette_store,
                 &main_type,
             )?;

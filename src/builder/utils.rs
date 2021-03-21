@@ -1,10 +1,11 @@
 use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
+    /// Create a list of relationships' id, to use as value for later inserting
     pub(crate) fn gen_rel_values(
         &mut self,
         ids: Vec<value::Ciboulette2SqlValue<'a>>,
-        table: &'a Ciboulette2PostgresTableSettings<'a>,
+        table: &'a Ciboulette2PostgresTable<'a>,
         id_param: &Ciboulette2PostgresId,
     ) -> Result<(), Ciboulette2SqlError> {
         // It's a logic error to have an empty id vector here
@@ -24,20 +25,25 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Finish building the query, setting the last ';' and then converting the
+    /// final query to UTF-8
     #[inline]
     pub fn build(mut self) -> Result<(String, Ciboulette2SqlArguments<'a>), Ciboulette2SqlError> {
         self.buf.write_all(b";")?;
         Ok((
-            String::from_utf8(self.buf.into_inner()?.into_inner())?,
+            String::from_utf8(self.buf.into_inner()?.into_inner())?, // TODO Is it the best way to handle that ?
             self.params,
         ))
     }
 
+    /// Inserts an identifier to the query.
+    ///
+    /// In the form `"schema"."table"."ident"[::CAST] [AS "ALIAS"]`
     #[inline]
     pub(crate) fn insert_ident_inner(
         buf: &mut Ciboulette2PostgresBuf,
         field: &Ciboulette2PostgresTableField,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
         force_cast: Option<&'static str>,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::write_table_info_inner(buf, table)?;
@@ -69,20 +75,24 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Wrapper for [insert_ident_inner](Self::insert_ident_inner)
     #[inline]
     pub(crate) fn insert_ident(
         &mut self,
         field: &Ciboulette2PostgresTableField,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::insert_ident_inner(&mut self.buf, &field, table, None)
     }
 
+    /// Inserts an identifier name to the query.
+    ///
+    /// In the form `"ident"`[::CAST] [AS "ALIAS"]
     #[inline]
     pub(crate) fn insert_ident_name(
         &mut self,
         field: &Ciboulette2PostgresTableField,
-        _table: &Ciboulette2PostgresTableSettings,
+        _table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(POSTGRES_QUOTE)?;
         self.buf.write_all(field.name().as_bytes())?;
@@ -106,11 +116,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Inserts a parameter into the query in the form of `$n` with n
+    /// incremented from 1
     #[inline]
     pub(crate) fn insert_params(
         &mut self,
         param: Ciboulette2SqlValue<'a>,
-        _table: &Ciboulette2PostgresTableSettings<'_>,
+        _table: &Ciboulette2PostgresTable<'_>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut buffer = [0u8; 20];
         self.params.push(param);
@@ -121,24 +133,23 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Handle joigning the related tables + ordering the result set depending
+    /// on the sorting requirement set by the request
     #[inline]
     pub(crate) fn handle_sorting_routine(
         mut buf: &mut Ciboulette2PostgresBuf,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_table: &Ciboulette2PostgresTableSettings<'a>,
-        table: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_table: &Ciboulette2PostgresTable<'a>,
+        table: &Ciboulette2PostgresTable<'a>,
         included_tables_map: &BTreeMap<
-            &'a Ciboulette2PostgresTableSettings<'a>,
-            (
-                Ciboulette2PostgresTableSettings<'a>,
-                CibouletteResponseRequiredType,
-            ),
+            &'a Ciboulette2PostgresTable<'a>,
+            (Ciboulette2PostgresTable<'a>, CibouletteResponseRequiredType),
         >,
     ) -> Result<(), Ciboulette2SqlError> {
         if main_cte_table != table {
             return Ok(());
         }
-        let mut included_tables: Vec<&Ciboulette2PostgresTableSettings<'a>> =
+        let mut included_tables: Vec<&Ciboulette2PostgresTable<'a>> =
             Vec::with_capacity(state.query().sorting_map().len());
 
         for el in state.query().sorting() {
@@ -194,10 +205,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Write the table information to the query
+    ///
+    /// In the form of `"schema"."table"`
     #[inline]
     pub(crate) fn write_table_info_inner(
         buf: &mut Ciboulette2PostgresBuf,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(POSTGRES_QUOTE)?;
         match table.schema() {
@@ -212,18 +226,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Wrapper for [write_table_info_inner](Self::write_table_info_inner)
     #[inline]
     pub(crate) fn write_table_info(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::write_table_info_inner(&mut self.buf, table)
     }
 
+    /// Write a list of something to the query.
+    /// The something part will be determined by a callback function.
+    /// The result can be wrapped in parenthesis and will be comma-separated
     pub(crate) fn write_list<I, F>(
         &mut self,
         arr: I,
-        table: &Ciboulette2PostgresTableSettings,
+        table: &Ciboulette2PostgresTable,
         wrap_in_parenthesis: bool,
         f: F,
     ) -> Result<(), Ciboulette2SqlError>
@@ -232,7 +250,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         F: for<'r> Fn(
             &'r mut Ciboulette2PostgresBuilder<'a>,
             I::Item,
-            &Ciboulette2PostgresTableSettings,
+            &Ciboulette2PostgresTable,
         ) -> Result<(), Ciboulette2SqlError>,
     {
         let mut iter = arr.into_iter().peekable();
@@ -252,11 +270,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
+    /// Compare 2 fields, casting them to `TEXT` to be sure of type compatibility
     pub(crate) fn compare_fields(
         &mut self,
-        left_table: &Ciboulette2PostgresTableSettings,
+        left_table: &Ciboulette2PostgresTable,
         left: &Ciboulette2PostgresTableField,
-        right_table: &Ciboulette2PostgresTableSettings,
+        right_table: &Ciboulette2PostgresTable,
         right: &Ciboulette2PostgresTableField,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::insert_ident_inner(&mut self.buf, left, &left_table, Some("TEXT"))?;
@@ -265,29 +284,4 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         //FIXME Make a better id type management system
         Ok(())
     }
-
-    // pub(crate) fn should_include_type(
-    //     ciboulette_store: &'a CibouletteStore<'a>,
-    //     query: &CibouletteQueryParameters<'a>,
-    //     path: &CiboulettePath<'a>,
-    //     type_: &CibouletteResourceType<'a>,
-    // ) -> bool {
-    //     query.include().contains(type_)
-    //         || query.sorting_map().contains_key(type_)
-    //         || match path {
-    //             CiboulettePath::Type(x) => x == &type_,
-    //             CiboulettePath::TypeId(x, _) => x == &type_,
-    //             CiboulettePath::TypeIdRelated(x, y, z) => x == &type_ || z == &type_,
-    //             CiboulettePath::TypeIdRelationship(x, y, z) => {
-    //                 x == &type_
-    //                     || ciboulette_store
-    //                         .get_rel(x.name().as_str(), y.name().as_str())
-    //                         .and_then(|(_, opt)| match opt {
-    //                             CibouletteRelationshipOption::One(opt) => z == &type_,
-    //                             CibouletteRelationshipOption::Many(opt) => z == &type_,
-    // 							_ => false
-    //                         })
-    //             }
-    //         }
-    // }
 }

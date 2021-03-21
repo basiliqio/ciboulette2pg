@@ -1,13 +1,15 @@
 use super::*;
 use std::convert::TryFrom;
 
+/// Informations about the main resource type, extracted from the request
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresMain<'a> {
+pub(crate) struct Ciboulette2PostgresMainResourceInformations<'a> {
     pub insert_values: Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
     pub single_relationships: Vec<&'a str>,
 }
 
+/// Check the informations of a one-to-one relationship
 fn check_single_relationships<'a>(
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
     from_type_: &'a CibouletteResourceType,
@@ -60,6 +62,8 @@ fn check_single_relationships<'a>(
     }
 }
 
+/// Extract attributes from the request and push them to an arguments vector
+/// compatible with SQLx for later execution
 pub fn fill_attributes<'a>(
     args: &mut Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
     obj: &'a Option<MessyJsonObjectValue<'a>>,
@@ -76,13 +80,15 @@ pub fn fill_attributes<'a>(
     Ok(())
 }
 
-pub fn extract_fields<'a>(
+/// Extract attribute and single relationships from the query, allowing to build the
+/// request for the main resource
+pub(crate) fn extract_fields_and_values<'a>(
     store: &'a CibouletteStore,
     main_type: &'a CibouletteResourceType<'a>,
     attributes: &'a Option<MessyJsonObjectValue<'a>>,
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
     fails_on_many: bool,
-) -> Result<Ciboulette2PostgresMain<'a>, Ciboulette2SqlError> {
+) -> Result<Ciboulette2PostgresMainResourceInformations<'a>, Ciboulette2SqlError> {
     let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
     let mut res_rel: Vec<&'a str> = Vec::with_capacity(128);
     let main_type_index = store
@@ -112,13 +118,14 @@ pub fn extract_fields<'a>(
             return Err(Ciboulette2SqlError::UpdatingManyRelationships);
         }
     }
-    Ok(Ciboulette2PostgresMain {
+    Ok(Ciboulette2PostgresMainResourceInformations {
         insert_values: res_val,
         single_relationships: res_rel,
     })
 }
 
-pub fn get_fields_single_rel<'a>(
+/// Get a list of a resource's single relationships (one-to-one)
+pub(crate) fn get_resource_single_rel<'a>(
     store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
 ) -> Result<Vec<&'a str>, Ciboulette2SqlError> {

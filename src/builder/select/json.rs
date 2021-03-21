@@ -5,7 +5,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// `JSON_BUILD_OBJECT` in the query
     pub(crate) fn gen_json_builder_routine<'b, I>(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings<'_>,
+        table: &Ciboulette2PostgresTable<'_>,
         obj: &'a MessyJsonObject<'a>,
         obj_name: &'b str,
         mut fields: std::iter::Peekable<I>,
@@ -55,7 +55,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the function that'll create the final object JSON returned by the database
     pub(crate) fn gen_json_builder(
         &mut self,
-        table: &Ciboulette2PostgresTableSettings<'_>,
+        table: &Ciboulette2PostgresTable<'_>,
         type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
         include: bool,

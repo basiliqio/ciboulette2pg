@@ -4,7 +4,7 @@ use super::*;
 fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let table = Ciboulette2PostgresTableSettings::new(
+    let table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
@@ -30,7 +30,7 @@ fn simple() {
 fn no_returning() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let table = Ciboulette2PostgresTableSettings::new(
+    let table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
@@ -56,7 +56,7 @@ fn no_returning() {
 fn no_params() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let table = Ciboulette2PostgresTableSettings::new(
+    let table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),

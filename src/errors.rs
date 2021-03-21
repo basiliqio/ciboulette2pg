@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// An error throwable by this library
 #[derive(Error, Debug)]
 pub enum Ciboulette2SqlError {
     #[error("Cannot represent `{0}`")]

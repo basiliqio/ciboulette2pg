@@ -2,9 +2,12 @@ use super::*;
 use getset::Getters;
 use std::convert::TryFrom;
 
+/// Represent a field belonging to a table.
+///
+/// Also contains the alias and the cast to use in the query, if any
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresTableField<'a> {
+pub(crate) struct Ciboulette2PostgresTableField<'a> {
     pub(crate) name: Cow<'a, Ciboulette2PostgresSafeIdent<'a>>,
     pub(crate) alias: Option<Cow<'a, Ciboulette2PostgresSafeIdent<'a>>>,
     pub(crate) cast: Option<Cow<'a, Ciboulette2PostgresSafeIdent<'a>>>,

@@ -13,25 +13,25 @@ mod update;
 
 pub fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2PostgresTableStore<'a> {
     vec![
-        Ciboulette2PostgresTableSettings::new(
+        Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("people-article").unwrap(),
             store.get_type("people-article").unwrap(),
         ),
-        Ciboulette2PostgresTableSettings::new(
+        Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("articles").unwrap(),
             store.get_type("articles").unwrap(),
         ),
-        Ciboulette2PostgresTableSettings::new(
+        Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
             store.get_type("peoples").unwrap(),
         ),
-        Ciboulette2PostgresTableSettings::new(
+        Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),

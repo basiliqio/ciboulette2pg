@@ -76,7 +76,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_main_select(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
+        main_cte_data: &Ciboulette2PostgresTable<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(main_cte_data)?;

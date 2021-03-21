@@ -24,7 +24,7 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
 pub use table_store::{
-    Ciboulette2PostgresId, Ciboulette2PostgresTableSettings, Ciboulette2PostgresTableStore,
+    Ciboulette2PostgresId, Ciboulette2PostgresTable, Ciboulette2PostgresTableStore,
 };
 pub use value::Ciboulette2SqlValue;
 

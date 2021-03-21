@@ -4,11 +4,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the query to insert a new type relationship
     pub(super) fn gen_rel_insert(
         &mut self,
-        dest_table: &Ciboulette2PostgresTableSettings,
+        dest_table: &Ciboulette2PostgresTable,
         main_key: &Ciboulette2PostgresSafeIdent,
         rel_key: &Ciboulette2PostgresSafeIdent,
-        main_table: &Ciboulette2PostgresTableSettings,
-        rel_table: &Ciboulette2PostgresTableSettings,
+        main_table: &Ciboulette2PostgresTable,
+        rel_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b"INSERT INTO ")?;
         self.write_table_info(dest_table)?;
@@ -30,10 +30,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_rel_insert_sub_select(
         &mut self,
         main_key: &Ciboulette2PostgresSafeIdent,
-        main_table: &Ciboulette2PostgresTableSettings,
+        main_table: &Ciboulette2PostgresTable,
         rel_key: &Ciboulette2PostgresSafeIdent,
-        rel_table: &Ciboulette2PostgresTableSettings,
-        dest_table: &Ciboulette2PostgresTableSettings,
+        rel_table: &Ciboulette2PostgresTable,
+        dest_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b" SELECT ")?;
         self.insert_ident(
@@ -79,11 +79,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(super) fn inserts_handle_multi_rels(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_data: &Ciboulette2PostgresTableSettings<'a>,
-        rels: &[Ciboulette2PostgresRelationships<'a>],
+        main_cte_data: &Ciboulette2PostgresTable<'a>,
+        rels: &[Ciboulette2PostgresMainResourceRelationships<'a>],
     ) -> Result<(), Ciboulette2SqlError> {
         let rel_iter = rels.iter().peekable();
-        for Ciboulette2PostgresRelationships {
+        for Ciboulette2PostgresMainResourceRelationships {
             type_: rel_type,
             bucket,
             values: rel_ids,

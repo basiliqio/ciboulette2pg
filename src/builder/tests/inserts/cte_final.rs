@@ -5,7 +5,7 @@ fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
@@ -40,7 +40,7 @@ fn sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
@@ -76,7 +76,7 @@ fn empty_sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
@@ -111,7 +111,7 @@ fn non_included() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),

@@ -13,6 +13,7 @@ pub enum Ciboulette2SqlAdditionalFieldType {
 }
 
 impl Ciboulette2SqlAdditionalFieldType {
+    /// Print the prefix of the additional type to str
     pub(crate) fn to_sql_prefix(&self) -> &str {
         match self {
             Ciboulette2SqlAdditionalFieldType::Relationship => "rel",
@@ -24,7 +25,7 @@ impl Ciboulette2SqlAdditionalFieldType {
 
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2SqlAdditionalField<'a> {
+pub(crate) struct Ciboulette2SqlAdditionalField<'a> {
     pub(crate) type_: Ciboulette2SqlAdditionalFieldType,
     pub(crate) ident: Ciboulette2PostgresTableField<'a>,
     pub(crate) name: Ciboulette2PostgresSafeIdent<'a>,
@@ -47,10 +48,10 @@ impl<'a> Ciboulette2SqlAdditionalField<'a> {
     }
 }
 
-impl<'a> TryFrom<&Ciboulette2PostgresTableSettings<'a>> for Ciboulette2SqlAdditionalField<'a> {
+impl<'a> TryFrom<&Ciboulette2PostgresTable<'a>> for Ciboulette2SqlAdditionalField<'a> {
     type Error = Ciboulette2SqlError;
 
-    fn try_from(table: &Ciboulette2PostgresTableSettings<'a>) -> Result<Self, Self::Error> {
+    fn try_from(table: &Ciboulette2PostgresTable<'a>) -> Result<Self, Self::Error> {
         Ciboulette2SqlAdditionalField::new(
             Ciboulette2PostgresTableField::from(table.id()),
             Ciboulette2SqlAdditionalFieldType::MainIdentifier,

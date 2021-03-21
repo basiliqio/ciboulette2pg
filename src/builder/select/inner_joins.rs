@@ -5,8 +5,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_inner_join(
         buf: &mut Ciboulette2PostgresBuf,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        left_table: &Ciboulette2PostgresTableSettings<'a>,
-        right_table: &Ciboulette2PostgresTableSettings<'a>,
+        left_table: &Ciboulette2PostgresTable<'a>,
+        right_table: &Ciboulette2PostgresTable<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         let left_type = left_table.ciboulette_type();
         let right_type = right_table.ciboulette_type();
@@ -39,9 +39,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Gen an inner join between two tables, in case of a one-to-one relationships
     fn gen_inner_join_single_rel(
         buf: &mut Ciboulette2PostgresBuf,
-        left_table: &Ciboulette2PostgresTableSettings,
+        left_table: &Ciboulette2PostgresTable,
         opt: &CibouletteRelationshipOneToOneOption,
-        right_table: &Ciboulette2PostgresTableSettings,
+        right_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" INNER JOIN ")?;
         Self::write_table_info_inner(&mut *buf, &left_table)?;
@@ -72,8 +72,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         state: &Ciboulette2PostgresBuilderState<'a>,
         opt: &'a CibouletteRelationshipBucket<'a>,
         right_type: &'a CibouletteResourceType<'a>,
-        right_table: &Ciboulette2PostgresTableSettings<'a>,
-        left_table: &Ciboulette2PostgresTableSettings<'a>,
+        right_table: &Ciboulette2PostgresTable<'a>,
+        left_table: &Ciboulette2PostgresTable<'a>,
         left_type: &'a CibouletteResourceType<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         let bucket_table = state
@@ -93,10 +93,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Gen an inner join between the left table and the bucket, in case of a one-to-many relationship
     fn gen_inner_join_multi_rel_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
-        bucket_table: &Ciboulette2PostgresTableSettings<'a>,
+        bucket_table: &Ciboulette2PostgresTable<'a>,
         opt: &'a CibouletteRelationshipBucket<'a>,
         right_type: &'a CibouletteResourceType<'a>,
-        right_table: &Ciboulette2PostgresTableSettings<'a>,
+        right_table: &Ciboulette2PostgresTable<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" INNER JOIN ")?;
         Self::write_table_info_inner(&mut *buf, bucket_table)?;
@@ -124,10 +124,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Gen an inner join between the right table and the bucket, in case of a one-to-many relationship
     fn gen_inner_join_multi_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
-        left_table: &Ciboulette2PostgresTableSettings<'a>,
+        left_table: &Ciboulette2PostgresTable<'a>,
         opt: &'a CibouletteRelationshipBucket<'a>,
         left_type: &'a CibouletteResourceType<'a>,
-        bucket_table: &Ciboulette2PostgresTableSettings<'a>,
+        bucket_table: &Ciboulette2PostgresTable<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" INNER JOIN ")?;
         Self::write_table_info_inner(buf, left_table)?;

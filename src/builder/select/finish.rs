@@ -56,7 +56,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_select_cte_final<'b, I>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        table: &Ciboulette2PostgresTableSettings<'a>,
+        table: &Ciboulette2PostgresTable<'a>,
         type_: &'a CibouletteResourceType<'a>,
         additional_fields: I,
         include: bool,

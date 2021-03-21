@@ -19,8 +19,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_update_main_update(
         &mut self,
         request: &'a CibouletteUpdateRequest<'a>,
-        main_table: &'a Ciboulette2PostgresTableSettings<'a>,
-        main_update_cte: &Ciboulette2PostgresTableSettings<'a>,
+        main_table: &'a Ciboulette2PostgresTable<'a>,
+        main_update_cte: &Ciboulette2PostgresTable<'a>,
         values: Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_update_cte)?;
@@ -36,8 +36,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         request: &'a CibouletteUpdateRequest<'a>,
-        main_update_cte: &Ciboulette2PostgresTableSettings<'a>,
-        main_data_cte: &Ciboulette2PostgresTableSettings<'a>,
+        main_update_cte: &Ciboulette2PostgresTable<'a>,
+        main_data_cte: &Ciboulette2PostgresTable<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_data_cte)?;
@@ -66,10 +66,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let mut se = Self::default();
         let main_attrs = extract_data(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_main_cte_tables(&state)?;
-        let Ciboulette2PostgresMain {
+        let Ciboulette2PostgresMainResourceInformations {
             insert_values: main_update_values,
             single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::extract_fields(
+        } = crate::graph_walker::main::extract_fields_and_values(
             &ciboulette_store,
             state.main_type(),
             main_attrs.attributes(),
@@ -107,13 +107,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the CTE table for updating the main object
     fn gen_update_main_cte_tables(
         state: &Ciboulette2PostgresBuilderState<'a>
-    ) -> Result<
-        (
-            Ciboulette2PostgresTableSettings<'a>,
-            Ciboulette2PostgresTableSettings<'a>,
-        ),
-        Ciboulette2SqlError,
-    > {
+    ) -> Result<(Ciboulette2PostgresTable<'a>, Ciboulette2PostgresTable<'a>), Ciboulette2SqlError>
+    {
         let main_cte_update = state.main_table().to_cte(Cow::Owned(format!(
             "cte_{}_update",
             state.main_table().name()

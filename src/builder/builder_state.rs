@@ -2,17 +2,20 @@ use super::*;
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresBuilderState<'a> {
+/// State that'll be shared by the query builder during the whole process,
+/// allowing to pass fewer arguments per functions
+pub(crate) struct Ciboulette2PostgresBuilderState<'a> {
     store: &'a CibouletteStore<'a>,
     table_store: &'a Ciboulette2PostgresTableStore<'a>,
     path: &'a CiboulettePath<'a>,
     query: &'a CibouletteQueryParameters<'a>,
     main_type: &'a CibouletteResourceType<'a>,
-    main_table: &'a Ciboulette2PostgresTableSettings<'a>,
+    main_table: &'a Ciboulette2PostgresTable<'a>,
     expected_response_type: &'a CibouletteResponseRequiredType,
 }
 
 impl<'a> Ciboulette2PostgresBuilderState<'a> {
+    /// Check if a relationship is needed in the response.
     fn check_if_rel_is_needed(
         &self,
         other: &CibouletteResourceType<'a>,
@@ -34,6 +37,8 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
                 _ => None,
             })
     }
+
+    /// Check if a type is needed in the response
     pub fn is_type_needed(
         &self,
         other: &CibouletteResourceType<'a>,
@@ -76,6 +81,8 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
             false => None,
         })
     }
+
+    /// Create a new state
     pub fn new(
         store: &'a CibouletteStore<'a>,
         table_store: &'a Ciboulette2PostgresTableStore<'a>,

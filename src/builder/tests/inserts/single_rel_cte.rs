@@ -5,13 +5,13 @@ fn simple() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let rel_table = Ciboulette2PostgresTableSettings::new(
+    let rel_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         store.get_type("favorite_color").unwrap(),
     );
-    let main_cte_table = Ciboulette2PostgresTableSettings::new(
+    let main_cte_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
@@ -48,13 +48,13 @@ fn sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let rel_table = Ciboulette2PostgresTableSettings::new(
+    let rel_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         store.get_type("favorite_color").unwrap(),
     );
-    let main_cte_table = Ciboulette2PostgresTableSettings::new(
+    let main_cte_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),
@@ -91,13 +91,13 @@ fn empty_sparse() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
     let table_store = gen_table_store(&store);
-    let rel_table = Ciboulette2PostgresTableSettings::new(
+    let rel_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
         store.get_type("favorite_color").unwrap(),
     );
-    let main_cte_table = Ciboulette2PostgresTableSettings::new(
+    let main_cte_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("cte_peoples").unwrap(),

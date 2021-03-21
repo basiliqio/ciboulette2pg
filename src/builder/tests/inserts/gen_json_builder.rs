@@ -4,7 +4,7 @@ use super::*;
 fn no_sparse_fields() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
@@ -29,7 +29,7 @@ fn no_sparse_fields() {
 fn sparse_field() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
@@ -54,7 +54,7 @@ fn sparse_field() {
 fn sparse_field_empty() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
@@ -79,7 +79,7 @@ fn sparse_field_empty() {
 fn not_included() {
     let mut builder = Ciboulette2PostgresBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTableSettings::new(
+    let dest_table = Ciboulette2PostgresTable::new(
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
