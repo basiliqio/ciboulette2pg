@@ -343,9 +343,10 @@ fn relationship_internal_single_include() {
 fn relationship_internal_single_include_all() {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
-    let parsed_url =
-        Url::parse("http://localhost/peoples?include=favorite_color,articles,people-article")
-            .unwrap();
+    let parsed_url = Url::parse(
+        "http://localhost/peoples?include=favorite_color,articles,people-article,comments",
+    )
+    .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
         r#"

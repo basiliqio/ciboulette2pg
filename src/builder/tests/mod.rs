@@ -34,6 +34,12 @@ pub fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2Postgre
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
+            Ciboulette2PostgresSafeIdent::try_from("comments").unwrap(),
+            store.get_type("comments").unwrap(),
+        ),
+        Ciboulette2PostgresTable::new(
+            Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
+            Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
             store.get_type("favorite_color").unwrap(),
         ),

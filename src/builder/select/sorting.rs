@@ -9,7 +9,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         opt: &CibouletteRelationshipOption<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         match opt {
-            CibouletteRelationshipOption::One(opt) => {
+            CibouletteRelationshipOption::OneToOne(opt) => {
                 let main_cte_table_id = Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::from(main_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
@@ -99,7 +99,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_sorting_keys(
         &mut self,
         table: &Ciboulette2PostgresTable<'a>,
-        type_: &'a CibouletteResourceType<'a>,
+        type_: &CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         if let Some(sorting_arr) = query.sorting_map().get(&type_) {

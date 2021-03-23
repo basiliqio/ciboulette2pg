@@ -10,32 +10,51 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub fn gen_delete(
         store: &'a CibouletteStore<'a>,
         table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        query: &'a CibouletteDeleteRequest<'a>,
+        request: &'a CibouletteDeleteRequest<'a>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut se = Ciboulette2PostgresBuilder::default();
-        match query.related_type() {
+        match request.related_type() {
             Some(related_type) => {
-                let alias = query
+                let alias = request
                     .resource_type()
                     .get_alias(related_type.name().as_str())?; // Get the alias
                 let (_, opt) =
-                    store.get_rel(query.resource_type().name().as_str(), alias.as_str())?; // Get the relationship
+                    store.get_rel(request.resource_type().name().as_str(), alias.as_str())?; // Get the relationship
                 match opt {
-                    CibouletteRelationshipOption::One(opt) if *opt.optional() => {
+                    CibouletteRelationshipOption::OneToOne(opt) if *opt.optional() => {
                         // If it's an single optional value, go ahed
-                        se.gen_delete_rel(&table_store, query, opt)
+                        se.gen_delete_rel(&table_store, request, opt)
                     }
-                    CibouletteRelationshipOption::One(opt) => {
+                    CibouletteRelationshipOption::OneToOne(opt) => {
                         // Fails if it's not optional
                         return Err(Ciboulette2SqlError::RequiredRelationship(
-                            query.resource_type().name().clone(),
+                            request.resource_type().name().clone(),
                             opt.key().clone(),
+                        ));
+                    }
+                    CibouletteRelationshipOption::ManyToOne(opt)
+                    | CibouletteRelationshipOption::OneToMany(opt)
+                        if &opt.many_table() == request.resource_type() // If the deleted type is the many part of the one-to-many
+                            && &opt.one_table() == related_type // If the deleted related type is the one part of the one-to-many
+                            && *opt.optional() =>
+                    // If the field is optional
+                    {
+                        se.gen_delete_rel_one_to_many(&table_store, request, opt)
+                    }
+                    CibouletteRelationshipOption::ManyToOne(opt)
+                    | CibouletteRelationshipOption::OneToMany(opt)
+                        if &opt.many_table() == request.resource_type()
+                            && &opt.one_table() == related_type =>
+                    {
+                        return Err(Ciboulette2SqlError::RequiredRelationship(
+                            request.resource_type().name().clone(),
+                            opt.one_table().name().clone(),
                         ));
                     }
                     _ => return Err(Ciboulette2SqlError::BulkRelationshipDelete), // Fails if it's a multi relationship
                 }
             }
-            None => se.gen_delete_normal(&table_store, query), // If we're not deleting a relationships but an object
+            None => se.gen_delete_normal(&table_store, request), // If we're not deleting a relationships but an object
         }?;
         Ok(se)
     }

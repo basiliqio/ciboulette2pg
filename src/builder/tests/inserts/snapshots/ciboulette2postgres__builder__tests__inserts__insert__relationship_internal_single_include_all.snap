@@ -67,6 +67,17 @@ WITH "cte_peoples_insert" AS (
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
+),
+"cte_rel_comments_data" AS (
+  SELECT
+    "public"."comments"."id" :: TEXT AS "id",
+    $18 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($19, "public"."comments"."body") AS "data",
+    "public"."comments"."author" AS "rel_author"
+  FROM
+    "public"."comments"
+  WHERE
+    "public"."comments"."author" = "cte_peoples_data"."id"
 ) (
   SELECT
     "cte_rel_articles_data"."id",
@@ -74,6 +85,15 @@ WITH "cte_peoples_insert" AS (
     "cte_rel_articles_data"."data"
   FROM
     "cte_rel_articles_data"
+)
+UNION
+ALL (
+  SELECT
+    "cte_rel_comments_data"."id",
+    "cte_rel_comments_data"."type",
+    "cte_rel_comments_data"."data"
+  FROM
+    "cte_rel_comments_data"
 )
 UNION
 ALL (

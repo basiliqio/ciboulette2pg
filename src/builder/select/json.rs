@@ -6,7 +6,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_json_builder_routine<'b, I>(
         &mut self,
         table: &Ciboulette2PostgresTable<'_>,
-        obj: &'a MessyJsonObject<'a>,
+        obj: &'b MessyJsonObject<'b>,
         obj_name: &'b str,
         mut fields: std::iter::Peekable<I>,
     ) -> Result<(), Ciboulette2SqlError>

@@ -15,11 +15,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             .store()
             .get_rel(left_type.name().as_str(), right_type_alias)?;
         match opt {
-            CibouletteRelationshipOption::One(opt) => {
+            CibouletteRelationshipOption::OneToOne(opt) => {
                 Self::gen_inner_join_single_rel(&mut *buf, left_table, opt, right_table)?;
             }
-            CibouletteRelationshipOption::ManyDirect(opt) => {
-                Self::gen_inner_join_multi_rel(
+            CibouletteRelationshipOption::ManyToMany(opt) => {
+                Self::gen_inner_join_many_to_many_rel(
                     &mut *buf,
                     state,
                     opt,
@@ -29,8 +29,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     left_type,
                 )?;
             }
-            _ => {
-                return Err(Ciboulette2SqlError::UnknownError);
+            CibouletteRelationshipOption::ManyToOne(opt)
+            | CibouletteRelationshipOption::OneToMany(opt) => {
+                Self::gen_inner_join_one_to_many_rel_table(&mut *buf, &state, left_table, opt)?;
             }
         }
         Ok(())
@@ -66,11 +67,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    /// Gen an inner join between two tables, in case of a one-to-many relationships
-    fn gen_inner_join_multi_rel(
+    /// Gen an inner join between two tables, in case of a many-to-many relationships
+    fn gen_inner_join_many_to_many_rel(
         buf: &mut Ciboulette2PostgresBuf,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        opt: &'a CibouletteRelationshipBucket<'a>,
+        opt: &'a CibouletteRelationshipManyToManyOption<'a>,
         right_type: &'a CibouletteResourceType<'a>,
         right_table: &Ciboulette2PostgresTable<'a>,
         left_table: &Ciboulette2PostgresTable<'a>,
@@ -86,7 +87,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             right_type,
             right_table,
         )?;
-        Self::gen_inner_join_multi_rel_table(&mut *buf, left_table, opt, left_type, bucket_table)?;
+        Self::gen_inner_join_many_to_many_rel_table(
+            &mut *buf,
+            left_table,
+            opt,
+            left_type,
+            bucket_table,
+        )?;
         Ok(())
     }
 
@@ -94,7 +101,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_inner_join_multi_rel_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
         bucket_table: &Ciboulette2PostgresTable<'a>,
-        opt: &'a CibouletteRelationshipBucket<'a>,
+        opt: &'a CibouletteRelationshipManyToManyOption<'a>,
         right_type: &'a CibouletteResourceType<'a>,
         right_table: &Ciboulette2PostgresTable<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -121,11 +128,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Ok(())
     }
 
-    /// Gen an inner join between the right table and the bucket, in case of a one-to-many relationship
-    fn gen_inner_join_multi_rel_table(
+    /// Gen an inner join between the right table and the bucket, in case of a many-to-many relationship
+    fn gen_inner_join_many_to_many_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
         left_table: &Ciboulette2PostgresTable<'a>,
-        opt: &'a CibouletteRelationshipBucket<'a>,
+        opt: &'a CibouletteRelationshipManyToManyOption<'a>,
         left_type: &'a CibouletteResourceType<'a>,
         bucket_table: &Ciboulette2PostgresTable<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -147,6 +154,37 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 None,
             ),
             bucket_table,
+            None,
+        )?;
+        Ok(())
+    }
+
+    /// Gen an inner join between the right table and the bucket, in case of a one-to-many relationship
+    fn gen_inner_join_one_to_many_rel_table(
+        buf: &mut Ciboulette2PostgresBuf,
+        state: &Ciboulette2PostgresBuilderState<'a>,
+        left_table: &Ciboulette2PostgresTable<'a>,
+        opt: &'a CibouletteRelationshipOneToManyOption<'a>,
+    ) -> Result<(), Ciboulette2SqlError> {
+        let many_table = state.table_store().get(opt.many_table().name().as_str())?;
+        buf.write_all(b" INNER JOIN ")?;
+        Self::write_table_info_inner(buf, left_table)?;
+        buf.write_all(b" ON ")?;
+        Self::insert_ident_inner(
+            buf,
+            &Ciboulette2PostgresTableField::new_ref(left_table.id().get_ident(), None, None),
+            left_table,
+            None,
+        )?;
+        buf.write_all(b" = ")?;
+        Self::insert_ident_inner(
+            buf,
+            &Ciboulette2PostgresTableField::new_owned(
+                Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key().as_str())?,
+                None,
+                None,
+            ),
+            many_table,
             None,
         )?;
         Ok(())

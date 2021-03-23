@@ -48,7 +48,9 @@ lazy_static::lazy_static! {
 pub mod tests;
 
 use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
-use crate::graph_walker::relationships::Ciboulette2PostgresMainResourceRelationships;
+use crate::graph_walker::relationships::{
+    Ciboulette2PostgresMainResourceRelationships, Ciboulette2PostgresMultiRelationships,
+};
 use additional_fields::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalFieldType};
 use builder_state::Ciboulette2PostgresBuilderState;
 use field_name::Ciboulette2PostgresTableField;

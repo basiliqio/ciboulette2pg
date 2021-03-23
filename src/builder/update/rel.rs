@@ -80,7 +80,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &rels,
         )?;
 
-        se.select_single_rels_routine(&state, &main_cte_data, &rels)?;
+        se.select_one_to_one_rels_routine(&state, &main_cte_data, &rels)?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;
         se.add_working_table(

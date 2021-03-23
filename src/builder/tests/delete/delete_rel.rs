@@ -42,8 +42,9 @@ fn simple_single_rel_non_optional() {
         &ciboulette_request,
     )
     .unwrap_err();
+    println!("{:#?}", err);
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::RequiredRelationship(x, y) if x == "comments" && y == "author_id"),
+        matches!(err, Ciboulette2SqlError::RequiredRelationship(x, y) if x == "comments" && y == "peoples"),
         true
     );
 }

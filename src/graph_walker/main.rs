@@ -62,6 +62,64 @@ fn check_single_relationships<'a>(
     }
 }
 
+/// Check the informations of a one-to-many relationship
+fn check_one_to_many_relationships<'a>(
+    relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
+    from_type_: &'a CibouletteResourceType,
+    to_type_: &'a CibouletteResourceType,
+    to_type_alias: &'a str,
+    opt: &'a CibouletteRelationshipOneToManyOption,
+) -> Result<Option<(&'a str, Ciboulette2SqlValue<'a>)>, Ciboulette2SqlError> {
+    match relationships
+        .get(to_type_alias)
+        .map(|x| x.data())
+        .unwrap_or(&CibouletteOptionalData::Null(false))
+    {
+        CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
+            Ok(Some((
+                opt.many_table_key().as_str(),
+                Ciboulette2SqlValue::from(rel_id.id()),
+            )))
+        }
+        CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::Many(_)) => {
+            return Err(Ciboulette2SqlError::RequiredSingleRelationship(
+                to_type_.name().to_string(),
+            ));
+        }
+        CibouletteOptionalData::Null(x) if *x => {
+            if !opt.optional() {
+                return Err(Ciboulette2SqlError::MissingRelationship(
+                    from_type_.name().to_string(),
+                    to_type_.name().to_string(),
+                ));
+            }
+            match opt.one_table().id_type() {
+                CibouletteIdType::Number => Ok(Some((
+                    opt.many_table_key().as_str(),
+                    Ciboulette2SqlValue::Numeric(None),
+                ))),
+                CibouletteIdType::Uuid => Ok(Some((
+                    opt.many_table_key().as_str(),
+                    Ciboulette2SqlValue::Uuid(None),
+                ))),
+                CibouletteIdType::Text => Ok(Some((
+                    opt.many_table_key().as_str(),
+                    Ciboulette2SqlValue::Text(None),
+                ))),
+            }
+        }
+        CibouletteOptionalData::Null(_) => {
+            if !opt.optional() {
+                return Err(Ciboulette2SqlError::MissingRelationship(
+                    from_type_.name().to_string(),
+                    to_type_.name().to_string(),
+                ));
+            }
+            Ok(None)
+        }
+    }
+}
+
 /// Extract attributes from the request and push them to an arguments vector
 /// compatible with SQLx for later execution
 pub fn fill_attributes<'a>(
@@ -83,7 +141,7 @@ pub fn fill_attributes<'a>(
 /// Extract attribute and single relationships from the query, allowing to build the
 /// request for the main resource
 pub(crate) fn extract_fields_and_values<'a>(
-    store: &'a CibouletteStore,
+    store: &'a CibouletteStore<'a>,
     main_type: &'a CibouletteResourceType<'a>,
     attributes: &'a Option<MessyJsonObjectValue<'a>>,
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
@@ -105,18 +163,30 @@ pub(crate) fn extract_fields_and_values<'a>(
         let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
         let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
 
-        if let CibouletteRelationshipOption::One(opt) =
-            store.graph().edge_weight(edge_index).unwrap()
-        {
-            if let Some(v) =
+        match store.graph().edge_weight(edge_index).unwrap() // FIXME
+		{
+			CibouletteRelationshipOption::OneToOne(opt) => {
+				if let Some(v) =
                 check_single_relationships(&relationships, &main_type, &node_weight, alias, opt)?
             {
                 res_val.push(v); // Insert the relationship values
             }
             res_rel.push(alias.as_str());
-        } else if fails_on_many && relationships.contains_key(alias.as_str()) {
-            return Err(Ciboulette2SqlError::UpdatingManyRelationships);
-        }
+			},
+			CibouletteRelationshipOption::ManyToOne(opt) |CibouletteRelationshipOption::OneToMany(opt) if opt.part_of_many_to_many().is_none() && opt.many_table() == main_type => {
+				if let Some(v) =
+                check_one_to_many_relationships(&relationships, &main_type, &node_weight, alias, opt)?
+            {
+                res_val.push(v); // Insert the relationship values
+            }
+            res_rel.push(alias.as_str());
+			},
+			_ => {
+				if fails_on_many  && relationships.contains_key(alias.as_str()){
+					return Err(Ciboulette2SqlError::UpdatingManyRelationships);
+				}
+			}
+		}
     }
     Ok(Ciboulette2PostgresMainResourceInformations {
         insert_values: res_val,
@@ -141,7 +211,8 @@ pub(crate) fn get_resource_single_rel<'a>(
     while let Some((edge_index, node_index)) = walker.next(&store.graph()) {
         // For each connect edge outgoing from the original node
         let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
-        if let CibouletteRelationshipOption::One(_) = store.graph().edge_weight(edge_index).unwrap()
+        if let CibouletteRelationshipOption::OneToOne(_) =
+            store.graph().edge_weight(edge_index).unwrap()
         {
             let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
             res.push(alias.as_str());

@@ -26,15 +26,22 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
             .get_rel(x.name(), y.name())
             .ok()
             .and_then(|(_rel_other_type, edge_weight)| match edge_weight {
-                CibouletteRelationshipOption::Many(opt) => {
+                CibouletteRelationshipOption::ManyToMany(opt) => {
                     if opt.bucket_resource() == other {
                         Some(CibouletteResponseRequiredType::Object)
                     } else {
                         None
                     }
                 }
-                CibouletteRelationshipOption::One(_) => None,
-                _ => None,
+                CibouletteRelationshipOption::ManyToOne(opt)
+                | CibouletteRelationshipOption::OneToMany(opt) => {
+                    if opt.one_table() == other || opt.many_table() == other {
+                        Some(CibouletteResponseRequiredType::Object)
+                    } else {
+                        None
+                    }
+                }
+                CibouletteRelationshipOption::OneToOne(_) => None,
             })
     }
 
@@ -55,7 +62,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
             CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x == &other {
                 true => Some(CibouletteResponseRequiredType::Object),
                 // false => None
-                false => self.check_if_rel_is_needed(other, x, other),
+                false => None,
             },
             CiboulettePath::TypeIdRelated(x, _, y) => {
                 if x == &other {
