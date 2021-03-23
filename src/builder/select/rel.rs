@@ -126,12 +126,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                             (rel_cte_rel_data, rel_requirement_type),
                         );
                     }
-                    Ciboulette2PostgresMultiRelationships::OneToMany(opt)
-                        if opt.part_of_many_to_many().is_some() =>
+                    Ciboulette2PostgresMultiRelationships::ManyToOne(opt)
+                        if opt.part_of_many_to_many().is_none() =>
                     {
-                        continue
-                    }
-                    Ciboulette2PostgresMultiRelationships::OneToMany(opt) => {
                         self.buf.write_all(b", ")?;
                         let additional_params = Self::gen_additional_params_one_to_many_rels(opt)?;
                         let rel_table = state.table_store().get(rel_type.name().as_str())?;
@@ -149,6 +146,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         )?;
                         self.add_working_table(&rel_table, (rel_cte_data, rel_requirement_type));
                     }
+                    _ => continue,
                 }
             }
         }

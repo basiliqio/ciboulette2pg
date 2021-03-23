@@ -13,6 +13,7 @@ pub(crate) struct Ciboulette2PostgresMainResourceRelationships<'a> {
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum Ciboulette2PostgresMultiRelationships<'a> {
     OneToMany(&'a CibouletteRelationshipOneToManyOption<'a>),
+    ManyToOne(&'a CibouletteRelationshipOneToManyOption<'a>),
     ManyToMany(&'a CibouletteRelationshipManyToManyOption<'a>),
 }
 
@@ -20,6 +21,7 @@ impl<'a> Ciboulette2PostgresMultiRelationships<'a> {
     pub fn dest_resource(&self) -> &CibouletteResourceType<'a> {
         match self {
             Ciboulette2PostgresMultiRelationships::OneToMany(x) => x.many_table(),
+            Ciboulette2PostgresMultiRelationships::ManyToOne(x) => x.many_table(),
             Ciboulette2PostgresMultiRelationships::ManyToMany(x) => x.bucket_resource(),
         }
     }
@@ -30,6 +32,7 @@ impl<'a> Ciboulette2PostgresMultiRelationships<'a> {
     ) -> Result<&str, CibouletteError> {
         match self {
             Ciboulette2PostgresMultiRelationships::OneToMany(x) => Ok(x.many_table_key().as_str()),
+            Ciboulette2PostgresMultiRelationships::ManyToOne(x) => Ok(x.many_table_key().as_str()), // FIXME
             Ciboulette2PostgresMultiRelationships::ManyToMany(x) => x.keys_for_type(main_type),
         }
     }
@@ -186,8 +189,7 @@ pub(crate) fn extract_fields<'a>(
         let edge_weight = store.graph().edge_weight(edge_index).unwrap(); //TODO unwrap // Get the edge weight
         let node_weight = store.graph().node_weight(node_index).unwrap(); //TODO unwrap // Get the node weight
         match &edge_weight {
-            CibouletteRelationshipOption::ManyToOne(opt)
-            | CibouletteRelationshipOption::OneToMany(opt) => {
+            CibouletteRelationshipOption::OneToMany(opt) => {
                 let type_to_alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
                 extract_relationships(
                     &mut res,
@@ -195,6 +197,16 @@ pub(crate) fn extract_fields<'a>(
                     node_weight,
                     type_to_alias,
                     Ciboulette2PostgresMultiRelationships::OneToMany(opt),
+                );
+            }
+            CibouletteRelationshipOption::ManyToOne(opt) => {
+                let type_to_alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
+                extract_relationships(
+                    &mut res,
+                    relationships,
+                    node_weight,
+                    type_to_alias,
+                    Ciboulette2PostgresMultiRelationships::ManyToOne(opt),
                 );
             }
             CibouletteRelationshipOption::ManyToMany(opt) => {

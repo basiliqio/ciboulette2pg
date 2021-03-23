@@ -1,0 +1,18 @@
+---
+source: src/tests/select/select_success.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    }
+  }
+]
