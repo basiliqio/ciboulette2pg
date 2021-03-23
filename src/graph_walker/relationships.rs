@@ -144,20 +144,19 @@ pub(crate) fn extract_fields_rel<'a>(
         .get_type_index(rels.type_().name())
         .ok_or_else(|| CibouletteError::UnknownType(rels.type_().name().to_string()))?;
 
-    for rel in store
-        .graph()
-        .edges_connecting(*main_type_index, *rel_type_index)
-    {
-        match rel.weight() {
-            CibouletteRelationshipOption::OneToOne(opt) => {
-                return Ok(extract_single_relationships_from_ressource_identifiers(
-                    &rels, &opt,
-                )?)
-            }
-            CibouletteRelationshipOption::OneToMany(_)
-            | CibouletteRelationshipOption::ManyToOne(_)
-            | CibouletteRelationshipOption::ManyToMany(_) => {
-                return Err(Ciboulette2SqlError::UpdatingManyRelationships)
+    if let Some(rel_edge) = store.graph().find_edge(*main_type_index, *rel_type_index) {
+        if let Some(rel) = store.graph().edge_weight(rel_edge) {
+            match rel {
+                CibouletteRelationshipOption::OneToOne(opt) => {
+                    return Ok(extract_single_relationships_from_ressource_identifiers(
+                        &rels, &opt,
+                    )?)
+                }
+                CibouletteRelationshipOption::OneToMany(_)
+                | CibouletteRelationshipOption::ManyToOne(_)
+                | CibouletteRelationshipOption::ManyToMany(_) => {
+                    return Err(Ciboulette2SqlError::UpdatingManyRelationships)
+                }
             }
         }
     }
