@@ -122,3 +122,51 @@ async fn select_one_to_one_relationships(mut transaction: sqlx::Transaction<'_, 
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
+
+#[ciboulette2postgres_test]
+async fn select_one_to_many_relationships(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!("/peoples/{}/relationships/comments", people_id).as_str(),
+        "",
+        &data,
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows!(res);
+}
+
+#[ciboulette2postgres_test]
+async fn select_many_to_one_relationships(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("comments").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!("/comments/{}/relationships/author", people_id).as_str(),
+        "",
+        &data,
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows!(res);
+}
+
+#[ciboulette2postgres_test]
+async fn select_many_to_many_relationships(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_select(
+        &mut transaction,
+        format!("/peoples/{}/relationships/articles", people_id).as_str(),
+        "",
+        &data,
+    )
+    .await;
+    let res =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    check_rows!(res);
+}
