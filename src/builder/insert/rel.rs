@@ -119,7 +119,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 }
             }
         }
-        self.select_multi_rels_routine(state, main_cte_data, rels)?;
+        self.select_multi_rels_routine(
+            state,
+            main_cte_data,
+            rels,
+            Ciboulette2PostgresBuilderState::is_needed_all,
+        )?;
         Ok(())
     }
 }

@@ -8,6 +8,7 @@ mod builder_state;
 mod delete;
 mod field_name;
 mod insert;
+mod is_needed;
 mod relationships;
 mod select;
 mod update;

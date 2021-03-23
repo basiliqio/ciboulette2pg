@@ -16,7 +16,7 @@ pub(crate) struct Ciboulette2PostgresBuilderState<'a> {
 
 impl<'a> Ciboulette2PostgresBuilderState<'a> {
     /// Check if a relationship is needed in the response.
-    fn check_if_rel_is_needed(
+    pub(crate) fn check_if_rel_is_needed(
         &self,
         other: &CibouletteResourceType<'a>,
         x: &CibouletteResourceType<'a>,
@@ -43,54 +43,6 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
                 }
                 CibouletteRelationshipOption::OneToOne(_) => None,
             })
-    }
-
-    /// Check if a type is needed in the response
-    pub fn is_type_needed(
-        &self,
-        other: &CibouletteResourceType<'a>,
-    ) -> Option<CibouletteResponseRequiredType> {
-        match self.query().include().contains(other) {
-            true => Some(**self.expected_response_type()),
-            false => None,
-        }
-        .or_else(|| match self.query().include().contains(other) {
-            true => Some(CibouletteResponseRequiredType::Object),
-            false => None,
-        })
-        .or_else(|| match self.path() {
-            CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x == &other {
-                true => Some(CibouletteResponseRequiredType::Object),
-                // false => None
-                false => None,
-            },
-            CiboulettePath::TypeIdRelated(x, _, y) => {
-                if x == &other {
-                    Some(CibouletteResponseRequiredType::None)
-                } else if y == &other {
-                    Some(CibouletteResponseRequiredType::Object)
-                } else {
-                    self.check_if_rel_is_needed(other, x, y)
-                }
-            }
-            CiboulettePath::TypeIdRelationship(x, _, y) => {
-                if x == &other {
-                    Some(CibouletteResponseRequiredType::None)
-                } else if y == &other {
-                    Some(CibouletteResponseRequiredType::Id)
-                } else {
-                    self.check_if_rel_is_needed(other, x, y)
-                }
-            }
-        })
-        .or_else(|| match &other == self.main_type() {
-            true => Some(CibouletteResponseRequiredType::Object),
-            false => None,
-        })
-        .or_else(|| match self.query().sorting_map().contains_key(other) {
-            true => Some(CibouletteResponseRequiredType::None),
-            false => None,
-        })
     }
 
     /// Create a new state

@@ -2,13 +2,20 @@ use super::*;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Select into a new CTE a one-to-one relationship
-    pub(crate) fn select_one_to_one_rels_routine(
+    pub(crate) fn select_one_to_one_rels_routine<F>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         main_type: &'a CibouletteResourceType<'a>,
         main_cte_data: &Ciboulette2PostgresTable<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
-    ) -> Result<(), Ciboulette2SqlError> {
+        is_needed_cb: F,
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        F: Fn(
+            &Ciboulette2PostgresBuilderState<'a>,
+            &CibouletteResourceType<'a>,
+        ) -> Option<CibouletteResponseRequiredType>,
+    {
         for (rel_key, additional_fields) in rels
             .single_rels_keys()
             .iter()
@@ -16,7 +23,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         {
             let rel_type: &CibouletteResourceType =
                 main_type.get_relationship(&state.store(), rel_key)?;
-            if let Some(requirement_type) = state.is_type_needed(&rel_type) {
+            if let Some(requirement_type) = is_needed_cb(&state, &rel_type) {
                 let rel_table: &Ciboulette2PostgresTable = state.table_store().get(rel_key)?;
                 let rel_table_cte: Ciboulette2PostgresTable =
                     rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
@@ -80,12 +87,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     /// Create new CTE with relationships data and relationships linking data
-    pub(crate) fn select_multi_rels_routine(
+    pub(crate) fn select_multi_rels_routine<F>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         main_cte_data: &Ciboulette2PostgresTable<'a>,
         rels: &[Ciboulette2PostgresMainResourceRelationships<'a>],
-    ) -> Result<(), Ciboulette2SqlError> {
+        is_needed_cb: F,
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        F: Fn(
+            &Ciboulette2PostgresBuilderState<'a>,
+            &CibouletteResourceType<'a>,
+        ) -> Option<CibouletteResponseRequiredType>,
+    {
         let rel_iter = rels.iter().peekable();
         for Ciboulette2PostgresMainResourceRelationships {
             type_: rel_type,
@@ -93,7 +107,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             values: _rel_ids,
         } in rel_iter
         {
-            if let Some(rel_requirement_type) = state.is_type_needed(&rel_type) {
+            if let Some(rel_requirement_type) = is_needed_cb(&state, &rel_type) {
                 match bucket {
                     Ciboulette2PostgresMultiRelationships::ManyToMany(opt) => {
                         self.buf.write_all(b", ")?;

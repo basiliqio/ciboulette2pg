@@ -18,8 +18,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b"WITH \n")?;
         se.gen_main_select(&state, &main_cte_data, &rels)?;
 
-        se.select_one_to_one_rels_routine(&state, state.main_type(), &main_cte_data, &rels)?;
-        se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels())?;
+        let is_needed_cb = match request.path() {
+            CiboulettePath::TypeIdRelationship(_, _, _) => {
+                Ciboulette2PostgresBuilderState::is_needed_all_for_relationships
+            }
+            _ => Ciboulette2PostgresBuilderState::is_needed_all,
+        };
+        se.select_one_to_one_rels_routine(
+            &state,
+            state.main_type(),
+            &main_cte_data,
+            &rels,
+            is_needed_cb,
+        )?;
+        se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels(), is_needed_cb)?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;
         se.add_working_table(
             &state.main_table(),

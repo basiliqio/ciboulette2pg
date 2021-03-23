@@ -1,0 +1,17 @@
+---
+source: src/tests/select/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": null
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": null
+  }
+]
