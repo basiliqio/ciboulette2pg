@@ -33,7 +33,7 @@ async fn test_update<'a>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body_opt);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update_main(
+    let builder = Ciboulette2PostgresBuilder::gen_update(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,

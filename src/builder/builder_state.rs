@@ -50,7 +50,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         &self,
         other: &CibouletteResourceType<'a>,
     ) -> Option<CibouletteResponseRequiredType> {
-        match &other == self.main_type() {
+        match self.query().include().contains(other) {
             true => Some(**self.expected_response_type()),
             false => None,
         }
@@ -82,6 +82,10 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
                     self.check_if_rel_is_needed(other, x, y)
                 }
             }
+        })
+        .or_else(|| match &other == self.main_type() {
+            true => Some(CibouletteResponseRequiredType::Object),
+            false => None,
         })
         .or_else(|| match self.query().sorting_map().contains_key(other) {
             true => Some(CibouletteResponseRequiredType::None),

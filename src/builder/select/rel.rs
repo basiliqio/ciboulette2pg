@@ -5,6 +5,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn select_one_to_one_rels_routine(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
+        main_type: &'a CibouletteResourceType<'a>,
         main_cte_data: &Ciboulette2PostgresTable<'a>,
         rels: &Ciboulette2SqlQueryRels<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -13,9 +14,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             .iter()
             .zip(rels.single_rels_additional_fields().iter())
         {
-            let rel_type: &CibouletteResourceType = state
-                .main_type()
-                .get_relationship(&state.store(), rel_key)?;
+            let rel_type: &CibouletteResourceType =
+                main_type.get_relationship(&state.store(), rel_key)?;
             if let Some(requirement_type) = state.is_type_needed(&rel_type) {
                 let rel_table: &Ciboulette2PostgresTable = state.table_store().get(rel_key)?;
                 let rel_table_cte: Ciboulette2PostgresTable =

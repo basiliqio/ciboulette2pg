@@ -18,7 +18,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b"WITH \n")?;
         se.gen_main_select(&state, &main_cte_data, &rels)?;
 
-        se.select_one_to_one_rels_routine(&state, &main_cte_data, &rels)?;
+        se.select_one_to_one_rels_routine(&state, state.main_type(), &main_cte_data, &rels)?;
         se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels())?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;
         se.add_working_table(
@@ -86,10 +86,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &state.main_table(),
             &state.main_type(),
             rels.single_rels_additional_fields().iter(),
-            true,
+            !matches!(state.path(), CiboulettePath::TypeIdRelationship(_, _, _)),
         )?;
         match state.path() {
-            CiboulettePath::TypeIdRelated(left_type, id, right_type) => self
+            CiboulettePath::TypeIdRelationship(left_type, id, right_type)
+            | CiboulettePath::TypeIdRelated(left_type, id, right_type) => self
                 .gen_matcher_for_related_select(
                     state.table_store(),
                     left_type,
@@ -97,9 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     state,
                     id,
                 )?,
-            CiboulettePath::TypeId(_, id) | CiboulettePath::TypeIdRelationship(_, id, _) => {
-                self.gen_matcher_for_normal_select(state, id)?
-            }
+            CiboulettePath::TypeId(_, id) => self.gen_matcher_for_normal_select(state, id)?,
             _ => (),
         }
         self.buf.write_all(b")")?;

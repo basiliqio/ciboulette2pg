@@ -22,7 +22,7 @@ fn simple() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update_rel(
+    let builder = Ciboulette2PostgresBuilder::gen_update(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,
@@ -52,7 +52,7 @@ fn forced_null() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update_rel(
+    let builder = Ciboulette2PostgresBuilder::gen_update(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,
@@ -92,7 +92,7 @@ fn forbidden_multi_ids() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_update_rel(
+    let err = Ciboulette2PostgresBuilder::gen_update(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,
@@ -129,7 +129,7 @@ fn forbidden_one_to_many() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_update_rel(
+    let err = Ciboulette2PostgresBuilder::gen_update(
         &ciboulette_store,
         &table_store,
         &ciboulette_request,

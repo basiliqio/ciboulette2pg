@@ -7,7 +7,7 @@ pub mod utils;
 
 impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate a normal update with a simple `WHERE` selecting a single id
-    pub fn gen_update_normal(
+    pub(crate) fn gen_update_normal(
         &mut self,
         table: &Ciboulette2PostgresTable,
         params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
@@ -29,5 +29,33 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             self.buf.write_all(b" RETURNING *")?;
         }
         Ok(())
+    }
+
+    /// Generate the CTE table for updating an object
+    fn gen_update_cte_tables(
+        main_type: &'a Ciboulette2PostgresTable<'a>
+    ) -> Result<(Ciboulette2PostgresTable<'a>, Ciboulette2PostgresTable<'a>), Ciboulette2SqlError>
+    {
+        let main_cte_update =
+            main_type.to_cte(Cow::Owned(format!("cte_{}_update", main_type.name())))?;
+        let main_cte_data =
+            main_type.to_cte(Cow::Owned(format!("cte_{}_data", main_type.name())))?;
+        Ok((main_cte_update, main_cte_data))
+    }
+
+    pub fn gen_update(
+        ciboulette_store: &'a CibouletteStore<'a>,
+        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
+        request: &'a CibouletteUpdateRequest<'a>,
+    ) -> Result<Self, Ciboulette2SqlError> {
+        match request.path() {
+            CiboulettePath::TypeId(_, _) => {
+                Self::gen_update_main(&ciboulette_store, &ciboulette_table_store, &request)
+            }
+            CiboulettePath::TypeIdRelationship(type_, _, _) => {
+                Self::gen_update_rel(&ciboulette_store, &ciboulette_table_store, &request, &type_)
+            }
+            _ => unreachable!(), // FIXME
+        }
     }
 }

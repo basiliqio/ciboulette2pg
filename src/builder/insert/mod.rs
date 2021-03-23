@@ -33,7 +33,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.buf.write_all(b"WITH ")?;
         se.write_main_table_inserts(&main_cte_insert, &state, main_inserts_values)?;
         se.write_main_table_select(&main_cte_data, &state, main_cte_insert, &rels)?;
-        se.select_one_to_one_rels_routine(&state, &&main_cte_data, &rels)?;
+        se.select_one_to_one_rels_routine(&state, state.main_type(), &main_cte_data, &rels)?;
         se.inserts_handle_many_to_many_rels(&state, &main_cte_data, rels.multi_rels())?;
         se.buf.write_all(b" ")?;
         se.add_working_table(

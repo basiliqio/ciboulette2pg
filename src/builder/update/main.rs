@@ -57,7 +57,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     ///
     /// Update the main objects and its one-to-one relationships
     /// Fails if trying to update one-to-many relationships
-    pub fn gen_update_main(
+    pub(crate) fn gen_update_main(
         ciboulette_store: &'a CibouletteStore<'a>,
         ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
         request: &'a CibouletteUpdateRequest<'a>,
@@ -65,7 +65,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let mut se = Self::default();
         let main_attrs = extract_data(&request)?;
-        let (main_cte_update, main_cte_data) = Self::gen_update_main_cte_tables(&state)?;
+        let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&state.main_table())?;
         let Ciboulette2PostgresMainResourceInformations {
             insert_values: main_update_values,
             single_relationships: main_single_relationships,
@@ -91,7 +91,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             main_update_values,
         )?;
         se.gen_update_main_update_data(&state, &request, &main_cte_update, &main_cte_data, &rels)?;
-        se.select_one_to_one_rels_routine(&state, &main_cte_data, &rels)?;
+        se.select_one_to_one_rels_routine(&state, &state.main_type(), &main_cte_data, &rels)?;
         se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels())?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;
@@ -102,21 +102,5 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;
         Ok(se)
-    }
-
-    /// Generate the CTE table for updating the main object
-    fn gen_update_main_cte_tables(
-        state: &Ciboulette2PostgresBuilderState<'a>
-    ) -> Result<(Ciboulette2PostgresTable<'a>, Ciboulette2PostgresTable<'a>), Ciboulette2SqlError>
-    {
-        let main_cte_update = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_update",
-            state.main_table().name()
-        )))?;
-        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_data",
-            state.main_table().name()
-        )))?;
-        Ok((main_cte_update, main_cte_data))
     }
 }

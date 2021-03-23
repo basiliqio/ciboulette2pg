@@ -13,12 +13,8 @@ async fn test_update_fails<'a>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    Ciboulette2PostgresBuilder::gen_update_main(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap_err()
+    Ciboulette2PostgresBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+        .unwrap_err()
 }
 
 #[ciboulette2postgres_test]
