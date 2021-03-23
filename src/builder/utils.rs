@@ -157,10 +157,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 included_tables.push(main_cte_table);
                 continue;
             }
-            let (_, opt) = state.store().get_rel(
-                state.main_type().name().as_str(),
-                el.type_().name().as_str(),
-            )?;
+            let type_alias = state.main_type().get_alias(el.type_().name().as_str())?;
+            let (_, opt) = state
+                .store()
+                .get_rel(state.main_type().name().as_str(), type_alias.as_str())?;
             let (included_table, _) = included_tables_map
                 .get(state.table_store().get(el.type_().name().as_str())?)
                 .ok_or_else(|| {

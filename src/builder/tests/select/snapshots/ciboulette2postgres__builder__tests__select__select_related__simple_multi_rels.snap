@@ -38,7 +38,7 @@ WITH "cte_articles_data" AS (
     NULL :: json AS "data"
   FROM
     "public"."peoples"
-    INNER JOIN "cte_rel_peoples_rel_data" ON "cte_rel_peoples_rel_data"."rel_article_id" :: TEXT = "public"."peoples"."id" :: TEXT
+    INNER JOIN "cte_rel_peoples_rel_data" ON "cte_rel_peoples_rel_data"."rel_people_id" :: TEXT = "public"."peoples"."id" :: TEXT
 )(
   SELECT
     "cte_articles_data"."id",

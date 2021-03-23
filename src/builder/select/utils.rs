@@ -42,6 +42,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 &ciboulette_store,
                 &main_type,
             )?;
-        Ciboulette2SqlQueryRels::new(main_single_relationships, rels)
+        Ciboulette2SqlQueryRels::new(&main_type, main_single_relationships, rels)
     }
 }

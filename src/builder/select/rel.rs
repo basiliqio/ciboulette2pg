@@ -40,7 +40,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     /// Create 2 additional fields to select containing the linking key of the related table in the bucket table
     fn gen_additional_params_many_to_many_rels(
-        rels: &'a CibouletteRelationshipManyToManyOption
+        rels: &'a CibouletteRelationshipManyToManyOption<'a>
     ) -> Result<[Ciboulette2SqlAdditionalField<'a>; 2], Ciboulette2SqlError> {
         Ok([
             Ciboulette2SqlAdditionalField::new(
@@ -50,6 +50,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     None,
                 ),
                 Ciboulette2SqlAdditionalFieldType::Relationship,
+                &rels.keys()[0].0,
             )?,
             Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new_owned(
@@ -58,13 +59,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     None,
                 ),
                 Ciboulette2SqlAdditionalFieldType::Relationship,
+                &rels.keys()[1].0,
             )?,
         ])
     }
 
     /// Create 2 additional fields to select containing the linking key of the related table in the bucket table
     fn gen_additional_params_one_to_many_rels(
-        rels: &'a CibouletteRelationshipOneToManyOption
+        rels: &'a CibouletteRelationshipOneToManyOption<'a>
     ) -> Result<[Ciboulette2SqlAdditionalField<'a>; 1], Ciboulette2SqlError> {
         Ok([Ciboulette2SqlAdditionalField::new(
             Ciboulette2PostgresTableField::new_owned(
@@ -73,6 +75,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 None,
             ),
             Ciboulette2SqlAdditionalFieldType::Relationship,
+            rels.many_table(),
         )?])
     }
 
@@ -117,7 +120,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                             state,
                             rel_table,
                             &rel_cte_rel_data,
-                            &additional_params[0],
+                            match additional_params[0].ciboulette_type() == main_cte_data.ciboulette_type() // Match the type that's not compatible with the main one
+							{
+								true => &additional_params[1],
+								false => &additional_params[0],
+							},
                             &rel_requirement_type,
                         )?;
                         self.add_working_table(&rel_table, (rel_cte_data, rel_requirement_type));

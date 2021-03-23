@@ -13,10 +13,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 let main_cte_table_id = Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::from(main_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
+                    main_table.ciboulette_type(),
                 )?;
                 let rel_cte_table_id = Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::from(rel_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
+                    rel_table.ciboulette_type(),
                 )?;
                 Self::gen_left_join_single_main_table(
                     &mut *buf,
@@ -99,7 +101,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_sorting_keys(
         &mut self,
         table: &Ciboulette2PostgresTable<'a>,
-        type_: &CibouletteResourceType<'a>,
+        type_: &'a CibouletteResourceType<'a>,
         query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         if let Some(sorting_arr) = query.sorting_map().get(&type_) {
@@ -110,6 +112,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         Ciboulette2SqlAdditionalField::new(
                             Ciboulette2PostgresTableField::try_from(el)?,
                             Ciboulette2SqlAdditionalFieldType::Sorting,
+                            type_,
                         )?,
                     ),
                     table,

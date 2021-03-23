@@ -29,7 +29,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &request.path().main_type(),
             Some(request.data().relationships()),
         )?;
-        let rels = Ciboulette2SqlQueryRels::new(main_single_relationships, multi_rels)?;
+        let rels = Ciboulette2SqlQueryRels::new(
+            &state.main_type(),
+            main_single_relationships,
+            multi_rels,
+        )?;
         se.buf.write_all(b"WITH ")?;
         se.write_main_table_inserts(&main_cte_insert, &state, main_inserts_values)?;
         se.write_main_table_select(&main_cte_data, &state, main_cte_insert, &rels)?;

@@ -24,6 +24,14 @@ async fn test_select<'a>(
     )
     .unwrap();
     let (query, args) = builder.build().unwrap();
+    println!(
+        "{}",
+        sqlformat::format(
+            query.as_str(),
+            &sqlformat::QueryParams::None,
+            sqlformat::FormatOptions::default()
+        )
+    );
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut *transaction)
         .await

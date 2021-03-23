@@ -71,7 +71,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &request.resource_type(),
             &rels,
         )?;
-        let rels = Ciboulette2SqlQueryRels::new(single_relationships, vec![])?;
+        let rels = Ciboulette2SqlQueryRels::new(&main_type, single_relationships, vec![])?;
         se.buf.write_all(b"WITH ")?;
         se.gen_update_rel_update(&request, &main_table, &main_cte_update, rel_values)?;
         se.gen_update_rel_data(

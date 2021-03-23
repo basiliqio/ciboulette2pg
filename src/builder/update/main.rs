@@ -81,8 +81,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             state.main_type(),
             Some(main_attrs.relationships()),
         )?;
-        let rels =
-            Ciboulette2SqlQueryRels::new(main_single_relationships, main_multi_relationships)?;
+        let rels = Ciboulette2SqlQueryRels::new(
+            state.main_type(),
+            main_single_relationships,
+            main_multi_relationships,
+        )?;
         se.buf.write_all(b"WITH ")?;
         se.gen_update_main_update(
             &request,

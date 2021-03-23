@@ -13,6 +13,7 @@ pub(crate) struct Ciboulette2SqlQueryRels<'a> {
 
 impl<'a> Ciboulette2SqlQueryRels<'a> {
     pub fn new(
+        type_: &'a CibouletteResourceType<'a>,
         single_rels_keys: Vec<&'a str>,
         multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
     ) -> Result<Self, Ciboulette2SqlError> {
@@ -26,6 +27,7 @@ impl<'a> Ciboulette2SqlQueryRels<'a> {
                     None,
                 ),
                 Ciboulette2SqlAdditionalFieldType::Relationship,
+                &type_,
             )?)
         }
         Ok(Ciboulette2SqlQueryRels {

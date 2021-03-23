@@ -56,6 +56,48 @@ macro_rules! ciboulette_query_test_multi {
 }
 
 #[macro_export]
+macro_rules! ciboulette_query_test_related {
+    ($transform_function:ident) => {
+        ciboulette_query_test_routine!(
+            related_sorting_by_child_full_path,
+            $transform_function,
+            "/peoples/{}/articles?sort=articles.body",
+            "peoples"
+        );
+        ciboulette_query_test_routine!(
+            related_sorting_by_child,
+            $transform_function,
+            "/peoples/{}/articles?sort=title",
+            "peoples"
+        );
+        ciboulette_query_test_routine!(
+            related_sparse_child,
+            $transform_function,
+            "/peoples/{}/articles?fields[articles]=title",
+            "peoples"
+        );
+        ciboulette_query_test_routine!(
+            related_sort_and_sparse,
+            $transform_function,
+            "/peoples/{}/articles?fields[articles]=title&sort=articles.body",
+            "peoples"
+        );
+        ciboulette_query_test_routine!(
+            related_include_root,
+            $transform_function,
+            "/peoples/{}/articles?include=peoples",
+            "peoples"
+        );
+        ciboulette_query_test_routine!(
+            related_include_and_sparse,
+            $transform_function,
+            "/peoples/{}/articles?include=peoples&fields[peoples]=first-name",
+            "peoples"
+        );
+    };
+}
+
+#[macro_export]
 macro_rules! ciboulette_query_test_single {
     ($transform_function:ident) => {
         ciboulette_query_test_routine!(
