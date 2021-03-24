@@ -1,0 +1,19 @@
+---
+source: src/tests/update/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type": "comments",
+    "data": {
+      "body": "Wasnt convinced..."
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": null
+  }
+]

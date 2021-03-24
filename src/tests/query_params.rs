@@ -98,43 +98,85 @@ macro_rules! ciboulette_query_test_related {
 }
 
 #[macro_export]
-macro_rules! ciboulette_query_test_relationship {
+macro_rules! ciboulette_query_test_relationship_many_to_many {
     ($transform_function:ident) => {
         ciboulette_query_test_routine!(
-            relationships_sorting_by_child_full_path,
+            relationships_many_to_many_sorting_by_child_full_path,
             $transform_function,
             "/peoples/{}/relationships/articles?sort=articles.body",
             "peoples"
         );
         ciboulette_query_test_routine!(
-            relationships_sorting_by_child,
+            relationships_many_to_many_sorting_by_child,
             $transform_function,
             "/peoples/{}/relationships/articles?sort=title",
             "peoples"
         );
         ciboulette_query_test_routine!(
-            relationships_sparse_child,
+            relationships_many_to_many_sparse_child,
             $transform_function,
             "/peoples/{}/relationships/articles?fields[articles]=title",
             "peoples"
         );
         ciboulette_query_test_routine!(
-            relationships_sort_and_sparse,
+            relationships_many_to_many_sort_and_sparse,
             $transform_function,
             "/peoples/{}/relationships/articles?fields[articles]=title&sort=articles.body",
             "peoples"
         );
         ciboulette_query_test_routine!(
-            relationships_include_root,
+            relationships_many_to_many_include_root,
             $transform_function,
             "/peoples/{}/relationships/articles?include=peoples",
             "peoples"
         );
         ciboulette_query_test_routine!(
-            relationships_include_and_sparse,
+            relationships_many_to_many_include_and_sparse,
             $transform_function,
             "/peoples/{}/relationships/articles?include=peoples&fields[peoples]=first-name",
             "peoples"
+        );
+    };
+}
+
+#[macro_export]
+macro_rules! ciboulette_query_test_relationship_many_to_one {
+    ($transform_function:ident) => {
+        ciboulette_query_test_routine!(
+            relationships_many_to_one_sorting_by_child_full_path,
+            $transform_function,
+            "/comments/{}/relationships/author?sort=peoples.first-name",
+            "comments"
+        );
+        ciboulette_query_test_routine!(
+            relationships_many_to_one_sorting_by_child,
+            $transform_function,
+            "/comments/{}/relationships/author?sort=first-name",
+            "comments"
+        );
+        ciboulette_query_test_routine!(
+            relationships_many_to_one_sparse_child,
+            $transform_function,
+            "/comments/{}/relationships/author?fields[peoples]=first-name",
+            "comments"
+        );
+        ciboulette_query_test_routine!(
+            relationships_many_to_one_sort_and_sparse,
+            $transform_function,
+            "/comments/{}/relationships/author?fields[peoples]=first-name&sort=peoples.last-name",
+            "comments"
+        );
+        ciboulette_query_test_routine!(
+            relationships_many_to_one_include_root,
+            $transform_function,
+            "/comments/{}/relationships/author?include=articles",
+            "comments"
+        );
+        ciboulette_query_test_routine!(
+            relationships_many_to_one_include_and_sparse,
+            $transform_function,
+            "/comments/{}/relationships/author?include=articles&fields[peoples]=first-name",
+            "comments"
         );
     };
 }

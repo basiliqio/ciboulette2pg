@@ -29,6 +29,8 @@ pub async fn snapshot_table(
         ".*.*.id" => insta::dynamic_redaction(check_uuid),
         ".*.*.people_id" => insta::dynamic_redaction(check_uuid),
         ".*.*.article_id" => insta::dynamic_redaction(check_uuid),
+        ".*.*.articles" => insta::dynamic_redaction(check_uuid),
+        ".*.*.author" => insta::dynamic_redaction(check_uuid),
         ".*.*.favorite_color" => insta::dynamic_redaction(|value, _path| {
             match value
             .as_str()

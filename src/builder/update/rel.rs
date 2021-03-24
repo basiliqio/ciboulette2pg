@@ -86,7 +86,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &main_type,
             &main_cte_data,
             &rels,
-            Ciboulette2PostgresBuilderState::is_needed_all,
+            Ciboulette2PostgresBuilderState::is_needed_updating_relationships,
         )?;
         se.buf.write_all(b" ")?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;

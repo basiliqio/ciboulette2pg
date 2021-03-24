@@ -18,11 +18,28 @@ async fn test_update_fails<'a>(
 }
 
 #[ciboulette2postgres_test]
-async fn updating_one_to_many_rels(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+async fn updating_many_to_many_rels(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let err = test_update_fails(
         format!("/peoples/{}/relationships/articles", people_id).as_str(),
+        json!({ "data": serde_json::Value::Null })
+            .to_string()
+            .as_str(),
+    )
+    .await;
+    assert_eq!(
+        matches!(err, Ciboulette2SqlError::UpdatingManyRelationships),
+        true
+    );
+}
+
+#[ciboulette2postgres_test]
+async fn updating_one_to_many_rels(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let err = test_update_fails(
+        format!("/peoples/{}/relationships/comments", people_id).as_str(),
         json!({ "data": serde_json::Value::Null })
             .to_string()
             .as_str(),

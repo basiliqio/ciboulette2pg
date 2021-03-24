@@ -52,6 +52,16 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         }
     }
 
+    pub(crate) fn is_needed_updating_relationships(
+        &self,
+        other: &CibouletteResourceType<'a>,
+    ) -> Option<CibouletteResponseRequiredType> {
+        match &other == self.main_type() {
+            true => Some(CibouletteResponseRequiredType::Id),
+            false => None,
+        }
+    }
+
     fn is_needed_sorting(
         &self,
         other: &CibouletteResourceType<'a>,

@@ -68,6 +68,38 @@ async fn set_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) 
 }
 
 #[ciboulette2postgres_test]
+async fn set_many_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+    let data = init_values::init_values(&mut transaction).await;
+    baseline_for_people!(transaction);
+    let people_id = data.get("peoples").unwrap().last().unwrap();
+    let comment_id = data.get("comments").unwrap().first().unwrap();
+    let raw_rows = test_update(
+        &mut transaction,
+        format!("/comments/{}/relationships/author", comment_id).as_str(),
+        json!({
+            "data": json!({
+                "type": "peoples",
+                "id": people_id
+            })
+        })
+        .to_string()
+        .as_str(),
+    )
+    .await;
+    let rows =
+        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    snapshot_table(&mut transaction, "update_many_to_one", &["comments"]).await;
+    for row in rows.into_iter() {
+        if row.type_() != &"peoples" {
+            continue;
+        }
+        assert_eq!(row.id(), &people_id.to_string().as_str());
+        return;
+    }
+    panic!("The relation hasn't been returned");
+}
+
+#[ciboulette2postgres_test]
 async fn unset_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;
     baseline_for_people!(transaction);

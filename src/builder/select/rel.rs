@@ -24,7 +24,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             let rel_type: &CibouletteResourceType =
                 main_type.get_relationship(&state.store(), rel_key)?;
             if let Some(requirement_type) = is_needed_cb(&state, &rel_type) {
-                let rel_table: &Ciboulette2PostgresTable = state.table_store().get(rel_key)?;
+                let rel_table: &Ciboulette2PostgresTable =
+                    state.table_store().get(rel_type.name().as_str())?;
                 let rel_table_cte: Ciboulette2PostgresTable =
                     rel_table.to_cte(Cow::Owned(format!("cte_{}_data", rel_table.name())))?;
                 self.buf.write_all(b", ")?;

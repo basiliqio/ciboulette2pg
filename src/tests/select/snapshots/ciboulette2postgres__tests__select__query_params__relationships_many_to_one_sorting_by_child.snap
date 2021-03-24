@@ -1,0 +1,12 @@
+---
+source: src/tests/select/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": null
+  }
+]
