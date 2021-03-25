@@ -6,7 +6,9 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 SELECT
   "public"."favorite_color"."id" :: TEXT AS "id",
   $1 :: TEXT AS "type",
-  NULL :: json AS "data"
+  NULL :: json AS "data",
+  "public"."cte_peoples"."id" :: TEXT AS "related_id",
+  $2 :: TEXT AS "related_type"
 FROM
   "public"."favorite_color"
   INNER JOIN "public"."cte_peoples" ON "public"."favorite_color"."id" = "public"."cte_peoples"."favorite_color";

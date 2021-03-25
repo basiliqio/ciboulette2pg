@@ -26,6 +26,7 @@ fn simple() {
             &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
+            None,
             [].iter(),
             true,
         )
@@ -62,6 +63,7 @@ fn sparse() {
             &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
+            None,
             [].iter(),
             true,
         )
@@ -97,6 +99,7 @@ fn empty_sparse() {
             &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
+            None,
             [].iter(),
             true,
         )
@@ -132,6 +135,7 @@ fn non_included() {
             &state,
             &dest_table,
             store.get_type("peoples").unwrap(),
+            None,
             [].iter(),
             false,
         )

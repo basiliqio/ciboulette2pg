@@ -9,10 +9,13 @@ mod delete;
 mod field_name;
 mod insert;
 mod is_needed;
+mod relating_field;
 mod relationships;
 mod select;
 mod update;
 mod utils;
+
+use relating_field::Ciboulette2PostgresRelatingField;
 
 #[macro_export]
 macro_rules! get_state {

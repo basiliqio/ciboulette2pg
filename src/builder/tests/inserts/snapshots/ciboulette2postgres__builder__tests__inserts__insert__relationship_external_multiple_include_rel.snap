@@ -33,15 +33,17 @@ WITH "cte_peoples_insert" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     $9 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($10, "public"."favorite_color"."color") AS "data"
+    JSON_BUILD_OBJECT($10, "public"."favorite_color"."color") AS "data",
+    "cte_peoples_data"."id" :: TEXT AS "related_id",
+    $11 :: TEXT AS "related_type"
   FROM
     "public"."favorite_color"
     INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
 ),
 "cte_rel_articles_id" AS (
   VALUES
-    ($11 :: UUID),
-    ($12 :: UUID)
+    ($12 :: UUID),
+    ($13 :: UUID)
 ),
 "cte_rel_articles_insert" AS (
   INSERT INTO
@@ -67,13 +69,15 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $13 :: TEXT AS "type",
+    $14 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $14,
-      "public"."articles"."body",
       $15,
+      "public"."articles"."body",
+      $16,
       "public"."articles"."title"
-    ) AS "data"
+    ) AS "data",
+    "cte_rel_articles_rel_data"."rel_people_id" :: TEXT AS "related_id",
+    $17 :: TEXT AS "related_type"
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT

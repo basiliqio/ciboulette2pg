@@ -33,7 +33,9 @@ WITH "cte_peoples_insert" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     $10 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($11, "public"."favorite_color"."color") AS "data"
+    JSON_BUILD_OBJECT($11, "public"."favorite_color"."color") AS "data",
+    "cte_peoples_data"."id" :: TEXT AS "related_id",
+    $12 :: TEXT AS "related_type"
   FROM
     "public"."favorite_color"
     INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
@@ -50,13 +52,15 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $12 :: TEXT AS "type",
+    $13 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $13,
-      "public"."articles"."body",
       $14,
+      "public"."articles"."body",
+      $15,
       "public"."articles"."title"
-    ) AS "data"
+    ) AS "data",
+    "cte_rel_articles_rel_data"."rel_people_id" :: TEXT AS "related_id",
+    $16 :: TEXT AS "related_type"
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
@@ -64,8 +68,10 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_comments_data" AS (
   SELECT
     "public"."comments"."id" :: TEXT AS "id",
-    $15 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($16, "public"."comments"."body") AS "data",
+    $17 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($18, "public"."comments"."body") AS "data",
+    "public"."comments"."author" :: TEXT AS "related_id",
+    $19 :: TEXT AS "related_type",
     "public"."comments"."author" AS "rel_author"
   FROM
     "public"."comments"

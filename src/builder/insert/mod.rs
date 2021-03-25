@@ -69,6 +69,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             state,
             &main_cte_insert,
             &state.main_type(),
+            None,
             rels.single_rels_additional_fields().iter(),
             true,
         )?;

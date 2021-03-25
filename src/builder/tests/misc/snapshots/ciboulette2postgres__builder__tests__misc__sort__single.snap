@@ -29,6 +29,8 @@ WITH "cte_peoples_data" AS (
     "public"."favorite_color"."id" :: TEXT AS "id",
     $7 :: TEXT AS "type",
     NULL :: json AS "data",
+    "cte_peoples_data"."id" :: TEXT AS "related_id",
+    $8 :: TEXT AS "related_type",
     "public"."favorite_color"."id" :: UUID AS "_id",
     "public"."favorite_color"."color" AS "sort_color"
   FROM

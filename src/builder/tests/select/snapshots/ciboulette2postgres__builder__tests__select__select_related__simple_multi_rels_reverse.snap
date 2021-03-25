@@ -40,7 +40,9 @@ WITH "cte_peoples_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
     $8 :: TEXT AS "type",
-    NULL :: json AS "data"
+    NULL :: json AS "data",
+    "cte_rel_articles_rel_data"."rel_people_id" :: TEXT AS "related_id",
+    $9 :: TEXT AS "related_type"
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT

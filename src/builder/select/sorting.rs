@@ -98,7 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         Ok(())
     }
-    pub(crate) fn gen_sorting_keys(
+    pub(crate) fn gen_sorting_keys<'b>(
         &mut self,
         table: &Ciboulette2PostgresTable<'a>,
         type_: &'a CibouletteResourceType<'a>,

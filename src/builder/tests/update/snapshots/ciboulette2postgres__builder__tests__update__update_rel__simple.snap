@@ -35,7 +35,9 @@ WITH "cte_peoples_update" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     $9 :: TEXT AS "type",
-    NULL :: json AS "data"
+    NULL :: json AS "data",
+    "cte_peoples_data"."id" :: TEXT AS "related_id",
+    $10 :: TEXT AS "related_type"
   FROM
     "public"."favorite_color"
     INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"

@@ -50,7 +50,9 @@ WITH "cte_peoples_update" AS (
       "public"."articles"."body",
       $12,
       "public"."articles"."title"
-    ) AS "data"
+    ) AS "data",
+    "cte_rel_articles_rel_data"."rel_people_id" :: TEXT AS "related_id",
+    $13 :: TEXT AS "related_type"
   FROM
     "public"."articles"
     INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT

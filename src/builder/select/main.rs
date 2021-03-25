@@ -97,6 +97,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             state,
             &state.main_table(),
             &state.main_type(),
+            None,
             rels.single_rels_additional_fields().iter(),
             !matches!(state.path(), CiboulettePath::TypeIdRelationship(_, _, _)),
         )?;
