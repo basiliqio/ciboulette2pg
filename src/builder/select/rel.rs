@@ -219,6 +219,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     /// Generate the CTE to include a relationship (many-to-many) linking data to the query
+    #[allow(clippy::too_many_arguments)] //FIXME
     fn gen_select_many_to_many_rels_rel_data(
         &mut self,
         rel_cte_data: &Ciboulette2PostgresTable<'a>,

@@ -1,5 +1,4 @@
 use super::*;
-
 #[ciboulette2postgres_test]
 async fn select_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     let data = init_values::init_values(&mut transaction).await;

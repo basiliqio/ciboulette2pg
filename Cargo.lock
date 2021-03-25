@@ -198,6 +198,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#2846e175abbb2c6fbd13289b3822b44a948661a2"
 dependencies = [
  "getset",
  "itertools",
@@ -207,6 +208,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
+ "sqlx",
  "thiserror",
  "url",
  "uuid",
@@ -253,6 +255,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#2846e175abbb2c6fbd13289b3822b44a948661a2"
 dependencies = [
  "ciboulette",
  "messy_json",
