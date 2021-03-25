@@ -4,7 +4,10 @@ use super::*;
 #[inline]
 fn extract_data<'a>(
     request: &'a CibouletteUpdateRequest<'a>
-) -> Result<&'a CibouletteResource<'a, CibouletteResourceIdentifier<'a>>, Ciboulette2SqlError> {
+) -> Result<
+    &'a CibouletteResource<'a, MessyJsonObjectValue<'a>, CibouletteResourceIdentifier<'a>>,
+    Ciboulette2SqlError,
+> {
     match request.data() {
         CibouletteUpdateRequestType::MainType(attr) => Ok(attr),
         CibouletteUpdateRequestType::Relationship(_) => {

@@ -54,8 +54,8 @@ async fn set_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) 
         .as_str(),
     )
     .await;
-    let rows =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let rows = Ciboulette2PostgresRowBuilder::from_raw(&raw_rows)
+        .expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_one_to_one", &["peoples"]).await;
     for row in rows.into_iter() {
         if row.type_() != &"favorite_color" {
@@ -86,8 +86,8 @@ async fn set_many_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>)
         .as_str(),
     )
     .await;
-    let rows =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let rows = Ciboulette2PostgresRowBuilder::from_raw(&raw_rows)
+        .expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_many_to_one", &["comments"]).await;
     for row in rows.into_iter() {
         if row.type_() != &"peoples" {
@@ -112,6 +112,6 @@ async fn unset_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>
             .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_unset_one_to_one", &["peoples"]).await;
 }

@@ -56,7 +56,7 @@ async fn main_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_main_fields", &["peoples"]).await;
 }
 
@@ -90,7 +90,7 @@ async fn single_rel(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "update_single_rel_with_fields",
@@ -126,7 +126,7 @@ async fn single_rel_unset(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "update_single_rel_unset_with_fields",
@@ -156,6 +156,6 @@ async fn unsetting_a_field(mut transaction: sqlx::Transaction<'_, sqlx::Postgres
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "unsetting_main_field", &["peoples"]).await;
 }

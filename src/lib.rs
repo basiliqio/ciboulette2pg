@@ -15,7 +15,7 @@ mod value;
 pub use builder::Ciboulette2PostgresBuilder;
 use builder::Ciboulette2SqlArguments;
 use ciboulette::*;
-pub use ciboulette_row::Ciboulette2PostgresRow;
+pub use ciboulette_row::{Ciboulette2PostgresRow, Ciboulette2PostgresRowBuilder};
 pub use errors::Ciboulette2SqlError;
 use getset::Getters;
 use messy_json::{

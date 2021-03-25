@@ -7,7 +7,7 @@ macro_rules! ciboulette_query_test_routine {
             let raw_rows =
                 $transform_function(&mut transaction, $query_string, stringify!($name), &data)
                     .await;
-            let res = Ciboulette2PostgresRow::from_raw(&raw_rows)
+            let res = Ciboulette2PostgresRowBuilder::from_raw(&raw_rows)
                 .expect("to deserialize the returned rows");
             check_rows!(res);
         }
@@ -25,7 +25,7 @@ macro_rules! ciboulette_query_test_routine {
                 &data,
             )
             .await;
-            let res = Ciboulette2PostgresRow::from_raw(&raw_rows)
+            let res = Ciboulette2PostgresRowBuilder::from_raw(&raw_rows)
                 .expect("to deserialize the returned rows");
             check_rows!(res);
         }
