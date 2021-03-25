@@ -58,13 +58,6 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
-    $13 :: TEXT AS "type",
-    JSON_BUILD_OBJECT(
-      $14,
-      "public"."people-article"."article_id",
-      $15,
-      "public"."people-article"."people_id"
-    ) AS "data",
     "public"."people-article"."article_id" AS "rel_article_id",
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
@@ -74,11 +67,11 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
-    $16 :: TEXT AS "type",
+    $13 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
-      $17,
+      $14,
       "public"."articles"."body",
-      $18,
+      $15,
       "public"."articles"."title"
     ) AS "data"
   FROM
@@ -100,15 +93,6 @@ ALL (
     "cte_favorite_color_data"."data"
   FROM
     "cte_favorite_color_data"
-)
-UNION
-ALL (
-  SELECT
-    "cte_rel_articles_rel_data"."id",
-    "cte_rel_articles_rel_data"."type",
-    "cte_rel_articles_rel_data"."data"
-  FROM
-    "cte_rel_articles_rel_data"
 )
 UNION
 ALL (

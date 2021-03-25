@@ -65,9 +65,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         'a: 'b,
         I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'a>>,
     {
-        // SELECT
         self.buf.write_all(b"SELECT ")?;
-        // SELECT "schema"."mytable"."id"
         self.insert_ident(
             &Ciboulette2PostgresTableField::new_cow(
                 Cow::Borrowed(table.id().get_ident()),
@@ -76,25 +74,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             ),
             table,
         )?;
-        // SELECT "schema"."mytable"."id",
         self.buf.write_all(b", ")?;
-        // SELECT "schema"."mytable"."id", $0
         self.insert_params(
             Ciboulette2SqlValue::Text(Some(Cow::Borrowed(type_.name().as_ref()))), // TODO do better
             table,
         )?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type",
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..)
         self.gen_json_builder(table, type_, state.query(), include)?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM
         self.buf.write_all(b" AS \"data\"")?;
-        // if let Some(additional_fields) = additional_fields {
         self.handle_additionnal_params(&state, &table, additional_fields)?;
-        // }
         self.gen_sorting_keys(&table, &type_, &state.query())?;
         self.buf.write_all(b" FROM ")?;
-        // SELECT "schema"."mytable"."id", $0::TEXT AS "type", JSON_BUILD_OBJECT(..) AS "data" FROM "schema"."other_table"
         self.write_table_info(table)?;
         Ok(())
     }

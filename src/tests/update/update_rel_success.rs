@@ -58,7 +58,7 @@ async fn set_one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) 
         .expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_one_to_one", &["peoples"]).await;
     for row in rows.into_iter() {
-        if row.type_() != &"favorite_color" {
+        if row.type_() != "favorite_color" {
             continue;
         }
         assert_eq!(row.id(), &favorite_color.to_string().as_str());
@@ -90,7 +90,7 @@ async fn set_many_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>)
         .expect("to deserialize the returned rows");
     snapshot_table(&mut transaction, "update_many_to_one", &["comments"]).await;
     for row in rows.into_iter() {
-        if row.type_() != &"peoples" {
+        if row.type_() != "peoples" {
             continue;
         }
         assert_eq!(row.id(), &people_id.to_string().as_str());

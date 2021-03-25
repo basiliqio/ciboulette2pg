@@ -22,22 +22,6 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type": "people-article",
-    "data": {
-      "article_id": "[uuid]",
-      "people_id": "[uuid]"
-    }
-  },
-  {
-    "id": "[uuid]",
-    "type": "people-article",
-    "data": {
-      "article_id": "[uuid]",
-      "people_id": "[uuid]"
-    }
-  },
-  {
-    "id": "[uuid]",
     "type": "peoples",
     "data": {
       "age": 22,

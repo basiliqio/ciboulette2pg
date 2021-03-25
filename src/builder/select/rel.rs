@@ -127,7 +127,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                             bucket,
                             &additional_params,
                             main_cte_data,
-                            &rel_requirement_type,
                         )?;
                         self.buf.write_all(b"), ")?;
                         self.gen_select_many_to_many_rels_rel_data(
@@ -143,10 +142,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                             &rel_requirement_type,
                         )?;
                         self.add_working_table(&rel_table, (rel_cte_data, rel_requirement_type));
-                        self.add_working_table(
-                            &rel_rel_table,
-                            (rel_cte_rel_data, rel_requirement_type),
-                        );
+                        // self.add_working_table(
+                        //     &rel_rel_table,
+                        //     (rel_cte_rel_data, rel_requirement_type),
+                        // );
                     }
                     Ciboulette2PostgresMultiRelationships::ManyToOne(opt)
                         if opt.part_of_many_to_many().is_none() =>
@@ -256,22 +255,24 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         bucket: &Ciboulette2PostgresMultiRelationships<'a>,
         additional_params: &[Ciboulette2SqlAdditionalField<'a>],
         main_cte_data: &Ciboulette2PostgresTable<'a>,
-        rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         let dest_resource = state
             .store()
             .get_type(bucket.dest_resource().name().as_str())
             .unwrap(); //FIXME
-        self.gen_select_cte_final(
-            &state,
-            &rel_rel_table,
-            &dest_resource,
-            additional_params.iter(),
-            matches!(
-                rel_requirement_type,
-                Ciboulette2PostgresResponseType::Object
+        self.buf.write_all(b"SELECT ")?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new_cow(
+                Cow::Borrowed(rel_rel_table.id().get_ident()),
+                Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("id")?)),
+                Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("TEXT")?)),
             ),
+            rel_rel_table,
         )?;
+        self.handle_additionnal_params(&state, &rel_rel_table, additional_params.iter())?;
+        self.gen_sorting_keys(&rel_rel_table, &dest_resource, &state.query())?;
+        self.buf.write_all(b" FROM ")?;
+        self.write_table_info(rel_rel_table)?;
         self.buf.write_all(b" INNER JOIN ")?;
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" ON ")?;
