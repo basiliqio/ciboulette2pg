@@ -14,7 +14,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         F: Fn(
             &Ciboulette2PostgresBuilderState<'a>,
             &CibouletteResourceType<'a>,
-        ) -> Option<CibouletteResponseRequiredType>,
+        ) -> Option<Ciboulette2PostgresResponseType>,
     {
         for (rel_key, additional_fields) in rels
             .single_rels_keys()
@@ -99,7 +99,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         F: Fn(
             &Ciboulette2PostgresBuilderState<'a>,
             &CibouletteResourceType<'a>,
-        ) -> Option<CibouletteResponseRequiredType>,
+        ) -> Option<Ciboulette2PostgresResponseType>,
     {
         let rel_iter = rels.iter().peekable();
         for Ciboulette2PostgresMainResourceRelationships {
@@ -183,14 +183,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         main_cte_data: &Ciboulette2PostgresTable<'a>,
         additional_params: &[Ciboulette2SqlAdditionalField<'a>],
         opt: &CibouletteRelationshipOneToManyOption<'a>,
-        rel_requirement_type: &CibouletteResponseRequiredType,
+        rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         self.gen_select_cte_final(
             &state,
             &rel_table,
             &rel_table.ciboulette_type(),
             additional_params.iter(),
-            matches!(rel_requirement_type, CibouletteResponseRequiredType::Object),
+            matches!(
+                rel_requirement_type,
+                Ciboulette2PostgresResponseType::Object
+            ),
         )?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
@@ -218,7 +221,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         rel_table: &Ciboulette2PostgresTable<'a>,
         rel_cte_rel_data: &Ciboulette2PostgresTable<'a>,
         left_additional_params: &Ciboulette2SqlAdditionalField<'a>,
-        rel_requirement_type: &CibouletteResponseRequiredType,
+        rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(rel_cte_data)?;
         self.buf.write_all(b" AS (")?;
@@ -227,7 +230,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &rel_table,
             &rel_table.ciboulette_type(),
             [].iter(),
-            matches!(rel_requirement_type, CibouletteResponseRequiredType::Object),
+            matches!(
+                rel_requirement_type,
+                Ciboulette2PostgresResponseType::Object
+            ),
         )?;
         self.buf.write_all(b" INNER JOIN ")?;
         self.write_table_info(rel_cte_rel_data)?;
@@ -250,7 +256,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         bucket: &Ciboulette2PostgresMultiRelationships<'a>,
         additional_params: &[Ciboulette2SqlAdditionalField<'a>],
         main_cte_data: &Ciboulette2PostgresTable<'a>,
-        rel_requirement_type: &CibouletteResponseRequiredType,
+        rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         let dest_resource = state
             .store()
@@ -261,7 +267,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             &rel_rel_table,
             &dest_resource,
             additional_params.iter(),
-            matches!(rel_requirement_type, CibouletteResponseRequiredType::Object),
+            matches!(
+                rel_requirement_type,
+                Ciboulette2PostgresResponseType::Object
+            ),
         )?;
         self.buf.write_all(b" INNER JOIN ")?;
         self.write_table_info(&main_cte_data)?;
@@ -287,14 +296,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         type_: &'a CibouletteResourceType<'a>,
         main_cte_table: &Ciboulette2PostgresTable<'a>,
         field_id: &Ciboulette2PostgresSafeIdent<'a>,
-        requirement_type: &CibouletteResponseRequiredType,
+        requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         self.gen_select_cte_final(
             &state,
             &table,
             &type_,
             [].iter(),
-            matches!(requirement_type, CibouletteResponseRequiredType::Object),
+            matches!(requirement_type, Ciboulette2PostgresResponseType::Object),
         )?;
         self.buf.write_all(b" INNER JOIN ")?;
         self.write_table_info(&main_cte_table)?;

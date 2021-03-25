@@ -111,7 +111,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.gen_cte_for_sort(&state, &main_cte_data)?;
         se.add_working_table(
             &state.main_table(),
-            (main_cte_data, CibouletteResponseRequiredType::Object),
+            (main_cte_data, Ciboulette2PostgresResponseType::Object),
         );
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;

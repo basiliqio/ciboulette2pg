@@ -22,7 +22,7 @@ macro_rules! get_state {
             $ciboulette_table_store,
             $req.path(),
             $req.query(),
-            $req.expected_response_type(),
+            Ciboulette2PostgresResponseType::from(*$req.expected_response_type()),
         )
     };
 }
@@ -99,7 +99,10 @@ pub struct Ciboulette2PostgresBuilder<'a> {
     #[getset(get_mut = "pub")]
     working_tables: BTreeMap<
         &'a Ciboulette2PostgresTable<'a>,
-        (Ciboulette2PostgresTable<'a>, CibouletteResponseRequiredType),
+        (
+            Ciboulette2PostgresTable<'a>,
+            Ciboulette2PostgresResponseType,
+        ),
     >,
 }
 
@@ -119,7 +122,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn add_working_table(
         &mut self,
         main_table: &'a Ciboulette2PostgresTable<'a>,
-        val: (Ciboulette2PostgresTable<'a>, CibouletteResponseRequiredType),
+        val: (
+            Ciboulette2PostgresTable<'a>,
+            Ciboulette2PostgresResponseType,
+        ),
     ) {
         self.working_tables.insert(main_table, val);
     }

@@ -11,7 +11,7 @@ pub(crate) struct Ciboulette2PostgresBuilderState<'a> {
     query: &'a CibouletteQueryParameters<'a>,
     main_type: &'a CibouletteResourceType<'a>,
     main_table: &'a Ciboulette2PostgresTable<'a>,
-    expected_response_type: &'a CibouletteResponseRequiredType,
+    expected_response_type: Ciboulette2PostgresResponseType,
 }
 
 impl<'a> Ciboulette2PostgresBuilderState<'a> {
@@ -21,14 +21,14 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         other: &CibouletteResourceType<'a>,
         x: &CibouletteResourceType<'a>,
         y: &CibouletteResourceType<'a>,
-    ) -> Option<CibouletteResponseRequiredType> {
+    ) -> Option<Ciboulette2PostgresResponseType> {
         self.store()
             .get_rel(x.name(), y.name())
             .ok()
             .and_then(|(_rel_other_type, edge_weight)| match edge_weight {
                 CibouletteRelationshipOption::ManyToMany(opt) => {
                     if opt.bucket_resource() == other {
-                        Some(CibouletteResponseRequiredType::Object)
+                        Some(Ciboulette2PostgresResponseType::Object)
                     } else {
                         None
                     }
@@ -36,7 +36,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
                 CibouletteRelationshipOption::ManyToOne(opt)
                 | CibouletteRelationshipOption::OneToMany(opt) => {
                     if opt.one_table() == other || opt.many_table() == other {
-                        Some(CibouletteResponseRequiredType::Object)
+                        Some(Ciboulette2PostgresResponseType::Object)
                     } else {
                         None
                     }
@@ -51,7 +51,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         table_store: &'a Ciboulette2PostgresTableStore<'a>,
         path: &'a CiboulettePath<'a>,
         query: &'a CibouletteQueryParameters<'a>,
-        expected_response_type: &'a CibouletteResponseRequiredType,
+        expected_response_type: Ciboulette2PostgresResponseType,
     ) -> Result<Self, Ciboulette2SqlError> {
         let main_type = path.main_type();
         let main_table = table_store.get(main_type.name().as_str())?;

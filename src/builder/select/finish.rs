@@ -10,7 +10,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         })?;
         let mut first_one = true;
         for (table, is_needed) in self.working_tables.values() {
-            if matches!(is_needed, CibouletteResponseRequiredType::None) {
+            if matches!(is_needed, Ciboulette2PostgresResponseType::None) {
                 continue;
             } else if !first_one {
                 self.buf.write_all(b" UNION ALL ")?;

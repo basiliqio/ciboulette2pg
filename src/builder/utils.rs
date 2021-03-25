@@ -143,7 +143,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         table: &Ciboulette2PostgresTable<'a>,
         included_tables_map: &BTreeMap<
             &'a Ciboulette2PostgresTable<'a>,
-            (Ciboulette2PostgresTable<'a>, CibouletteResponseRequiredType),
+            (
+                Ciboulette2PostgresTable<'a>,
+                Ciboulette2PostgresResponseType,
+            ),
         >,
     ) -> Result<(), Ciboulette2SqlError> {
         if main_cte_table != table {
