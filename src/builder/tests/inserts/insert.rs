@@ -22,7 +22,7 @@ fn simple() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -70,7 +70,7 @@ fn relationship_external_single() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -123,7 +123,7 @@ fn relationship_external_multiple() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -176,7 +176,7 @@ fn relationship_external_multiple_include() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -231,7 +231,7 @@ fn relationship_external_multiple_include_rel() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -278,7 +278,7 @@ fn relationship_internal_single() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -325,7 +325,7 @@ fn relationship_internal_single_include() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(
@@ -375,7 +375,7 @@ fn relationship_internal_single_include_all() {
 	"#,
     );
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_insert(

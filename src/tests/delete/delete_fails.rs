@@ -6,7 +6,7 @@ async fn test_delete_fails<'a>(query_end: &str) -> Ciboulette2SqlError {
     let parsed_url = Url::parse(format!("http://localhost{}", query_end).as_str()).unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Delete;
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
     Ciboulette2PostgresBuilder::gen_delete(&ciboulette_store, &table_store, &ciboulette_request)

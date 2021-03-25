@@ -9,7 +9,7 @@ fn simple_multi_rels() {
     let parsed_url = Url::parse(url_str.as_str()).unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(
@@ -31,7 +31,7 @@ fn simple_multi_rels_reverse() {
     let parsed_url = Url::parse(url_str.as_str()).unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(
@@ -53,7 +53,7 @@ fn simple_single_rel() {
     let parsed_url = Url::parse(url_str.as_str()).unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(

@@ -10,7 +10,7 @@ async fn test_update_fails<'a>(
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
     let body: Option<&str> = Some(body);
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
     Ciboulette2PostgresBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)

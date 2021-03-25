@@ -7,7 +7,7 @@ fn multi() {
     let parsed_url = Url::parse("http://localhost/peoples?sort=articles.title").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let error = Ciboulette2PostgresBuilder::gen_select(
@@ -30,7 +30,7 @@ fn single() {
     let parsed_url = Url::parse("http://localhost/peoples?sort=favorite_color.color").unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(

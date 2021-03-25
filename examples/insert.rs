@@ -37,7 +37,7 @@
 //     let req_url = Url::parse("http://localhost:8080/peoples").unwrap();
 //     let store = gen_bag();
 //     let req: CibouletteCreateRequest =
-//         CibouletteRequestBuilder::new(CibouletteIntention::Create, &req_url, &Some(BODY))
+//         CibouletteInboundRequestBuilder::new(CibouletteIntention::Create, &req_url, &Some(BODY))
 //             .build(&store)
 //             .unwrap()
 //             .try_into()
