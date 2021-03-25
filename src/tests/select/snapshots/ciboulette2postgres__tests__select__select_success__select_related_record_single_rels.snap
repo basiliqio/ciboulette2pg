@@ -9,6 +9,7 @@ expression: value
     "type": "favorite_color",
     "data": {
       "color": "red"
-    }
+    },
+    "related": null
   }
 ]

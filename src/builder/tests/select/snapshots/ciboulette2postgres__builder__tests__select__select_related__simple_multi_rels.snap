@@ -12,7 +12,9 @@ WITH "cte_articles_data" AS (
       "public"."articles"."body",
       $3,
       "public"."articles"."title"
-    ) AS "data"
+    ) AS "data",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type"
   FROM
     "public"."articles"
     INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
@@ -43,7 +45,9 @@ WITH "cte_articles_data" AS (
   SELECT
     "cte_articles_data"."id",
     "cte_articles_data"."type",
-    "cte_articles_data"."data"
+    "cte_articles_data"."data",
+    "cte_articles_data"."related_type",
+    "cte_articles_data"."related_id"
   FROM
     "cte_articles_data"
 );

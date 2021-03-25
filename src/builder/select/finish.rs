@@ -39,6 +39,20 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 table,
                 None,
             )?;
+            self.buf.write_all(b", ")?;
+            Self::insert_ident_inner(
+                &mut self.buf,
+                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_RELATED_TYPE_IDENT, None, None),
+                table,
+                None,
+            )?;
+            self.buf.write_all(b", ")?;
+            Self::insert_ident_inner(
+                &mut self.buf,
+                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_RELATED_ID_IDENT, None, None),
+                table,
+                None,
+            )?;
             self.buf.write_all(b" FROM ")?;
             // SELECT * FROM "schema"."mytable"
             Self::write_table_info_inner(&mut self.buf, table)?;
@@ -82,18 +96,23 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
         self.gen_json_builder(table, type_, state.query(), include)?;
-        self.buf.write_all(b" AS \"data\"")?;
-        if let Some(relating_field) = relating_field {
-            self.buf.write_all(b", ")?;
-            self.insert_ident(relating_field.field(), relating_field.table())?;
-            self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
-            self.insert_params(
-                Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
-                    relating_field.related_type().name().as_ref(),
-                ))), // TODO do better
-                relating_field.table(),
-            )?;
-            self.buf.write_all(b"::TEXT AS \"related_type\"")?;
+        self.buf.write_all(b" AS \"data\", ")?;
+        match relating_field {
+            Some(relating_field) => {
+                self.insert_ident(relating_field.field(), relating_field.table())?;
+                self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
+                self.insert_params(
+                    Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
+                        relating_field.related_type().name().as_ref(),
+                    ))), // TODO do better
+                    relating_field.table(),
+                )?;
+                self.buf.write_all(b"::TEXT AS \"related_type\"")?;
+            }
+            None => {
+                self.buf
+                    .write_all(b"NULL::TEXT AS \"related_id\", NULL::TEXT AS \"related_type\"")?;
+            }
         }
         self.handle_additionnal_params(&state, &table, additional_fields)?;
         self.gen_sorting_keys(&table, &type_, &state.query())?;

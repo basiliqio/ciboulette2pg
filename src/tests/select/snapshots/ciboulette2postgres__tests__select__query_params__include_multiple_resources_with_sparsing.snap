@@ -9,6 +9,11 @@ expression: value
     "type": "articles",
     "data": {
       "title": "How to dead"
+    },
+    "related": {
+      "type": "peoples",
+      "id": "[uuid]",
+      "meta": null
     }
   },
   {
@@ -16,6 +21,11 @@ expression: value
     "type": "articles",
     "data": {
       "title": "Oh my g**"
+    },
+    "related": {
+      "type": "peoples",
+      "id": "[uuid]",
+      "meta": null
     }
   },
   {
@@ -23,6 +33,7 @@ expression: value
     "type": "peoples",
     "data": {
       "last-name": "Le Roy"
-    }
+    },
+    "related": null
   }
 ]

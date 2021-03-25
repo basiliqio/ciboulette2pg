@@ -10,7 +10,8 @@ expression: value
     "data": {
       "body": "Yes",
       "title": "How to dead"
-    }
+    },
+    "related": null
   },
   {
     "id": "[uuid]",
@@ -18,6 +19,19 @@ expression: value
     "data": {
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
+    },
+    "related": null
+  },
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "first-name": "Francis"
+    },
+    "related": {
+      "type": "articles",
+      "id": "[uuid]",
+      "meta": null
     }
   },
   {
@@ -25,13 +39,11 @@ expression: value
     "type": "peoples",
     "data": {
       "first-name": "Francis"
-    }
-  },
-  {
-    "id": "[uuid]",
-    "type": "peoples",
-    "data": {
-      "first-name": "Francis"
+    },
+    "related": {
+      "type": "articles",
+      "id": "[uuid]",
+      "meta": null
     }
   },
   {
@@ -39,6 +51,11 @@ expression: value
     "type": "peoples",
     "data": {
       "first-name": "Somebody"
+    },
+    "related": {
+      "type": "articles",
+      "id": "[uuid]",
+      "meta": null
     }
   }
 ]

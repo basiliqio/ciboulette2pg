@@ -1,4 +1,5 @@
 use crate::Ciboulette2SqlError;
+use ciboulette::{CibouletteId, CibouletteResourceIdentifier};
 use getset::CopyGetters;
 use getset::Getters;
 use serde::Serialize;
@@ -12,6 +13,7 @@ pub struct Ciboulette2PostgresRow<'a> {
     #[serde(rename = "type")]
     pub(crate) type_: Cow<'a, str>,
     pub(crate) data: Option<&'a serde_json::value::RawValue>, // TODO doesn't make it an option
+    pub(crate) related: Option<CibouletteResourceIdentifier<'a>>,
 }
 
 /// Row returned by a query
@@ -26,6 +28,10 @@ pub struct Ciboulette2PostgresRowBuilder<'a> {
     type_: &'a str,
     #[getset(get = "pub")]
     data: Option<&'a serde_json::value::RawValue>, // TODO doesn't make it an option
+    #[getset(get = "pub")]
+    related_type: Option<&'a str>,
+    #[getset(get = "pub")]
+    related_id: Option<&'a str>,
 }
 
 impl<'a> Ciboulette2PostgresRowBuilder<'a> {
@@ -44,10 +50,19 @@ impl<'a> Ciboulette2PostgresRowBuilder<'a> {
 
 impl<'a> From<Ciboulette2PostgresRowBuilder<'a>> for Ciboulette2PostgresRow<'a> {
     fn from(other: Ciboulette2PostgresRowBuilder<'a>) -> Ciboulette2PostgresRow<'a> {
+        let identifier = match (other.related_type, other.related_id) {
+            (Some(related_type), Some(related_id)) => Some(CibouletteResourceIdentifier {
+                type_: Cow::Borrowed(related_type),
+                id: CibouletteId::Text(Cow::Borrowed(related_id)),
+                meta: serde_json::Value::Null,
+            }),
+            _ => None,
+        };
         Ciboulette2PostgresRow {
             id: Cow::Borrowed(other.id),
             type_: Cow::Borrowed(other.type_),
             data: other.data,
+            related: identifier,
         }
     }
 }

@@ -44,6 +44,7 @@ macro_rules! check_rows {
     	insta::assert_json_snapshot!(value,
     	{
     	    "[].id" => insta::dynamic_redaction(check_uuid),
+    	    "[].related.id" => insta::dynamic_redaction(check_uuid),
     	    "[].data.article_id" => insta::dynamic_redaction(check_uuid),
     	    "[].data.people_id" => insta::dynamic_redaction(check_uuid)
     	});

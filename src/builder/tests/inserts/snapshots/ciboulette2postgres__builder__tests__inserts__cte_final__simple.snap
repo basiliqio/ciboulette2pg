@@ -17,6 +17,8 @@ SELECT
     "public"."peoples"."last-name",
     $6,
     "public"."peoples"."twitter"
-  ) AS "data"
+  ) AS "data",
+  NULL :: TEXT AS "related_id",
+  NULL :: TEXT AS "related_type"
 FROM
   "public"."peoples";

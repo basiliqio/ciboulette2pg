@@ -10,6 +10,11 @@ expression: value
     "data": {
       "body": "Yes",
       "title": "How to dead"
+    },
+    "related": {
+      "type": "peoples",
+      "id": "[uuid]",
+      "meta": null
     }
   },
   {
@@ -18,6 +23,11 @@ expression: value
     "data": {
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
+    },
+    "related": {
+      "type": "peoples",
+      "id": "[uuid]",
+      "meta": null
     }
   },
   {
@@ -29,6 +39,7 @@ expression: value
       "gender": "M",
       "last-name": "Le Roy",
       "twitter": null
-    }
+    },
+    "related": null
   }
 ]

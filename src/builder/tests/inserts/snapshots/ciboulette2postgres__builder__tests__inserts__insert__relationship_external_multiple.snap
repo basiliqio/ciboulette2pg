@@ -25,6 +25,8 @@ WITH "cte_peoples_insert" AS (
       $8,
       "cte_peoples_insert"."twitter"
     ) AS "data",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
     "cte_peoples_insert"."favorite_color" AS "rel_favorite_color"
   FROM
     "cte_peoples_insert"
@@ -49,7 +51,9 @@ WITH "cte_peoples_insert" AS (
   SELECT
     "cte_peoples_data"."id",
     "cte_peoples_data"."type",
-    "cte_peoples_data"."data"
+    "cte_peoples_data"."data",
+    "cte_peoples_data"."related_type",
+    "cte_peoples_data"."related_id"
   FROM
     "cte_peoples_data"
 );

@@ -9,11 +9,17 @@ expression: value
     "type": "comments",
     "data": {
       "body": "Wasnt convinced..."
-    }
+    },
+    "related": null
   },
   {
     "id": "[uuid]",
     "type": "peoples",
-    "data": null
+    "data": null,
+    "related": {
+      "type": "comments",
+      "id": "[uuid]",
+      "meta": null
+    }
   }
 ]

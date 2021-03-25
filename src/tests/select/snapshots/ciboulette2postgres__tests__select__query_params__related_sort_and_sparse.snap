@@ -9,13 +9,15 @@ expression: value
     "type": "articles",
     "data": {
       "title": "Oh my g**"
-    }
+    },
+    "related": null
   },
   {
     "id": "[uuid]",
     "type": "articles",
     "data": {
       "title": "How to dead"
-    }
+    },
+    "related": null
   }
 ]

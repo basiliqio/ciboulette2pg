@@ -46,6 +46,14 @@ lazy_static::lazy_static! {
     static ref CIBOULETTE_DATA_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
         Ciboulette2PostgresSafeIdent::try_from("data").unwrap()
     };
+
+    static ref CIBOULETTE_RELATED_ID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+        Ciboulette2PostgresSafeIdent::try_from("related_id").unwrap()
+    };
+
+    static ref CIBOULETTE_RELATED_TYPE_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
+        Ciboulette2PostgresSafeIdent::try_from("related_type").unwrap()
+    };
 }
 
 #[cfg(test)]

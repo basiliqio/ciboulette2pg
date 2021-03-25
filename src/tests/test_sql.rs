@@ -27,6 +27,7 @@ pub async fn snapshot_table(
         serde_json::Value::Object(map),
     {
         ".*.*.id" => insta::dynamic_redaction(check_uuid),
+        ".*.*.related.id" => insta::dynamic_redaction(check_uuid),
         ".*.*.people_id" => insta::dynamic_redaction(check_uuid),
         ".*.*.article_id" => insta::dynamic_redaction(check_uuid),
         ".*.*.articles" => insta::dynamic_redaction(check_uuid),
