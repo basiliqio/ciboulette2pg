@@ -11,10 +11,8 @@ expression: value
       "body": "Yes",
       "title": "How to dead"
     },
-    "related": {
-      "type": "peoples",
-      "id": "[uuid]"
-    }
+    "related_type": "peoples",
+    "related_id": "[uuid]"
   },
   {
     "id": "[uuid]",
@@ -23,10 +21,8 @@ expression: value
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
     },
-    "related": {
-      "type": "peoples",
-      "id": "[uuid]"
-    }
+    "related_type": "peoples",
+    "related_id": "[uuid]"
   },
   {
     "id": "[uuid]",
@@ -37,7 +33,6 @@ expression: value
       "gender": "M",
       "last-name": "Le Roy",
       "twitter": null
-    },
-    "related": null
+    }
   }
 ]

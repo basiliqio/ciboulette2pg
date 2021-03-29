@@ -9,7 +9,6 @@ expression: value
     "type": "peoples",
     "data": {
       "first-name": "Francis"
-    },
-    "related": null
+    }
   }
 ]

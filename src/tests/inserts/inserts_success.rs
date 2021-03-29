@@ -50,7 +50,7 @@ async fn insert_main_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Pos
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "insert_main_all_fields",
@@ -77,7 +77,7 @@ async fn insert_main_required_only(mut transaction: sqlx::Transaction<'_, sqlx::
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "insert_main_required_fields",
@@ -103,7 +103,7 @@ async fn insert_main_with_favorite_color(mut transaction: sqlx::Transaction<'_, 
         .as_str(),
     )
     .await;
-    let color_rows = Ciboulette2PostgresRowBuilder::from_raw(&raw_rows_color)
+    let color_rows = Ciboulette2PostgresRow::from_raw(&raw_rows_color)
         .expect("to deserialize the returned rows");
     let raw_rows_main = test_insert(
         &mut transaction,
@@ -129,8 +129,7 @@ async fn insert_main_with_favorite_color(mut transaction: sqlx::Transaction<'_, 
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows_main)
-        .expect("to deserialize the returned rows");
+    Ciboulette2PostgresRow::from_raw(&raw_rows_main).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "insert_main_with_color",

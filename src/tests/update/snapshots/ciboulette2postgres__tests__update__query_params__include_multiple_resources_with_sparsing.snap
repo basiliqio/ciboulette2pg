@@ -10,10 +10,8 @@ expression: value
     "data": {
       "title": "How to dead"
     },
-    "related": {
-      "type": "peoples",
-      "id": "[uuid]"
-    }
+    "related_type": "peoples",
+    "related_id": "[uuid]"
   },
   {
     "id": "[uuid]",
@@ -21,17 +19,14 @@ expression: value
     "data": {
       "title": "Oh my g**"
     },
-    "related": {
-      "type": "peoples",
-      "id": "[uuid]"
-    }
+    "related_type": "peoples",
+    "related_id": "[uuid]"
   },
   {
     "id": "[uuid]",
     "type": "peoples",
     "data": {
       "last-name": "Yor el"
-    },
-    "related": null
+    }
   }
 ]

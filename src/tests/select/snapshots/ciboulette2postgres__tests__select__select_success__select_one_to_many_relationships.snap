@@ -6,14 +6,10 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type": "comments",
-    "data": null,
-    "related": null
+    "type": "comments"
   },
   {
     "id": "[uuid]",
-    "type": "comments",
-    "data": null,
-    "related": null
+    "type": "comments"
   }
 ]

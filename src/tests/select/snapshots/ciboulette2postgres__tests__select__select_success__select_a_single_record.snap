@@ -13,7 +13,6 @@ expression: value
       "gender": "M",
       "last-name": "Le Roy",
       "twitter": null
-    },
-    "related": null
+    }
   }
 ]

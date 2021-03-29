@@ -44,7 +44,7 @@ async fn main(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     baseline!(transaction);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_delete(&mut transaction, format!("/peoples/{}", people_id).as_str()).await;
-    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "delete_main",
@@ -63,7 +63,7 @@ async fn one_to_one(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
         format!("/peoples/{}/relationships/favorite_color", people_id).as_str(),
     )
     .await;
-    Ciboulette2PostgresRowBuilder::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut transaction,
         "delete_one_to_one",

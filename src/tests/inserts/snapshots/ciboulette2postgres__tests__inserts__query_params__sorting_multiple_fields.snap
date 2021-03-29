@@ -13,7 +13,6 @@ expression: value
       "gender": "M",
       "last-name": "World",
       "twitter": "@myhandle"
-    },
-    "related": null
+    }
   }
 ]

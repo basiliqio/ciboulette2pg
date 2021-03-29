@@ -6,14 +6,10 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type": "articles",
-    "data": null,
-    "related": null
+    "type": "articles"
   },
   {
     "id": "[uuid]",
-    "type": "articles",
-    "data": null,
-    "related": null
+    "type": "articles"
   }
 ]

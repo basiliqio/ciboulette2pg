@@ -9,16 +9,12 @@ expression: value
     "type": "comments",
     "data": {
       "body": "Wasnt convinced..."
-    },
-    "related": null
+    }
   },
   {
     "id": "[uuid]",
     "type": "peoples",
-    "data": null,
-    "related": {
-      "type": "comments",
-      "id": "[uuid]"
-    }
+    "related_type": "comments",
+    "related_id": "[uuid]"
   }
 ]

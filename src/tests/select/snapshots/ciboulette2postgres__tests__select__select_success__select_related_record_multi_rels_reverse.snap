@@ -13,8 +13,7 @@ expression: value
       "gender": "M",
       "last-name": "Le Roy",
       "twitter": null
-    },
-    "related": null
+    }
   },
   {
     "id": "[uuid]",
@@ -25,7 +24,6 @@ expression: value
       "gender": "F",
       "last-name": "Wuhu",
       "twitter": "@randomhandle"
-    },
-    "related": null
+    }
   }
 ]
