@@ -18,8 +18,7 @@ expression: value
     "data": null,
     "related": {
       "type": "comments",
-      "id": "[uuid]",
-      "meta": null
+      "id": "[uuid]"
     }
   }
 ]

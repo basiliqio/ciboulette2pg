@@ -12,8 +12,7 @@ expression: value
     },
     "related": {
       "type": "peoples",
-      "id": "[uuid]",
-      "meta": null
+      "id": "[uuid]"
     }
   },
   {
@@ -24,8 +23,7 @@ expression: value
     },
     "related": {
       "type": "peoples",
-      "id": "[uuid]",
-      "meta": null
+      "id": "[uuid]"
     }
   },
   {

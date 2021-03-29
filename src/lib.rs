@@ -3,7 +3,7 @@ mod builder;
 mod ciboulette_row;
 mod errors;
 pub mod graph_walker;
-mod response;
+mod response_type;
 mod safe_ident;
 mod table_store;
 
@@ -21,7 +21,7 @@ use getset::Getters;
 use messy_json::{
     MessyJson, MessyJsonNullType, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue,
 };
-use response::response_type::Ciboulette2PostgresResponseType;
+use response_type::Ciboulette2PostgresResponseType;
 use safe_ident::Ciboulette2PostgresSafeIdent;
 use std::borrow::Cow;
 use std::collections::BTreeMap;

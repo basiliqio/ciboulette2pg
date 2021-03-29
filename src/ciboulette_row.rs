@@ -57,7 +57,6 @@ impl<'a> From<Ciboulette2PostgresRowBuilder<'a>> for Ciboulette2PostgresRow<'a> 
             (Some(related_type), Some(related_id)) => Some(CibouletteResourceIdentifier {
                 type_: Cow::Borrowed(related_type),
                 id: related_id,
-                meta: serde_json::Value::Null,
             }),
             _ => None,
         };

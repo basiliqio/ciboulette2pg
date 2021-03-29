@@ -34,8 +34,7 @@ expression: value
     },
     "related": {
       "type": "articles",
-      "id": "[uuid]",
-      "meta": null
+      "id": "[uuid]"
     }
   },
   {
@@ -50,8 +49,7 @@ expression: value
     },
     "related": {
       "type": "articles",
-      "id": "[uuid]",
-      "meta": null
+      "id": "[uuid]"
     }
   },
   {
@@ -66,8 +64,7 @@ expression: value
     },
     "related": {
       "type": "articles",
-      "id": "[uuid]",
-      "meta": null
+      "id": "[uuid]"
     }
   }
 ]
