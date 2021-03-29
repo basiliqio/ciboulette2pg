@@ -1,0 +1,49 @@
+---
+source: src/tests/response_elements.rs
+expression: value
+
+---
+[
+  {
+    "identifier": {
+      "type": "peoples",
+      "id": "[uuid]"
+    },
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    },
+    "related": null
+  },
+  {
+    "identifier": {
+      "type": "peoples",
+      "id": "[uuid]"
+    },
+    "data": {
+      "age": 34,
+      "first-name": "Somebody",
+      "gender": "F",
+      "last-name": "Wuhu",
+      "twitter": "@randomhandle"
+    },
+    "related": null
+  },
+  {
+    "identifier": {
+      "type": "peoples",
+      "id": "[uuid]"
+    },
+    "data": {
+      "age": null,
+      "first-name": "AAAAAAAA",
+      "gender": null,
+      "last-name": "BBBBBBBBB",
+      "twitter": null
+    },
+    "related": null
+  }
+]

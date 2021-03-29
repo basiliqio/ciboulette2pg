@@ -1,0 +1,80 @@
+---
+source: src/tests/response_elements.rs
+expression: value
+
+---
+[
+  {
+    "identifier": {
+      "type": "articles",
+      "id": "[uuid]"
+    },
+    "data": {
+      "body": "Yes",
+      "title": "How to dead"
+    },
+    "related": null
+  },
+  {
+    "identifier": {
+      "type": "articles",
+      "id": "[uuid]"
+    },
+    "data": {
+      "body": "Yeah I know ! Right ?!",
+      "title": "Oh my g**"
+    },
+    "related": null
+  },
+  {
+    "identifier": {
+      "type": "peoples",
+      "id": "[uuid]"
+    },
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    },
+    "related": {
+      "type": "articles",
+      "id": "[uuid]"
+    }
+  },
+  {
+    "identifier": {
+      "type": "peoples",
+      "id": "[uuid]"
+    },
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    },
+    "related": {
+      "type": "articles",
+      "id": "[uuid]"
+    }
+  },
+  {
+    "identifier": {
+      "type": "peoples",
+      "id": "[uuid]"
+    },
+    "data": {
+      "age": 34,
+      "first-name": "Somebody",
+      "gender": "F",
+      "last-name": "Wuhu",
+      "twitter": "@randomhandle"
+    },
+    "related": {
+      "type": "articles",
+      "id": "[uuid]"
+    }
+  }
+]

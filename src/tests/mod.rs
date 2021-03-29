@@ -12,6 +12,7 @@ mod delete;
 mod init_values;
 mod inserts;
 mod query_params;
+mod response_elements;
 #[allow(clippy::mutex_atomic)]
 mod run_migrations;
 mod select;
@@ -45,6 +46,21 @@ macro_rules! check_rows {
     	{
     	    "[].id" => insta::dynamic_redaction(check_uuid),
     	    "[].related_id" => insta::dynamic_redaction(check_uuid),
+    	    "[].data.article_id" => insta::dynamic_redaction(check_uuid),
+    	    "[].data.people_id" => insta::dynamic_redaction(check_uuid)
+    	});
+	};
+}
+
+#[macro_export]
+macro_rules! check_response_elements {
+	($rows:ident) => {
+		let value = serde_json::to_value($rows).unwrap();
+
+    	insta::assert_json_snapshot!(value,
+    	{
+    	    "[].identifier.id" => insta::dynamic_redaction(check_uuid),
+    	    "[].related.id" => insta::dynamic_redaction(check_uuid),
     	    "[].data.article_id" => insta::dynamic_redaction(check_uuid),
     	    "[].data.people_id" => insta::dynamic_redaction(check_uuid)
     	});

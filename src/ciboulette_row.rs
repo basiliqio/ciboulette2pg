@@ -6,7 +6,7 @@ use ciboulette::{
 use getset::Getters;
 use serde::Serialize;
 use sqlx::FromRow;
-use std::borrow::Cow;
+use std::{borrow::Cow, usize};
 
 /// Row returned by a query
 ///
@@ -43,30 +43,42 @@ impl<'a> Ciboulette2PostgresRow<'a> {
         Ok(res)
     }
 
-    pub fn into_response_elements(
-        self,
+    pub fn build_response_elements<I>(
+        rows: I,
         store: &'a CibouletteStore<'a>,
-    ) -> Result<CibouletteResponseElement<'a, &'a serde_json::value::RawValue>, Ciboulette2SqlError>
+        hint_size: Option<usize>,
+    ) -> Result<
+        Vec<CibouletteResponseElement<'a, &'a serde_json::value::RawValue>>,
+        Ciboulette2SqlError,
+    >
+    where
+        I: IntoIterator<Item = Ciboulette2PostgresRow<'a>>,
     {
-        let type_ = store.get_type(&self.type_)?;
-        let id = CibouletteIdBuilder::Text(Cow::Borrowed(self.id)).build(type_.id_type())?;
-        let identifier = CibouletteResourceIdentifier::new(id, Cow::Borrowed(self.type_));
-        let related_identifier = match (self.related_type, self.related_id) {
-            (Some(type_), Some(id)) => {
-                let related_type = store.get_type(type_)?;
-                let related_id =
-                    CibouletteIdBuilder::Text(Cow::Borrowed(id)).build(related_type.id_type())?;
-                let related_identifier =
-                    CibouletteResourceIdentifier::new(related_id, Cow::Borrowed(type_));
-                Some(related_identifier)
-            }
-            _ => None,
-        };
-        Ok(CibouletteResponseElement::new(
-            &store,
-            identifier,
-            self.data,
-            related_identifier,
-        )?)
+        let mut res: Vec<CibouletteResponseElement<'a, &'a serde_json::value::RawValue>> =
+            Vec::with_capacity(hint_size.unwrap_or_default());
+
+        for row in rows.into_iter() {
+            let type_ = store.get_type(&row.type_)?;
+            let id = CibouletteIdBuilder::Text(Cow::Borrowed(row.id)).build(type_.id_type())?;
+            let identifier = CibouletteResourceIdentifier::new(id, Cow::Borrowed(row.type_));
+            let related_identifier = match (row.related_type, row.related_id) {
+                (Some(type_), Some(id)) => {
+                    let related_type = store.get_type(type_)?;
+                    let related_id = CibouletteIdBuilder::Text(Cow::Borrowed(id))
+                        .build(related_type.id_type())?;
+                    let related_identifier =
+                        CibouletteResourceIdentifier::new(related_id, Cow::Borrowed(type_));
+                    Some(related_identifier)
+                }
+                _ => None,
+            };
+            res.push(CibouletteResponseElement::new(
+                &store,
+                identifier,
+                row.data,
+                related_identifier,
+            )?);
+        }
+        Ok(res)
     }
 }

@@ -3,7 +3,7 @@ use super::*;
 mod query_params;
 mod select_success;
 
-async fn test_select<'a>(
+pub(crate) async fn test_select<'a>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     _name: &str,
