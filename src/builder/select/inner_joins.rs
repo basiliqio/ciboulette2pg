@@ -15,9 +15,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             .store()
             .get_rel(left_type.name().as_str(), right_type_alias)?;
         match opt {
-            CibouletteRelationshipOption::OneToOne(opt) => {
-                Self::gen_inner_join_single_rel(&mut *buf, left_table, opt, right_table)?;
-            }
             CibouletteRelationshipOption::ManyToMany(opt) => {
                 Self::gen_inner_join_many_to_many_rel(
                     &mut *buf,
@@ -36,36 +33,6 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 Self::gen_inner_join_many_to_one_rel_table(&mut *buf, &state, right_table, opt)?;
             }
         }
-        Ok(())
-    }
-
-    /// Gen an inner join between two tables, in case of a one-to-one relationships
-    fn gen_inner_join_single_rel(
-        buf: &mut Ciboulette2PostgresBuf,
-        left_table: &Ciboulette2PostgresTable,
-        opt: &CibouletteRelationshipOneToOneOption,
-        right_table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
-        buf.write_all(b" INNER JOIN ")?;
-        Self::write_table_info_inner(&mut *buf, &left_table)?;
-        buf.write_all(b" ON ")?;
-        Self::insert_ident_inner(
-            &mut *buf,
-            &Ciboulette2PostgresTableField::new_owned(
-                Ciboulette2PostgresSafeIdent::try_from(opt.key().as_str())?,
-                None,
-                None,
-            ),
-            left_table,
-            None,
-        )?;
-        buf.write_all(b" = ")?;
-        Self::insert_ident_inner(
-            &mut *buf,
-            &Ciboulette2PostgresTableField::new_ref(right_table.id().get_ident(), None, None),
-            right_table,
-            None,
-        )?;
         Ok(())
     }
 

@@ -27,7 +27,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
             .ok()
             .and_then(|(_rel_other_type, edge_weight)| match edge_weight {
                 CibouletteRelationshipOption::ManyToMany(opt) => {
-                    if opt.bucket_resource() == other {
+                    if opt.bucket_resource().as_ref() == other {
                         Some(Ciboulette2PostgresResponseType::Object)
                     } else {
                         None
@@ -35,13 +35,12 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
                 }
                 CibouletteRelationshipOption::ManyToOne(opt)
                 | CibouletteRelationshipOption::OneToMany(opt) => {
-                    if opt.one_table() == other || opt.many_table() == other {
+                    if opt.one_table().as_ref() == other || opt.many_table().as_ref() == other {
                         Some(Ciboulette2PostgresResponseType::Object)
                     } else {
                         None
                     }
                 }
-                CibouletteRelationshipOption::OneToOne(_) => None,
             })
     }
 

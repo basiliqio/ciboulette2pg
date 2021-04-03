@@ -9,7 +9,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         opt: &CibouletteRelationshipOption<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         match opt {
-            CibouletteRelationshipOption::OneToOne(opt) => {
+            CibouletteRelationshipOption::ManyToOne(opt) => {
                 let main_cte_table_id = Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::from(main_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
@@ -153,7 +153,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         buf: &mut Ciboulette2PostgresBuf,
         rel_table: &Ciboulette2PostgresTable,
         rel_cte_table_id: Ciboulette2SqlAdditionalField,
-        opt: &CibouletteRelationshipOneToOneOption,
+        opt: &CibouletteRelationshipOneToManyOption<'a>,
         main_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
@@ -169,7 +169,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         Self::insert_ident_inner(
             buf,
             &Ciboulette2PostgresTableField::new_owned(
-                Ciboulette2PostgresSafeIdent::try_from(opt.key().as_str())?,
+                Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key().as_str())?,
                 None,
                 None,
             ),

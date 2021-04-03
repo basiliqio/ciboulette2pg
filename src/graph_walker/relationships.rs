@@ -39,41 +39,6 @@ impl<'a> Ciboulette2PostgresMultiRelationships<'a> {
 }
 
 /// Extract data from a single relationship object
-fn extract_one_to_one_relationships_from_ressource_identifiers<'a>(
-    rel_ids: &'a CibouletteUpdateRelationship<'a>,
-    rel_opt: &'a CibouletteRelationshipOneToOneOption,
-) -> Result<Ciboulette2PostgresMainResourceInformations<'a>, Ciboulette2SqlError> {
-    match rel_ids.value() {
-        CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
-            Ok(Ciboulette2PostgresMainResourceInformations {
-                insert_values: vec![(
-                    rel_opt.key().as_str(),
-                    Ciboulette2SqlValue::from(rel_id.id()),
-                )],
-                single_relationships: vec![rel_opt.key().as_str()],
-            })
-        }
-        CibouletteOptionalData::Object(_) => {
-            Err(Ciboulette2SqlError::MultiIdsForSingleRelationships)
-        }
-        CibouletteOptionalData::Null(x) if *x => Ok(Ciboulette2PostgresMainResourceInformations {
-            insert_values: vec![(
-                rel_opt.key().as_str(),
-                match rel_opt.id_type() {
-                    CibouletteIdType::Text => Ciboulette2SqlValue::Text(None),
-                    CibouletteIdType::Number => Ciboulette2SqlValue::Numeric(None),
-                    CibouletteIdType::Uuid => Ciboulette2SqlValue::Uuid(None),
-                },
-            )],
-            single_relationships: vec![rel_opt.key().as_str()],
-        }),
-        CibouletteOptionalData::Null(_) => {
-            Ok(Ciboulette2PostgresMainResourceInformations::default())
-        }
-    }
-}
-
-/// Extract data from a single relationship object
 fn extract_many_to_one_relationships_from_ressource_identifiers<'a>(
     rel_ids: &'a CibouletteUpdateRelationship<'a>,
     rel_opt: &'a CibouletteRelationshipOneToManyOption<'a>,
@@ -182,11 +147,6 @@ pub(crate) fn extract_fields_rel<'a>(
     if let Some(rel_edge) = store.graph().find_edge(*main_type_index, *rel_type_index) {
         if let Some(rel) = store.graph().edge_weight(rel_edge) {
             match rel {
-                CibouletteRelationshipOption::OneToOne(opt) => {
-                    return Ok(extract_one_to_one_relationships_from_ressource_identifiers(
-                        &rels, &opt,
-                    )?)
-                }
                 CibouletteRelationshipOption::ManyToOne(opt) => {
                     return Ok(
                         extract_many_to_one_relationships_from_ressource_identifiers(&rels, &opt)?,
@@ -257,7 +217,6 @@ pub(crate) fn extract_fields<'a>(
                     Ciboulette2PostgresMultiRelationships::ManyToMany(opt),
                 );
             }
-            _ => continue,
         }
     }
     Ok(res)

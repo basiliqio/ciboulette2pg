@@ -21,21 +21,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 let (_, opt) =
                     store.get_rel(request.resource_type().name().as_str(), alias.as_str())?; // Get the relationship
                 match opt {
-                    CibouletteRelationshipOption::OneToOne(opt) if *opt.optional() => {
-                        // If it's an single optional value, go ahed
-                        se.gen_delete_rel(&table_store, request, opt)
-                    }
-                    CibouletteRelationshipOption::OneToOne(opt) => {
-                        // Fails if it's not optional
-                        return Err(Ciboulette2SqlError::RequiredRelationship(
-                            request.resource_type().name().clone(),
-                            opt.key().clone(),
-                        ));
-                    }
                     CibouletteRelationshipOption::ManyToOne(opt)
                     | CibouletteRelationshipOption::OneToMany(opt)
-                        if &opt.many_table() == request.resource_type() // If the deleted type is the many part of the one-to-many
-                            && &opt.one_table() == related_type // If the deleted related type is the one part of the one-to-many
+                        if &opt.many_table().as_ref() == request.resource_type() // If the deleted type is the many part of the one-to-many
+                            && &opt.one_table().as_ref() == related_type // If the deleted related type is the one part of the one-to-many
                             && *opt.optional() =>
                     // If the field is optional
                     {
@@ -43,8 +32,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     }
                     CibouletteRelationshipOption::ManyToOne(opt)
                     | CibouletteRelationshipOption::OneToMany(opt)
-                        if &opt.many_table() == request.resource_type()
-                            && &opt.one_table() == related_type =>
+                        if &opt.many_table().as_ref() == request.resource_type()
+                            && &opt.one_table().as_ref() == related_type =>
                     {
                         return Err(Ciboulette2SqlError::RequiredRelationship(
                             request.resource_type().name().clone(),
