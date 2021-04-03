@@ -26,6 +26,7 @@ use safe_ident::Ciboulette2PostgresSafeIdent;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
+use std::sync::Arc;
 pub use table_store::{
     Ciboulette2PostgresId, Ciboulette2PostgresTable, Ciboulette2PostgresTableStore,
 };

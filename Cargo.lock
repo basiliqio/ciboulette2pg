@@ -198,6 +198,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#cb4c872a777f2b31015ee4d184060cc0d16a7410"
 dependencies = [
  "getset",
  "itertools",
@@ -254,6 +255,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#cb4c872a777f2b31015ee4d184060cc0d16a7410"
 dependencies = [
  "ciboulette",
  "messy_json",

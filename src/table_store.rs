@@ -4,7 +4,7 @@ use super::*;
 #[derive(Getters, Clone, Debug, Default)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresTableStore<'a> {
-    map: BTreeMap<String, Ciboulette2PostgresTable<'a>>,
+    map: BTreeMap<String, Arc<Ciboulette2PostgresTable<'a>>>,
 }
 
 impl<'a> Ciboulette2PostgresTableStore<'a> {
@@ -12,7 +12,7 @@ impl<'a> Ciboulette2PostgresTableStore<'a> {
     pub fn add_table(
         &mut self,
         key: String,
-        val: Ciboulette2PostgresTable<'a>,
+        val: Arc<Ciboulette2PostgresTable<'a>>,
     ) {
         self.map.insert(key, val);
     }
@@ -24,14 +24,15 @@ impl<'a> Ciboulette2PostgresTableStore<'a> {
     ) -> Result<&Ciboulette2PostgresTable<'a>, Ciboulette2SqlError> {
         self.map
             .get(key)
+            .map(Arc::as_ref)
             .ok_or_else(|| Ciboulette2SqlError::UnknownTable(key.to_string()))
     }
 }
 
-impl<'a> std::iter::FromIterator<(String, Ciboulette2PostgresTable<'a>)>
+impl<'a> std::iter::FromIterator<(String, Arc<Ciboulette2PostgresTable<'a>>)>
     for Ciboulette2PostgresTableStore<'a>
 {
-    fn from_iter<I: IntoIterator<Item = (String, Ciboulette2PostgresTable<'a>)>>(
+    fn from_iter<I: IntoIterator<Item = (String, Arc<Ciboulette2PostgresTable<'a>>)>>(
         iter: I
     ) -> Ciboulette2PostgresTableStore<'a> {
         Ciboulette2PostgresTableStore {
