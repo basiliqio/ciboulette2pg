@@ -119,7 +119,7 @@ impl<'a> Ciboulette2PostgresTable<'a> {
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTable {
             id: self.id.clone(),
-            ciboulette_type: self.ciboulette_type,
+            ciboulette_type: self.ciboulette_type.clone(),
             schema: None,
             name: Ciboulette2PostgresSafeIdent::try_from(name)?,
         })

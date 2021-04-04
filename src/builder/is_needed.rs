@@ -16,24 +16,24 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         other: &CibouletteResourceType<'a>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.path() {
-            CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x == &other {
+            CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x.as_ref() == other {
                 true => Some(Ciboulette2PostgresResponseType::Object),
                 // false => None
                 false => None,
             },
             CiboulettePath::TypeIdRelated(x, _, y) => {
-                if x == &other {
+                if x.as_ref() == other {
                     Some(Ciboulette2PostgresResponseType::None)
-                } else if y == &other {
+                } else if y.as_ref() == other {
                     Some(Ciboulette2PostgresResponseType::Object)
                 } else {
                     self.check_if_rel_is_needed(other, x, y)
                 }
             }
             CiboulettePath::TypeIdRelationship(x, _, y) => {
-                if x == &other {
+                if x.as_ref() == other {
                     Some(Ciboulette2PostgresResponseType::None)
-                } else if y == &other {
+                } else if y.as_ref() == other {
                     Some(Ciboulette2PostgresResponseType::Id)
                 } else {
                     self.check_if_rel_is_needed(other, x, y)
@@ -46,7 +46,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         &self,
         other: &CibouletteResourceType<'a>,
     ) -> Option<Ciboulette2PostgresResponseType> {
-        match &other == self.main_type() {
+        match other == self.main_type().as_ref() {
             true => Some(Ciboulette2PostgresResponseType::Object),
             false => None,
         }
@@ -56,7 +56,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         &self,
         other: &CibouletteResourceType<'a>,
     ) -> Option<Ciboulette2PostgresResponseType> {
-        match &other == self.main_type() {
+        match other == self.main_type().as_ref() {
             true => Some(Ciboulette2PostgresResponseType::Id),
             false => None,
         }

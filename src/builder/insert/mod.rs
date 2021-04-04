@@ -19,18 +19,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             single_relationships: main_single_relationships,
         } = crate::graph_walker::main::extract_fields_and_values(
             &ciboulette_store,
-            request.path().main_type(),
+            request.path().main_type().clone(),
             request.data().attributes(),
             request.data().relationships(),
             false,
         )?;
         let multi_rels = crate::graph_walker::relationships::extract_fields(
             &ciboulette_store,
-            &request.path().main_type(),
+            request.path().main_type().clone(),
             Some(request.data().relationships()),
         )?;
         let rels = Ciboulette2SqlQueryRels::new(
-            &state.main_type(),
+            state.main_type().clone().clone(),
             main_single_relationships,
             multi_rels,
         )?;
@@ -39,7 +39,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.write_main_table_select(&main_cte_data, &state, main_cte_insert, &rels)?;
         se.select_one_to_one_rels_routine(
             &state,
-            state.main_type(),
+            state.main_type().clone(),
             &main_cte_data,
             &rels,
             Ciboulette2PostgresBuilderState::is_needed_all,
@@ -68,7 +68,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.gen_select_cte_final(
             state,
             &main_cte_insert,
-            &state.main_type(),
+            state.main_type().clone(),
             None,
             rels.single_rels_additional_fields().iter(),
             true,
@@ -82,7 +82,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         main_cte_insert: &Ciboulette2PostgresTable<'a>,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_inserts_values: Vec<(&str, Ciboulette2SqlValue<'a>)>,
+        main_inserts_values: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(main_cte_insert)?;
         self.buf.write_all(b" AS (")?;

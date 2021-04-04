@@ -5,14 +5,14 @@ use super::*;
 pub(crate) struct Ciboulette2PostgresRelatingField<'a> {
     pub(crate) field: Ciboulette2PostgresTableField<'a>,
     pub(crate) table: Ciboulette2PostgresTable<'a>,
-    pub(crate) related_type: &'a CibouletteResourceType<'a>,
+    pub(crate) related_type: Arc<CibouletteResourceType<'a>>,
 }
 
 impl<'a> Ciboulette2PostgresRelatingField<'a> {
     pub fn new(
         field: Ciboulette2PostgresTableField<'a>,
         table: Ciboulette2PostgresTable<'a>,
-        related_type: &'a CibouletteResourceType<'a>,
+        related_type: Arc<CibouletteResourceType<'a>>,
     ) -> Self {
         Ciboulette2PostgresRelatingField {
             field,

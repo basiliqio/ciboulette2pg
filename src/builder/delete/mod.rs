@@ -23,8 +23,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 match opt {
                     CibouletteRelationshipOption::ManyToOne(opt)
                     | CibouletteRelationshipOption::OneToMany(opt)
-                        if &opt.many_table().as_ref() == request.resource_type() // If the deleted type is the many part of the one-to-many
-                            && &opt.one_table().as_ref() == related_type // If the deleted related type is the one part of the one-to-many
+                        if opt.many_table().as_ref() == request.resource_type().as_ref() // If the deleted type is the many part of the one-to-many
+                            && opt.one_table().as_ref() == related_type.as_ref() // If the deleted related type is the one part of the one-to-many
                             && *opt.optional() =>
                     // If the field is optional
                     {
@@ -32,12 +32,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     }
                     CibouletteRelationshipOption::ManyToOne(opt)
                     | CibouletteRelationshipOption::OneToMany(opt)
-                        if &opt.many_table().as_ref() == request.resource_type()
-                            && &opt.one_table().as_ref() == related_type =>
+                        if opt.many_table().as_ref() == request.resource_type().as_ref()
+                            && opt.one_table().as_ref() == related_type.as_ref() =>
                     {
                         return Err(Ciboulette2SqlError::RequiredRelationship(
-                            request.resource_type().name().clone(),
-                            opt.one_table().name().clone(),
+                            request.resource_type().name().to_string(),
+                            opt.one_table().name().to_string(),
                         ));
                     }
                     _ => return Err(Ciboulette2SqlError::BulkRelationshipDelete), // Fails if it's a multi relationship

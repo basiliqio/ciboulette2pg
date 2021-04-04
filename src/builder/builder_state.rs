@@ -9,7 +9,7 @@ pub(crate) struct Ciboulette2PostgresBuilderState<'a> {
     table_store: &'a Ciboulette2PostgresTableStore<'a>,
     path: &'a CiboulettePath<'a>,
     query: &'a CibouletteQueryParameters<'a>,
-    main_type: &'a CibouletteResourceType<'a>,
+    main_type: Arc<CibouletteResourceType<'a>>,
     main_table: &'a Ciboulette2PostgresTable<'a>,
     expected_response_type: Ciboulette2PostgresResponseType,
 }
@@ -52,7 +52,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
         query: &'a CibouletteQueryParameters<'a>,
         expected_response_type: Ciboulette2PostgresResponseType,
     ) -> Result<Self, Ciboulette2SqlError> {
-        let main_type = path.main_type();
+        let main_type = path.main_type().clone();
         let main_table = table_store.get(main_type.name().as_str())?;
 
         Ok(Ciboulette2PostgresBuilderState {

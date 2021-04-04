@@ -33,15 +33,17 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Get the relationships data for the main type
     pub(crate) fn get_relationships(
         ciboulette_store: &'a CibouletteStore<'a>,
-        main_type: &'a CibouletteResourceType<'a>,
+        main_type: Arc<CibouletteResourceType<'a>>,
     ) -> Result<Ciboulette2SqlQueryRels<'a>, Ciboulette2SqlError> {
-        let main_single_relationships =
-            crate::graph_walker::main::get_resource_single_rel(&ciboulette_store, &main_type)?;
+        let main_single_relationships = crate::graph_walker::main::get_resource_single_rel(
+            &ciboulette_store,
+            main_type.clone(),
+        )?;
         let rels: Vec<Ciboulette2PostgresMainResourceRelationships> =
             crate::graph_walker::relationships::get_resource_multi_rels(
                 &ciboulette_store,
-                &main_type,
+                main_type.clone(),
             )?;
-        Ciboulette2SqlQueryRels::new(&main_type, main_single_relationships, rels)
+        Ciboulette2SqlQueryRels::new(main_type, main_single_relationships, rels)
     }
 }

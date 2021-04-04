@@ -24,7 +24,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteUpdateRequest<'a>,
         main_table: &'a Ciboulette2PostgresTable<'a>,
         main_update_cte: &Ciboulette2PostgresTable<'a>,
-        values: Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
+        values: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_update_cte)?;
         self.buf.write_all(b" AS (")?;
@@ -48,7 +48,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.gen_select_cte_final(
             &state,
             &main_update_cte,
-            &request.resource_type(),
+            request.resource_type().clone(),
             None,
             rels.single_rels_additional_fields().iter(),
             true,
@@ -75,18 +75,18 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             single_relationships: main_single_relationships,
         } = crate::graph_walker::main::extract_fields_and_values(
             &ciboulette_store,
-            state.main_type(),
+            state.main_type().clone(),
             main_attrs.attributes(),
             main_attrs.relationships(),
             true,
         )?;
         let main_multi_relationships = crate::graph_walker::relationships::extract_fields(
             &ciboulette_store,
-            state.main_type(),
+            state.main_type().clone(),
             Some(main_attrs.relationships()),
         )?;
         let rels = Ciboulette2SqlQueryRels::new(
-            state.main_type(),
+            state.main_type().clone(),
             main_single_relationships,
             main_multi_relationships,
         )?;
@@ -100,7 +100,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         se.gen_update_main_update_data(&state, &request, &main_cte_update, &main_cte_data, &rels)?;
         se.select_one_to_one_rels_routine(
             &state,
-            &state.main_type(),
+            state.main_type().clone(),
             &main_cte_data,
             &rels,
             Ciboulette2PostgresBuilderState::is_needed_all,

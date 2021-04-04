@@ -17,31 +17,31 @@ pub fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2Postgre
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("people-article").unwrap(),
-            store.get_type("people-article").unwrap(),
+            store.get_type("people-article").unwrap().clone(),
         ),
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("articles").unwrap(),
-            store.get_type("articles").unwrap(),
+            store.get_type("articles").unwrap().clone(),
         ),
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
-            store.get_type("peoples").unwrap(),
+            store.get_type("peoples").unwrap().clone(),
         ),
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("comments").unwrap(),
-            store.get_type("comments").unwrap(),
+            store.get_type("comments").unwrap().clone(),
         ),
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
             Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
             Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
-            store.get_type("favorite_color").unwrap(),
+            store.get_type("favorite_color").unwrap().clone(),
         ),
     ]
     .into_iter()

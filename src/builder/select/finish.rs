@@ -71,7 +71,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'a>,
         table: &Ciboulette2PostgresTable<'a>,
-        type_: &'a CibouletteResourceType<'a>,
+        type_: Arc<CibouletteResourceType<'a>>,
         relating_field: Option<Ciboulette2PostgresRelatingField<'a>>,
         additional_fields: I,
         include: bool,
@@ -91,19 +91,19 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         self.buf.write_all(b", ")?;
         self.insert_params(
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed(type_.name().as_ref()))), // TODO do better
+            Ciboulette2SqlValue::Text(Some(ArcCowStr::Arc(type_.name().clone()))),
             table,
         )?;
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
-        self.gen_json_builder(table, type_, state.query(), include)?;
+        self.gen_json_builder(table, type_.clone(), state.query(), include)?;
         self.buf.write_all(b" AS \"data\", ")?;
         match relating_field {
             Some(relating_field) => {
                 self.insert_ident(relating_field.field(), relating_field.table())?;
                 self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::Text(Some(Cow::Borrowed(
-                        relating_field.related_type().name().as_ref(),
+                    Ciboulette2SqlValue::Text(Some(ArcCowStr::Arc(
+                        relating_field.related_type().name().clone(),
                     ))), // TODO do better
                     relating_field.table(),
                 )?;
@@ -115,7 +115,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             }
         }
         self.handle_additionnal_params(&state, &table, additional_fields)?;
-        self.gen_sorting_keys(&table, &type_, &state.query())?;
+        self.gen_sorting_keys(&table, type_.clone(), &state.query())?;
         self.buf.write_all(b" FROM ")?;
         self.write_table_info(table)?;
         Ok(())

@@ -5,7 +5,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_insert_normal(
         &mut self,
         table: &Ciboulette2PostgresTable,
-        params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
+        params: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b"INSERT INTO ")?;
@@ -28,7 +28,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate columns name before the "VALUES" and insert the parameters after that
     fn gen_normal_insert_values(
         &mut self,
-        params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
+        params: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
         table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut param_ident: Vec<Ciboulette2PostgresTableField> = Vec::with_capacity(params.len());

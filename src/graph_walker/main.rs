@@ -5,16 +5,16 @@ use std::convert::TryFrom;
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2PostgresMainResourceInformations<'a> {
-    pub insert_values: Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
-    pub single_relationships: Vec<&'a str>,
+    pub insert_values: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
+    pub single_relationships: Vec<Cow<'a, str>>,
 }
 
 /// Check the informations of a one-to-many relationship
 fn check_one_to_many_relationships<'a>(
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
-    from_type_: &'a CibouletteResourceType,
-    to_type_: &'a CibouletteResourceType,
-    to_type_alias: &'a str,
+    from_type_: Arc<CibouletteResourceType<'a>>,
+    to_type_: Arc<CibouletteResourceType<'a>>,
+    to_type_alias: &str,
     opt: &'a CibouletteRelationshipOneToManyOption,
 ) -> Result<Option<(&'a str, Ciboulette2SqlValue<'a>)>, Ciboulette2SqlError> {
     match relationships
@@ -70,7 +70,7 @@ fn check_one_to_many_relationships<'a>(
 /// Extract attributes from the request and push them to an arguments vector
 /// compatible with SQLx for later execution
 pub fn fill_attributes<'a>(
-    args: &mut Vec<(&'a str, Ciboulette2SqlValue<'a>)>,
+    args: &mut Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
     obj: &'a Option<MessyJsonObjectValue<'a>>,
 ) -> Result<(), Ciboulette2SqlError> {
     if let Some(obj) = obj {
@@ -79,7 +79,7 @@ pub fn fill_attributes<'a>(
                 continue;
             }
             // Iterate over every attribute
-            args.push((k, Ciboulette2SqlValue::try_from(v)?));
+            args.push((k.clone(), Ciboulette2SqlValue::try_from(v)?));
         }
     }
     Ok(())
@@ -89,13 +89,13 @@ pub fn fill_attributes<'a>(
 /// request for the main resource
 pub(crate) fn extract_fields_and_values<'a>(
     store: &'a CibouletteStore<'a>,
-    main_type: &'a CibouletteResourceType<'a>,
+    main_type: Arc<CibouletteResourceType<'a>>,
     attributes: &'a Option<MessyJsonObjectValue<'a>>,
     relationships: &'a BTreeMap<Cow<'a, str>, CibouletteRelationshipObject<'a>>,
     fails_on_many: bool,
 ) -> Result<Ciboulette2PostgresMainResourceInformations<'a>, Ciboulette2SqlError> {
-    let mut res_val: Vec<(&'a str, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
-    let mut res_rel: Vec<&'a str> = Vec::with_capacity(128);
+    let mut res_val: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)> = Vec::with_capacity(128);
+    let mut res_rel: Vec<Cow<'a, str>> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -108,17 +108,17 @@ pub(crate) fn extract_fields_and_values<'a>(
     while let Some((edge_index, node_index)) = walker.next(&store.graph()) {
         // For each connect edge outgoing from the original node
         let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
-        let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
+        let alias = main_type.get_alias(node_weight.name().as_str())?.clone(); // Get the alias translation of that resource
 
         match store.graph().edge_weight(edge_index).unwrap() // FIXME
 		{
-			CibouletteRelationshipOption::ManyToOne(opt) |CibouletteRelationshipOption::OneToMany(opt) if opt.part_of_many_to_many().is_none() && opt.many_table().as_ref() == main_type => {
+			CibouletteRelationshipOption::ManyToOne(opt) |CibouletteRelationshipOption::OneToMany(opt) if opt.part_of_many_to_many().is_none() && opt.many_table().as_ref() == main_type.as_ref() => {
 				if let Some(v) =
-                check_one_to_many_relationships(&relationships, &main_type, &node_weight, alias, opt)?
+                check_one_to_many_relationships(&relationships, main_type.clone(), node_weight.clone(), &alias, opt)?
             {
-                res_val.push(v); // Insert the relationship values
+                res_val.push((Cow::Borrowed(v.0), v.1)); // Insert the relationship values
             }
-            res_rel.push(alias.as_str());
+            res_rel.push(Cow::Owned(alias.to_string())); // FIXME
 			},
 			_ => {
 				if fails_on_many  && relationships.contains_key(alias.as_str()){
@@ -136,9 +136,9 @@ pub(crate) fn extract_fields_and_values<'a>(
 /// Get a list of a resource's single relationships (one-to-one)
 pub(crate) fn get_resource_single_rel<'a>(
     store: &'a CibouletteStore<'a>,
-    main_type: &'a CibouletteResourceType<'a>,
-) -> Result<Vec<&'a str>, Ciboulette2SqlError> {
-    let mut res: Vec<&'a str> = Vec::with_capacity(128);
+    main_type: Arc<CibouletteResourceType<'a>>,
+) -> Result<Vec<Cow<'a, str>>, Ciboulette2SqlError> {
+    let mut res: Vec<Cow<'a, str>> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -153,8 +153,10 @@ pub(crate) fn get_resource_single_rel<'a>(
         if let CibouletteRelationshipOption::ManyToOne(_) =
             store.graph().edge_weight(edge_index).unwrap()
         {
-            let alias: &String = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
-            res.push(alias.as_str());
+            let alias: String = main_type
+                .get_alias(node_weight.name().as_str())?
+                .to_string(); // FIXME Get the alias translation of that resource
+            res.push(Cow::Owned(alias));
         }
     }
     Ok(res)

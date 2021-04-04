@@ -9,7 +9,7 @@ fn simple() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
@@ -25,7 +25,7 @@ fn simple() {
         .gen_select_cte_final(
             &state,
             &dest_table,
-            store.get_type("peoples").unwrap(),
+            store.get_type("peoples").unwrap().clone(),
             None,
             [].iter(),
             true,
@@ -45,7 +45,7 @@ fn sparse() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples?fields[peoples]=first-name").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
@@ -62,7 +62,7 @@ fn sparse() {
         .gen_select_cte_final(
             &state,
             &dest_table,
-            store.get_type("peoples").unwrap(),
+            store.get_type("peoples").unwrap().clone(),
             None,
             [].iter(),
             true,
@@ -82,7 +82,7 @@ fn empty_sparse() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples?fields[peoples]=").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
@@ -98,7 +98,7 @@ fn empty_sparse() {
         .gen_select_cte_final(
             &state,
             &dest_table,
-            store.get_type("peoples").unwrap(),
+            store.get_type("peoples").unwrap().clone(),
             None,
             [].iter(),
             true,
@@ -118,7 +118,7 @@ fn non_included() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
@@ -134,7 +134,7 @@ fn non_included() {
         .gen_select_cte_final(
             &state,
             &dest_table,
-            store.get_type("peoples").unwrap(),
+            store.get_type("peoples").unwrap().clone(),
             None,
             [].iter(),
             false,

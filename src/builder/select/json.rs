@@ -6,12 +6,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_json_builder_routine<'b, I>(
         &mut self,
         table: &Ciboulette2PostgresTable<'_>,
-        obj: &'b MessyJsonObject<'b>,
-        obj_name: &'b str,
+        obj: &MessyJsonObject<'b>,
+        obj_name: ArcStr,
         mut fields: std::iter::Peekable<I>,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        I: std::iter::Iterator<Item = &'a str>,
+        I: std::iter::Iterator<Item = ArcCowStr<'a>>,
     {
         // If there is nothing, return an empty JSON object
         if fields.peek().is_none() {
@@ -20,19 +20,23 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         }
         self.buf.write_all(b"JSON_BUILD_OBJECT(")?;
         while let Some(el) = fields.next() {
-            match obj.properties().get(el).ok_or_else(|| {
+            match obj.properties().get(&*el).ok_or_else(|| {
                 CibouletteError::UnknownField(obj_name.to_string(), el.to_string())
             })? {
                 MessyJson::Obj(obj) => {
                     self.gen_json_builder_routine(
                         table,
                         obj,
-                        obj_name,
-                        EMPTY_LIST.iter().map(Cow::as_ref).peekable(), // TODO Find a cleaner way to do that
+                        obj_name.clone(),
+                        EMPTY_LIST
+                            .iter()
+                            .map(Cow::as_ref)
+                            .map(ArcCowStr::from)
+                            .peekable(), // TODO Find a cleaner way to do that
                     )?;
                 }
                 _ => {
-                    self.insert_params(Ciboulette2SqlValue::Text(Some(Cow::Borrowed(el))), &table)?;
+                    self.insert_params(Ciboulette2SqlValue::Text(Some(el.clone())), &table)?;
                     self.buf.write_all(b", ")?;
                     self.insert_ident(
                         &Ciboulette2PostgresTableField::new_owned(
@@ -56,18 +60,22 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_json_builder(
         &mut self,
         table: &Ciboulette2PostgresTable<'_>,
-        type_: &'a CibouletteResourceType<'a>,
+        type_: Arc<CibouletteResourceType<'a>>,
         query: &'a CibouletteQueryParameters<'a>,
         include: bool,
     ) -> Result<(), Ciboulette2SqlError> {
-        match (query.sparse().get(type_), include) {
+        match (query.sparse().get(&*type_), include) {
             (Some(fields), true) => {
                 // If there is no sparse field, nothing will be returned
                 self.gen_json_builder_routine(
                     table,
                     type_.schema(),
-                    type_.name(),
-                    fields.iter().map(Cow::as_ref).peekable(),
+                    type_.name().clone(),
+                    fields
+                        .iter()
+                        .map(Cow::as_ref)
+                        .map(ArcCowStr::from)
+                        .peekable(),
                 )?;
             }
             (None, true) => {
@@ -75,12 +83,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.gen_json_builder_routine(
                     table,
                     type_.schema(),
-                    type_.name(),
+                    type_.name().clone(),
                     type_
                         .schema()
                         .properties()
                         .keys()
-                        .map(|x| x.as_str())
+                        .cloned()
+                        .map(ArcCowStr::from)
                         .peekable(),
                 )?;
             }
@@ -89,7 +98,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.gen_json_builder_routine(
                     table,
                     type_.schema(),
-                    type_.name(),
+                    type_.name().clone(),
                     vec![].into_iter().peekable(),
                 )?;
             }

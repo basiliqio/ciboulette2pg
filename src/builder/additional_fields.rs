@@ -29,14 +29,14 @@ pub(crate) struct Ciboulette2SqlAdditionalField<'a> {
     pub(crate) type_: Ciboulette2SqlAdditionalFieldType,
     pub(crate) ident: Ciboulette2PostgresTableField<'a>,
     pub(crate) name: Ciboulette2PostgresSafeIdent<'a>,
-    pub(crate) ciboulette_type: &'a CibouletteResourceType<'a>,
+    pub(crate) ciboulette_type: Arc<CibouletteResourceType<'a>>,
 }
 
 impl<'a> Ciboulette2SqlAdditionalField<'a> {
     pub fn new(
         ident: Ciboulette2PostgresTableField<'a>,
         type_: Ciboulette2SqlAdditionalFieldType,
-        ciboulette_type: &'a CibouletteResourceType<'a>,
+        ciboulette_type: Arc<CibouletteResourceType<'a>>,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2SqlAdditionalField {
             name: Ciboulette2PostgresSafeIdent::try_from(format!(
@@ -58,7 +58,7 @@ impl<'a> TryFrom<&Ciboulette2PostgresTable<'a>> for Ciboulette2SqlAdditionalFiel
         Ciboulette2SqlAdditionalField::new(
             Ciboulette2PostgresTableField::from(table.id()),
             Ciboulette2SqlAdditionalFieldType::MainIdentifier,
-            table.ciboulette_type(),
+            table.ciboulette_type().clone(),
         )
     }
 }
@@ -75,7 +75,7 @@ impl<'a> TryFrom<&CibouletteSortingElement<'a>> for Ciboulette2SqlAdditionalFiel
         Ciboulette2SqlAdditionalField::new(
             table_field,
             Ciboulette2SqlAdditionalFieldType::Sorting,
-            el.type_(),
+            el.type_().clone(),
         )
     }
 }

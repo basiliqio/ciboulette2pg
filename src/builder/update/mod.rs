@@ -10,7 +10,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_update_normal(
         &mut self,
         table: &Ciboulette2PostgresTable,
-        params: Vec<(&str, Ciboulette2SqlValue<'a>)>,
+        params: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
         query: &'a CibouletteUpdateRequest<'a>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -52,9 +52,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             CiboulettePath::TypeId(_, _) => {
                 Self::gen_update_main(&ciboulette_store, &ciboulette_table_store, &request)
             }
-            CiboulettePath::TypeIdRelationship(type_, _, _) => {
-                Self::gen_update_rel(&ciboulette_store, &ciboulette_table_store, &request, &type_)
-            }
+            CiboulettePath::TypeIdRelationship(type_, _, _) => Self::gen_update_rel(
+                &ciboulette_store,
+                &ciboulette_table_store,
+                &request,
+                type_.clone(),
+            ),
             _ => unreachable!(), // FIXME
         }
     }

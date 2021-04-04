@@ -13,7 +13,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             "cte_{}_data",
             state.main_table().name()
         )))?;
-        let rels = Self::get_relationships(&ciboulette_store, &state.main_type())?;
+        let rels = Self::get_relationships(&ciboulette_store, state.main_type().clone())?;
 
         se.buf.write_all(b"WITH \n")?;
         se.gen_main_select(&state, &main_cte_data, &rels)?;
@@ -26,7 +26,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         };
         se.select_one_to_one_rels_routine(
             &state,
-            state.main_type(),
+            state.main_type().clone(),
             &main_cte_data,
             &rels,
             is_needed_cb,
@@ -46,8 +46,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_matcher_for_related_select(
         &mut self,
         ciboulette_table_store: &Ciboulette2PostgresTableStore<'a>,
-        left_type: &&CibouletteResourceType<'a>,
-        right_type: &&CibouletteResourceType<'a>,
+        left_type: Arc<CibouletteResourceType<'a>>,
+        right_type: Arc<CibouletteResourceType<'a>>,
         state: &Ciboulette2PostgresBuilderState<'a>,
         id: &CibouletteId<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -96,7 +96,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         self.gen_select_cte_final(
             state,
             &state.main_table(),
-            &state.main_type(),
+            state.main_type().clone(),
             None,
             rels.single_rels_additional_fields().iter(),
             !matches!(state.path(), CiboulettePath::TypeIdRelationship(_, _, _)),
@@ -106,8 +106,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             | CiboulettePath::TypeIdRelated(left_type, id, right_type) => self
                 .gen_matcher_for_related_select(
                     state.table_store(),
-                    left_type,
-                    right_type,
+                    left_type.clone(),
+                    right_type.clone(),
                     state,
                     id,
                 )?,

@@ -13,12 +13,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 let main_cte_table_id = Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::from(main_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
-                    main_table.ciboulette_type(),
+                    main_table.ciboulette_type().clone(),
                 )?;
                 let rel_cte_table_id = Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::from(rel_table.id()),
                     Ciboulette2SqlAdditionalFieldType::MainIdentifier,
-                    rel_table.ciboulette_type(),
+                    rel_table.ciboulette_type().clone(),
                 )?;
                 Self::gen_left_join_single_main_table(
                     &mut *buf,
@@ -36,8 +36,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
             }
             _ => {
                 return Err(Ciboulette2SqlError::SortingByMultiRel(
-                    main_table.ciboulette_type().name().clone(),
-                    rel_table.ciboulette_type().name().clone(),
+                    main_table.ciboulette_type().name().to_string(),
+                    rel_table.ciboulette_type().name().to_string(),
                 ));
             }
         }
@@ -101,7 +101,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_sorting_keys(
         &mut self,
         table: &Ciboulette2PostgresTable<'a>,
-        type_: &'a CibouletteResourceType<'a>,
+        type_: Arc<CibouletteResourceType<'a>>,
         query: &'a CibouletteQueryParameters<'a>,
     ) -> Result<(), Ciboulette2SqlError> {
         if let Some(sorting_arr) = query.sorting_map().get(&type_) {
@@ -112,7 +112,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         Ciboulette2SqlAdditionalField::new(
                             Ciboulette2PostgresTableField::try_from(el)?,
                             Ciboulette2SqlAdditionalFieldType::Sorting,
-                            type_,
+                            type_.clone(),
                         )?,
                     ),
                     table,

@@ -8,16 +8,16 @@ fn simple() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
-    let params: Vec<(&str, Ciboulette2SqlValue<'_>)> = vec![
+    let params: Vec<(Cow<'_, str>, Ciboulette2SqlValue<'_>)> = vec![
         (
-            "first-name",
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed("hello"))),
+            Cow::Borrowed("first-name"),
+            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("hello")))),
         ),
         (
-            "last-name",
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed("world"))),
+            Cow::Borrowed("last-name"),
+            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("world")))),
         ),
     ];
     builder.gen_insert_normal(&table, params, true).unwrap();
@@ -34,16 +34,16 @@ fn no_returning() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
-    let params: Vec<(&str, Ciboulette2SqlValue<'_>)> = vec![
+    let params: Vec<(Cow<'_, str>, Ciboulette2SqlValue<'_>)> = vec![
         (
-            "first-name",
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed("hello"))),
+            Cow::Borrowed("first-name"),
+            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("hello")))),
         ),
         (
-            "last-name",
-            Ciboulette2SqlValue::Text(Some(Cow::Borrowed("world"))),
+            Cow::Borrowed("last-name"),
+            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("world")))),
         ),
     ];
     builder.gen_insert_normal(&table, params, false).unwrap();
@@ -60,7 +60,7 @@ fn no_params() {
         Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
         Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
-        store.get_type("peoples").unwrap(),
+        store.get_type("peoples").unwrap().clone(),
     );
     builder.gen_insert_normal(&table, vec![], true).unwrap();
     let res = builder.build().unwrap();

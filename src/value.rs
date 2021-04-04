@@ -14,15 +14,15 @@ pub enum Ciboulette2SqlValue<'a> {
     Integer(Option<i64>),
     Float(Option<f32>),
     Double(Option<f64>),
-    Text(Option<Cow<'a, str>>),
-    Enum(Option<Cow<'a, str>>),
+    Text(Option<ArcCowStr<'a>>),
+    Enum(Option<ArcCowStr<'a>>),
     Bytes(Option<Cow<'a, [u8]>>),
     Boolean(Option<bool>),
     Char(Option<char>),
     Array(Option<Vec<Ciboulette2SqlValue<'a>>>),
     Numeric(Option<BigDecimal>),
     Json(Option<serde_json::Value>),
-    Xml(Option<Cow<'a, str>>),
+    Xml(Option<ArcCowStr<'a>>),
     Uuid(Option<Uuid>),
     DateTime(Option<DateTime<Utc>>),
     Date(Option<NaiveDate>),
@@ -47,7 +47,9 @@ impl<'a> TryFrom<&MessyJsonValue<'a>> for Ciboulette2SqlValue<'a> {
                 bigdecimal::FromPrimitive::from_u128(*val)
                     .ok_or_else(|| Ciboulette2SqlError::BigDecimal(*val))?,
             )),
-            MessyJsonValue::String(val) => Ciboulette2SqlValue::Text(Some(val.clone())),
+            MessyJsonValue::String(val) => {
+                Ciboulette2SqlValue::Text(Some(ArcCowStr::from(val.clone())))
+            }
             MessyJsonValue::Uuid(val) => Ciboulette2SqlValue::Uuid(Some(**val)),
             MessyJsonValue::Array(arr) => {
                 let mut arr_res: Vec<Ciboulette2SqlValue<'_>> = Vec::with_capacity(arr.len());
@@ -67,7 +69,7 @@ impl<'a> From<&CibouletteId<'a>> for Ciboulette2SqlValue<'a> {
     fn from(val: &CibouletteId<'a>) -> Ciboulette2SqlValue<'a> {
         match val {
             CibouletteId::Number(x) => Ciboulette2SqlValue::Numeric(BigDecimal::from_u64(*x)),
-            CibouletteId::Text(x) => Ciboulette2SqlValue::Text(Some(x.clone())),
+            CibouletteId::Text(x) => Ciboulette2SqlValue::Text(Some(ArcCowStr::from(x.clone()))),
             CibouletteId::Uuid(x) => Ciboulette2SqlValue::Uuid(Some(*x)),
         }
     }
@@ -75,13 +77,13 @@ impl<'a> From<&CibouletteId<'a>> for Ciboulette2SqlValue<'a> {
 
 impl<'a> From<&'a str> for Ciboulette2SqlValue<'a> {
     fn from(val: &'a str) -> Ciboulette2SqlValue<'a> {
-        Ciboulette2SqlValue::Text(Some(Cow::Borrowed(val)))
+        Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed(val))))
     }
 }
 
 impl<'a> From<Cow<'a, str>> for Ciboulette2SqlValue<'a> {
     fn from(val: Cow<'a, str>) -> Ciboulette2SqlValue<'a> {
-        Ciboulette2SqlValue::Text(Some(val))
+        Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(val)))
     }
 }
 
