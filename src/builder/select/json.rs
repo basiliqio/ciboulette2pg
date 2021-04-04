@@ -11,7 +11,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         mut fields: std::iter::Peekable<I>,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        I: std::iter::Iterator<Item = ArcCowStr<'a>>,
+        I: std::iter::Iterator<Item = Ciboulette2PostgresStr<'a>>,
     {
         // If there is nothing, return an empty JSON object
         if fields.peek().is_none() {
@@ -31,7 +31,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         EMPTY_LIST
                             .iter()
                             .map(Cow::as_ref)
-                            .map(ArcCowStr::from)
+                            .map(Ciboulette2PostgresStr::from)
                             .peekable(), // TODO Find a cleaner way to do that
                     )?;
                 }
@@ -74,7 +74,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     fields
                         .iter()
                         .map(Cow::as_ref)
-                        .map(ArcCowStr::from)
+                        .map(Ciboulette2PostgresStr::from)
                         .peekable(),
                 )?;
             }
@@ -89,7 +89,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         .properties()
                         .keys()
                         .cloned()
-                        .map(ArcCowStr::from)
+                        .map(Ciboulette2PostgresStr::from)
                         .peekable(),
                 )?;
             }

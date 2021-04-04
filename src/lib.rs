@@ -1,18 +1,18 @@
 #![warn(clippy::all)]
-mod arccow;
 mod builder;
 mod ciboulette_row;
 mod errors;
 pub mod graph_walker;
 mod response_type;
 mod safe_ident;
+mod str;
 mod table_store;
 #[cfg(test)]
 mod tests;
 
 mod value;
 
-pub use arccow::ArcCowStr;
+pub use crate::str::Ciboulette2PostgresStr;
 use arcstr::ArcStr;
 pub use builder::Ciboulette2PostgresBuilder;
 use builder::Ciboulette2SqlArguments;
@@ -24,7 +24,7 @@ use messy_json::{
     MessyJson, MessyJsonNullType, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue,
 };
 use response_type::Ciboulette2PostgresResponseType;
-use safe_ident::Ciboulette2PostgresSafeIdent;
+pub use safe_ident::Ciboulette2PostgresSafeIdent;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;

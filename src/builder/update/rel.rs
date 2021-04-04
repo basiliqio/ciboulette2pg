@@ -17,7 +17,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         request: &'a CibouletteUpdateRequest<'a>,
         main_table: &Ciboulette2PostgresTable<'a>,
         main_cte_update: &Ciboulette2PostgresTable<'a>,
-        values: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
+        values: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_update)?;
         self.buf.write_all(b" AS (")?;

@@ -7,14 +7,14 @@ use super::*;
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2SqlQueryRels<'a> {
     multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
-    single_rels_keys: Vec<Cow<'a, str>>,
+    single_rels_keys: Vec<Ciboulette2PostgresStr<'a>>,
     single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>>,
 }
 
 impl<'a> Ciboulette2SqlQueryRels<'a> {
     pub fn new(
         type_: Arc<CibouletteResourceType<'a>>,
-        single_rels_keys: Vec<Cow<'a, str>>,
+        single_rels_keys: Vec<Ciboulette2PostgresStr<'a>>,
         multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>> =
@@ -22,7 +22,7 @@ impl<'a> Ciboulette2SqlQueryRels<'a> {
         for single_rel in single_rels_keys.iter() {
             single_rels_additional_fields.push(Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new_owned(
-                    Ciboulette2PostgresSafeIdent::try_from(single_rel.clone().into_owned())?, //FIXME
+                    Ciboulette2PostgresSafeIdent::try_from(single_rel.clone())?,
                     None,
                     None,
                 ),

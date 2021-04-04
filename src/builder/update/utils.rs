@@ -5,7 +5,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(super) fn gen_update_params(
         &mut self,
         table: &Ciboulette2PostgresTable,
-        params: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
+        params: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut iter = params.into_iter().peekable();
         while let Some((n, v)) = iter.next() {

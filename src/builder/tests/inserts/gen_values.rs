@@ -13,12 +13,12 @@ fn simple() {
     builder
         .gen_rel_values(
             vec![
-                Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed(
+                Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from(
                     "e1ba7ab3-12f9-4a70-aced-a1637b6a3c23",
-                )))),
-                Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed(
+                ))),
+                Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from(
                     "4ba2994f-0282-4251-8061-2f9cb92808e6",
-                )))),
+                ))),
             ],
             &dest_table,
             &Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),

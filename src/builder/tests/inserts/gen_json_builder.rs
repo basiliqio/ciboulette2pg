@@ -10,7 +10,7 @@ fn no_sparse_fields() {
         Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
-    let url = Url::parse("http://localhost/peoples").unwrap().clone();
+    let url = Url::parse("http://localhost/peoples").unwrap();
     let ciboulette_request = gen_req_create_people(&store, &url);
     builder
         .gen_json_builder(

@@ -91,7 +91,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         )?;
         self.buf.write_all(b", ")?;
         self.insert_params(
-            Ciboulette2SqlValue::Text(Some(ArcCowStr::Arc(type_.name().clone()))),
+            Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::Arc(type_.name().clone()))),
             table,
         )?;
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
@@ -102,7 +102,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                 self.insert_ident(relating_field.field(), relating_field.table())?;
                 self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::Text(Some(ArcCowStr::Arc(
+                    Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::Arc(
                         relating_field.related_type().name().clone(),
                     ))), // TODO do better
                     relating_field.table(),

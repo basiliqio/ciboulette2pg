@@ -10,7 +10,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn gen_update_normal(
         &mut self,
         table: &Ciboulette2PostgresTable,
-        params: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
+        params: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
         query: &'a CibouletteUpdateRequest<'a>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {

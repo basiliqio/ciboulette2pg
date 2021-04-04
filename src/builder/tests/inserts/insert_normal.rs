@@ -10,14 +10,14 @@ fn simple() {
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
-    let params: Vec<(Cow<'_, str>, Ciboulette2SqlValue<'_>)> = vec![
+    let params: Vec<(Ciboulette2PostgresStr<'_>, Ciboulette2SqlValue<'_>)> = vec![
         (
-            Cow::Borrowed("first-name"),
-            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("hello")))),
+            Ciboulette2PostgresStr::from("first-name"),
+            Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from("hello"))),
         ),
         (
-            Cow::Borrowed("last-name"),
-            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("world")))),
+            Ciboulette2PostgresStr::from("last-name"),
+            Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from("world"))),
         ),
     ];
     builder.gen_insert_normal(&table, params, true).unwrap();
@@ -36,14 +36,14 @@ fn no_returning() {
         Ciboulette2PostgresSafeIdent::try_from("mysimpletable").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
-    let params: Vec<(Cow<'_, str>, Ciboulette2SqlValue<'_>)> = vec![
+    let params: Vec<(Ciboulette2PostgresStr<'_>, Ciboulette2SqlValue<'_>)> = vec![
         (
-            Cow::Borrowed("first-name"),
-            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("hello")))),
+            Ciboulette2PostgresStr::from("first-name"),
+            Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from("hello"))),
         ),
         (
-            Cow::Borrowed("last-name"),
-            Ciboulette2SqlValue::Text(Some(ArcCowStr::Cow(Cow::Borrowed("world")))),
+            Ciboulette2PostgresStr::from("last-name"),
+            Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from("world"))),
         ),
     ];
     builder.gen_insert_normal(&table, params, false).unwrap();

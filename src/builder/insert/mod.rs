@@ -82,7 +82,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         &mut self,
         main_cte_insert: &Ciboulette2PostgresTable<'a>,
         state: &Ciboulette2PostgresBuilderState<'a>,
-        main_inserts_values: Vec<(Cow<'a, str>, Ciboulette2SqlValue<'a>)>,
+        main_inserts_values: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(main_cte_insert)?;
         self.buf.write_all(b" AS (")?;
