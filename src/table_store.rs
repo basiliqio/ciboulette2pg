@@ -67,6 +67,23 @@ impl<'a> Ciboulette2PostgresId<'a> {
             Ciboulette2PostgresId::Text(_) => &safe_ident::TEXT_IDENT,
         }
     }
+
+    pub fn new_from_ciboulette_id_type(
+        type_: CibouletteIdType,
+        name: &str,
+    ) -> Result<Self, Ciboulette2SqlError> {
+        Ok(match type_ {
+            CibouletteIdType::Number => Ciboulette2PostgresId::Number(
+                Ciboulette2PostgresSafeIdent::try_from(name.to_string())?,
+            ),
+            CibouletteIdType::Text => Ciboulette2PostgresId::Text(
+                Ciboulette2PostgresSafeIdent::try_from(name.to_string())?,
+            ),
+            CibouletteIdType::Uuid => Ciboulette2PostgresId::Uuid(
+                Ciboulette2PostgresSafeIdent::try_from(name.to_string())?,
+            ),
+        })
+    }
 }
 
 /// A Postgres table
@@ -75,7 +92,7 @@ impl<'a> Ciboulette2PostgresId<'a> {
 pub struct Ciboulette2PostgresTable<'a> {
     id: Ciboulette2PostgresId<'a>,
     schema: Option<Ciboulette2PostgresSafeIdent<'a>>,
-    ciboulette_type: &'a CibouletteResourceType<'a>,
+    ciboulette_type: Arc<CibouletteResourceType<'a>>,
     name: Ciboulette2PostgresSafeIdent<'a>,
 }
 
@@ -85,7 +102,7 @@ impl<'a> Ciboulette2PostgresTable<'a> {
         id: Ciboulette2PostgresId<'a>,
         schema: Option<Ciboulette2PostgresSafeIdent<'a>>,
         name: Ciboulette2PostgresSafeIdent<'a>,
-        ciboulette_type: &'a CibouletteResourceType<'a>,
+        ciboulette_type: Arc<CibouletteResourceType<'a>>,
     ) -> Self {
         Ciboulette2PostgresTable {
             id,
@@ -112,7 +129,7 @@ impl<'a> Ciboulette2PostgresTable<'a> {
     pub fn new_cte(
         id: Ciboulette2PostgresId<'a>,
         name: Cow<'a, str>,
-        ciboulette_type: &'a CibouletteResourceType<'a>,
+        ciboulette_type: Arc<CibouletteResourceType<'a>>,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTable {
             id: id.clone(),
