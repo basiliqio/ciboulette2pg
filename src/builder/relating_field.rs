@@ -2,17 +2,17 @@ use super::*;
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresRelatingField<'a> {
-    pub(crate) field: Ciboulette2PostgresTableField<'a>,
-    pub(crate) table: Ciboulette2PostgresTable<'a>,
-    pub(crate) related_type: Arc<CibouletteResourceType<'a>>,
+pub(crate) struct Ciboulette2PostgresRelatingField<'store> {
+    pub(crate) field: Ciboulette2PostgresTableField<'store>,
+    pub(crate) table: Ciboulette2PostgresTable<'store>,
+    pub(crate) related_type: Arc<CibouletteResourceType<'store>>,
 }
 
-impl<'a> Ciboulette2PostgresRelatingField<'a> {
+impl<'store> Ciboulette2PostgresRelatingField<'store> {
     pub fn new(
-        field: Ciboulette2PostgresTableField<'a>,
-        table: Ciboulette2PostgresTable<'a>,
-        related_type: Arc<CibouletteResourceType<'a>>,
+        field: Ciboulette2PostgresTableField<'store>,
+        table: Ciboulette2PostgresTable<'store>,
+        related_type: Arc<CibouletteResourceType<'store>>,
     ) -> Self {
         Ciboulette2PostgresRelatingField {
             field,

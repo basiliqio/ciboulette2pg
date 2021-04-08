@@ -1,13 +1,16 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Generate a SQL query to delete a single object from the database
     ///
     /// Generated when receiving a request like `DELETE /peoples/{id}`
     pub(super) fn gen_delete_normal(
         &mut self,
-        table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        query: &'a CibouletteDeleteRequest<'a>,
+        table_store: &'store Ciboulette2PostgresTableStore<'store>,
+        query: &'request CibouletteDeleteRequest<'request, 'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         let main_table = table_store.get(query.resource_type().name().as_str())?;
 

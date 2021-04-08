@@ -3,22 +3,22 @@ use main::Ciboulette2PostgresMainResourceInformations;
 /// Extract informations concerning the main resource's one-to-many relationships
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresMainResourceRelationships<'a> {
-    pub type_: Arc<CibouletteResourceType<'a>>,
-    pub rel_opt: Ciboulette2PostgresMultiRelationships<'a>,
-    pub values: Option<Vec<Ciboulette2SqlValue<'a>>>,
+pub(crate) struct Ciboulette2PostgresMainResourceRelationships<'store, 'request> {
+    pub type_: Arc<CibouletteResourceType<'store>>,
+    pub rel_opt: Ciboulette2PostgresMultiRelationships<'store>,
+    pub values: Option<Vec<Ciboulette2SqlValue<'request>>>,
 }
 
 /// Extract informations concerning the main resource's one-to-many relationships
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) enum Ciboulette2PostgresMultiRelationships<'a> {
-    OneToMany(&'a CibouletteRelationshipOneToManyOption<'a>),
-    ManyToOne(&'a CibouletteRelationshipOneToManyOption<'a>),
-    ManyToMany(&'a CibouletteRelationshipManyToManyOption<'a>),
+pub(crate) enum Ciboulette2PostgresMultiRelationships<'store> {
+    OneToMany(&'store CibouletteRelationshipOneToManyOption<'store>),
+    ManyToOne(&'store CibouletteRelationshipOneToManyOption<'store>),
+    ManyToMany(&'store CibouletteRelationshipManyToManyOption<'store>),
 }
 
-impl<'a> Ciboulette2PostgresMultiRelationships<'a> {
-    pub fn dest_resource(&self) -> &CibouletteResourceType<'a> {
+impl<'store> Ciboulette2PostgresMultiRelationships<'store> {
+    pub fn dest_resource(&self) -> &CibouletteResourceType<'store> {
         match self {
             Ciboulette2PostgresMultiRelationships::OneToMany(x) => x.many_table(),
             Ciboulette2PostgresMultiRelationships::ManyToOne(x) => x.many_table(),
@@ -28,7 +28,7 @@ impl<'a> Ciboulette2PostgresMultiRelationships<'a> {
 
     pub fn dest_key(
         &self,
-        main_type: &CibouletteResourceType<'a>,
+        main_type: &CibouletteResourceType<'store>,
     ) -> Result<&str, CibouletteError> {
         match self {
             Ciboulette2PostgresMultiRelationships::OneToMany(x) => Ok(x.many_table_key().as_str()),
@@ -39,10 +39,10 @@ impl<'a> Ciboulette2PostgresMultiRelationships<'a> {
 }
 
 /// Extract data from a single relationship object
-fn extract_many_to_one_relationships_from_ressource_identifiers<'a>(
-    rel_ids: &'a CibouletteUpdateRelationship<'a>,
-    rel_opt: &'a CibouletteRelationshipOneToManyOption<'a>,
-) -> Result<Ciboulette2PostgresMainResourceInformations<'a>, Ciboulette2SqlError> {
+fn extract_many_to_one_relationships_from_ressource_identifiers<'store, 'request>(
+    rel_ids: &'request CibouletteUpdateRelationship<'request, 'store>,
+    rel_opt: &'store CibouletteRelationshipOneToManyOption<'store>,
+) -> Result<Ciboulette2PostgresMainResourceInformations<'store, 'request>, Ciboulette2SqlError> {
     match rel_ids.value() {
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
             Ok(Ciboulette2PostgresMainResourceInformations {
@@ -78,12 +78,12 @@ fn extract_many_to_one_relationships_from_ressource_identifiers<'a>(
 }
 
 /// Extract one-to-many relationships
-fn extract_relationships<'a>(
-    buf: &mut Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
-    relationships: Option<&'a BTreeMap<ArcStr, CibouletteRelationshipObject<'a>>>,
-    type_: Arc<CibouletteResourceType<'a>>,
+fn extract_relationships<'store, 'request>(
+    buf: &mut Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>>,
+    relationships: Option<&'request BTreeMap<ArcStr, CibouletteRelationshipObject<'request>>>,
+    type_: Arc<CibouletteResourceType<'store>>,
     type_to_alias: &str,
-    opt: Ciboulette2PostgresMultiRelationships<'a>,
+    opt: Ciboulette2PostgresMultiRelationships<'store>,
 ) {
     let relationships = match relationships {
         Some(x) => x,
@@ -136,11 +136,11 @@ fn extract_relationships<'a>(
 }
 
 /// Extract one-to-one relationship informations, without its values from the request
-pub(crate) fn extract_fields_rel<'a>(
-    store: &'a CibouletteStore<'a>,
-    main_type: Arc<CibouletteResourceType<'a>>,
-    rels: &'a CibouletteUpdateRelationship<'a>,
-) -> Result<Ciboulette2PostgresMainResourceInformations<'a>, Ciboulette2SqlError> {
+pub(crate) fn extract_fields_rel<'store, 'request>(
+    store: &'store CibouletteStore<'store>,
+    main_type: Arc<CibouletteResourceType<'store>>,
+    rels: &'request CibouletteUpdateRelationship<'request, 'store>,
+) -> Result<Ciboulette2PostgresMainResourceInformations<'store, 'request>, Ciboulette2SqlError> {
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -152,9 +152,9 @@ pub(crate) fn extract_fields_rel<'a>(
         if let Some(rel) = store.graph().edge_weight(rel_edge) {
             match rel {
                 CibouletteRelationshipOption::ManyToOne(opt) => {
-                    return Ok(
-                        extract_many_to_one_relationships_from_ressource_identifiers(&rels, &opt)?,
-                    )
+                    return extract_many_to_one_relationships_from_ressource_identifiers(
+                        &rels, &opt,
+                    );
                 }
                 CibouletteRelationshipOption::OneToMany(_)
                 | CibouletteRelationshipOption::ManyToMany(_) => {
@@ -172,12 +172,13 @@ pub(crate) fn extract_fields_rel<'a>(
 }
 
 /// Extract one-to-one relationships informations, without their values from the request
-pub(crate) fn extract_fields<'a>(
-    store: &'a CibouletteStore<'a>,
-    main_type: Arc<CibouletteResourceType<'a>>,
-    relationships: Option<&'a BTreeMap<ArcStr, CibouletteRelationshipObject<'a>>>,
-) -> Result<Vec<Ciboulette2PostgresMainResourceRelationships<'a>>, Ciboulette2SqlError> {
-    let mut res: Vec<Ciboulette2PostgresMainResourceRelationships<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
+pub(crate) fn extract_fields<'store, 'request>(
+    store: &'store CibouletteStore<'store>,
+    main_type: Arc<CibouletteResourceType<'store>>,
+    relationships: Option<&'request BTreeMap<ArcStr, CibouletteRelationshipObject<'request>>>,
+) -> Result<Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>>, Ciboulette2SqlError>
+{
+    let mut res: Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>> = Vec::new(); // Vector in which the relationships queries will be stored
 
     let main_type_index = store
         .get_type_index(main_type.name())
@@ -227,11 +228,12 @@ pub(crate) fn extract_fields<'a>(
 }
 
 /// Get the multi relationships informations of a resource
-pub(crate) fn get_resource_multi_rels<'a>(
-    store: &'a CibouletteStore<'a>,
-    main_type: Arc<CibouletteResourceType<'a>>,
-) -> Result<Vec<Ciboulette2PostgresMainResourceRelationships<'a>>, Ciboulette2SqlError> {
-    let mut res: Vec<Ciboulette2PostgresMainResourceRelationships<'a>> = Vec::new(); // Vector in which the relationships queries will be stored
+pub(crate) fn get_resource_multi_rels<'store, 'request>(
+    store: &'store CibouletteStore<'store>,
+    main_type: Arc<CibouletteResourceType<'store>>,
+) -> Result<Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>>, Ciboulette2SqlError>
+{
+    let mut res: Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>> = Vec::new(); // Vector in which the relationships queries will be stored
 
     let main_type_index = store
         .get_type_index(main_type.name())

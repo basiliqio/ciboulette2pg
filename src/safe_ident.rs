@@ -19,11 +19,11 @@ pub const INTEGER_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
 
 /// An identifier that is safe to be wrapped in quote
 #[derive(Clone, Debug, PartialEq, Eq, Ord, Default, PartialOrd)]
-pub struct Ciboulette2PostgresSafeIdent<'a> {
-    pub inner: Ciboulette2PostgresStr<'a>,
+pub struct Ciboulette2PostgresSafeIdent<'store> {
+    pub inner: Ciboulette2PostgresStr<'store>,
 }
 
-impl<'a> std::fmt::Display for Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> std::fmt::Display for Ciboulette2PostgresSafeIdent<'store> {
     fn fmt(
         &self,
         f: &mut std::fmt::Formatter<'_>,
@@ -32,11 +32,11 @@ impl<'a> std::fmt::Display for Ciboulette2PostgresSafeIdent<'a> {
     }
 }
 
-impl<'a> Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> Ciboulette2PostgresSafeIdent<'store> {
     /// Check that the identifier is safe
     pub fn check(
-        val: Ciboulette2PostgresStr<'a>
-    ) -> Result<Ciboulette2PostgresStr<'a>, Ciboulette2SqlError> {
+        val: Ciboulette2PostgresStr<'store>
+    ) -> Result<Ciboulette2PostgresStr<'store>, Ciboulette2SqlError> {
         if (*val).find('\0').is_some() {
             return Err(Ciboulette2SqlError::NullCharIdent(val.to_string()));
         }
@@ -52,25 +52,25 @@ impl<'a> Ciboulette2PostgresSafeIdent<'a> {
     }
 }
 
-impl<'a> std::ops::Deref for Ciboulette2PostgresSafeIdent<'a> {
-    type Target = Ciboulette2PostgresStr<'a>;
+impl<'store> std::ops::Deref for Ciboulette2PostgresSafeIdent<'store> {
+    type Target = Ciboulette2PostgresStr<'store>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
     }
 }
 
-impl<'a> std::convert::TryFrom<&'a str> for Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> std::convert::TryFrom<&'store str> for Ciboulette2PostgresSafeIdent<'store> {
     type Error = Ciboulette2SqlError;
 
-    fn try_from(value: &'a str) -> Result<Self, Self::Error> {
+    fn try_from(value: &'store str) -> Result<Self, Self::Error> {
         Ok(Ciboulette2PostgresSafeIdent {
             inner: Ciboulette2PostgresSafeIdent::check(Ciboulette2PostgresStr::from(value))?,
         })
     }
 }
 
-impl<'a> std::convert::TryFrom<String> for Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> std::convert::TryFrom<String> for Ciboulette2PostgresSafeIdent<'store> {
     type Error = Ciboulette2SqlError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
@@ -82,7 +82,7 @@ impl<'a> std::convert::TryFrom<String> for Ciboulette2PostgresSafeIdent<'a> {
     }
 }
 
-impl<'a> std::convert::TryFrom<ArcStr> for Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> std::convert::TryFrom<ArcStr> for Ciboulette2PostgresSafeIdent<'store> {
     type Error = Ciboulette2SqlError;
 
     fn try_from(value: ArcStr) -> Result<Self, Self::Error> {
@@ -92,28 +92,30 @@ impl<'a> std::convert::TryFrom<ArcStr> for Ciboulette2PostgresSafeIdent<'a> {
     }
 }
 
-impl<'a> std::convert::TryFrom<Cow<'a, str>> for Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> std::convert::TryFrom<Cow<'store, str>> for Ciboulette2PostgresSafeIdent<'store> {
     type Error = Ciboulette2SqlError;
 
-    fn try_from(value: Cow<'a, str>) -> Result<Self, Self::Error> {
+    fn try_from(value: Cow<'store, str>) -> Result<Self, Self::Error> {
         Ok(Ciboulette2PostgresSafeIdent {
             inner: Ciboulette2PostgresSafeIdent::check(Ciboulette2PostgresStr::from(value))?,
         })
     }
 }
 
-impl<'a> std::convert::TryFrom<Ciboulette2PostgresStr<'a>> for Ciboulette2PostgresSafeIdent<'a> {
+impl<'store> std::convert::TryFrom<Ciboulette2PostgresStr<'store>>
+    for Ciboulette2PostgresSafeIdent<'store>
+{
     type Error = Ciboulette2SqlError;
 
-    fn try_from(value: Ciboulette2PostgresStr<'a>) -> Result<Self, Self::Error> {
+    fn try_from(value: Ciboulette2PostgresStr<'store>) -> Result<Self, Self::Error> {
         Ok(Ciboulette2PostgresSafeIdent {
             inner: Ciboulette2PostgresSafeIdent::check(value)?,
         })
     }
 }
 
-impl<'a> From<&Ciboulette2PostgresSafeIdent<'a>> for Ciboulette2PostgresSafeIdent<'a> {
-    fn from(value: &Ciboulette2PostgresSafeIdent<'a>) -> Self {
+impl<'store> From<&Ciboulette2PostgresSafeIdent<'store>> for Ciboulette2PostgresSafeIdent<'store> {
+    fn from(value: &Ciboulette2PostgresSafeIdent<'store>) -> Self {
         Ciboulette2PostgresSafeIdent {
             inner: value.inner.clone(),
         }

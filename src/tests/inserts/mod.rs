@@ -4,7 +4,7 @@ mod inserts_fails;
 mod inserts_success;
 mod query_params;
 
-async fn test_insert<'a>(
+async fn test_insert<'store>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     _test_name: &str,

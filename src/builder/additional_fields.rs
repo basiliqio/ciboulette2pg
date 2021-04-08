@@ -25,18 +25,18 @@ impl Ciboulette2SqlAdditionalFieldType {
 
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2SqlAdditionalField<'a> {
+pub(crate) struct Ciboulette2SqlAdditionalField<'store> {
     pub(crate) type_: Ciboulette2SqlAdditionalFieldType,
-    pub(crate) ident: Ciboulette2PostgresTableField<'a>,
-    pub(crate) name: Ciboulette2PostgresSafeIdent<'a>,
-    pub(crate) ciboulette_type: Arc<CibouletteResourceType<'a>>,
+    pub(crate) ident: Ciboulette2PostgresTableField<'store>,
+    pub(crate) name: Ciboulette2PostgresSafeIdent<'store>,
+    pub(crate) ciboulette_type: Arc<CibouletteResourceType<'store>>,
 }
 
-impl<'a> Ciboulette2SqlAdditionalField<'a> {
+impl<'store> Ciboulette2SqlAdditionalField<'store> {
     pub fn new(
-        ident: Ciboulette2PostgresTableField<'a>,
+        ident: Ciboulette2PostgresTableField<'store>,
         type_: Ciboulette2SqlAdditionalFieldType,
-        ciboulette_type: Arc<CibouletteResourceType<'a>>,
+        ciboulette_type: Arc<CibouletteResourceType<'store>>,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2SqlAdditionalField {
             name: Ciboulette2PostgresSafeIdent::try_from(format!(
@@ -51,10 +51,10 @@ impl<'a> Ciboulette2SqlAdditionalField<'a> {
     }
 }
 
-impl<'a> TryFrom<&Ciboulette2PostgresTable<'a>> for Ciboulette2SqlAdditionalField<'a> {
+impl<'store> TryFrom<&Ciboulette2PostgresTable<'store>> for Ciboulette2SqlAdditionalField<'store> {
     type Error = Ciboulette2SqlError;
 
-    fn try_from(table: &Ciboulette2PostgresTable<'a>) -> Result<Self, Self::Error> {
+    fn try_from(table: &Ciboulette2PostgresTable<'store>) -> Result<Self, Self::Error> {
         Ciboulette2SqlAdditionalField::new(
             Ciboulette2PostgresTableField::from(table.id()),
             Ciboulette2SqlAdditionalFieldType::MainIdentifier,
@@ -63,10 +63,10 @@ impl<'a> TryFrom<&Ciboulette2PostgresTable<'a>> for Ciboulette2SqlAdditionalFiel
     }
 }
 
-impl<'a> TryFrom<&CibouletteSortingElement<'a>> for Ciboulette2SqlAdditionalField<'a> {
+impl<'store> TryFrom<&CibouletteSortingElement<'store>> for Ciboulette2SqlAdditionalField<'store> {
     type Error = Ciboulette2SqlError;
 
-    fn try_from(el: &CibouletteSortingElement<'a>) -> Result<Self, Self::Error> {
+    fn try_from(el: &CibouletteSortingElement<'store>) -> Result<Self, Self::Error> {
         let table_field = Ciboulette2PostgresTableField::new_owned(
             Ciboulette2PostgresSafeIdent::try_from(el.field().clone())?,
             None,

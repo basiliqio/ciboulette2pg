@@ -72,31 +72,31 @@ type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2SqlArguments<'a> {
-    inner: Vec<Ciboulette2SqlValue<'a>>,
+pub struct Ciboulette2SqlArguments<'request> {
+    inner: Vec<Ciboulette2SqlValue<'request>>,
 }
 
-impl<'a> Ciboulette2SqlArguments<'a> {
+impl<'request> Ciboulette2SqlArguments<'request> {
     pub fn with_capacity(cap: usize) -> Self {
         Ciboulette2SqlArguments {
             inner: Vec::with_capacity(cap),
         }
     }
 
-    pub fn take(self) -> Vec<Ciboulette2SqlValue<'a>> {
+    pub fn take(self) -> Vec<Ciboulette2SqlValue<'request>> {
         self.inner
     }
 }
 
-impl<'a> std::ops::Deref for Ciboulette2SqlArguments<'a> {
-    type Target = Vec<Ciboulette2SqlValue<'a>>;
+impl<'request> std::ops::Deref for Ciboulette2SqlArguments<'request> {
+    type Target = Vec<Ciboulette2SqlValue<'request>>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
     }
 }
 
-impl<'a> std::ops::DerefMut for Ciboulette2SqlArguments<'a> {
+impl<'request> std::ops::DerefMut for Ciboulette2SqlArguments<'request> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
@@ -104,20 +104,23 @@ impl<'a> std::ops::DerefMut for Ciboulette2SqlArguments<'a> {
 
 #[derive(Debug, Getters, MutGetters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresBuilder<'a> {
+pub struct Ciboulette2PostgresBuilder<'store, 'request> {
     buf: Ciboulette2PostgresBuf,
-    params: Ciboulette2SqlArguments<'a>,
+    params: Ciboulette2SqlArguments<'request>,
     #[getset(get_mut = "pub")]
     working_tables: BTreeMap<
-        &'a Ciboulette2PostgresTable<'a>,
+        &'store Ciboulette2PostgresTable<'store>,
         (
-            Ciboulette2PostgresTable<'a>,
+            Ciboulette2PostgresTable<'store>,
             Ciboulette2PostgresResponseType,
         ),
     >,
 }
 
-impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Default for Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     fn default() -> Self {
         Ciboulette2PostgresBuilder {
             buf: Ciboulette2PostgresBuf::new_ringbuf(std::io::Cursor::new(Vec::with_capacity(
@@ -129,12 +132,15 @@ impl<'a> Default for Ciboulette2PostgresBuilder<'a> {
     }
 }
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     pub(crate) fn add_working_table(
         &mut self,
-        main_table: &'a Ciboulette2PostgresTable<'a>,
+        main_table: &'store Ciboulette2PostgresTable<'store>,
         val: (
-            Ciboulette2PostgresTable<'a>,
+            Ciboulette2PostgresTable<'store>,
             Ciboulette2PostgresResponseType,
         ),
     ) {

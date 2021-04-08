@@ -1,9 +1,12 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilderState<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilderState<'store, 'request>
+where
+    'store: 'request,
+{
     fn is_needed_included(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.query().include().contains(other) {
             true => Some(*self.expected_response_type()),
@@ -13,7 +16,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
 
     fn is_needed_path(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.path() {
             CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x.as_ref() == other {
@@ -44,7 +47,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
 
     fn is_needed_main_type(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match other == self.main_type().as_ref() {
             true => Some(Ciboulette2PostgresResponseType::Object),
@@ -54,7 +57,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
 
     pub(crate) fn is_needed_updating_relationships(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match other == self.main_type().as_ref() {
             true => Some(Ciboulette2PostgresResponseType::Id),
@@ -64,7 +67,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
 
     fn is_needed_sorting(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.query().sorting_map().contains_key(other) {
             true => Some(Ciboulette2PostgresResponseType::None),
@@ -74,7 +77,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
 
     pub(crate) fn is_needed_all_for_relationships(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         self.is_needed_main_type(other)
             .or_else(|| self.is_needed_sorting(other))
@@ -82,7 +85,7 @@ impl<'a> Ciboulette2PostgresBuilderState<'a> {
 
     pub(crate) fn is_needed_all(
         &self,
-        other: &CibouletteResourceType<'a>,
+        other: &CibouletteResourceType<'store>,
     ) -> Option<Ciboulette2PostgresResponseType> {
         self.is_needed_included(other)
             .or_else(|| self.is_needed_path(other))

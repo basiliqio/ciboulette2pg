@@ -3,18 +3,18 @@ use std::borrow::Borrow;
 use std::ops::Deref;
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
-pub enum Ciboulette2PostgresStr<'a> {
-    Borrowed(&'a str),
+pub enum Ciboulette2PostgresStr<'store> {
+    Borrowed(&'store str),
     Arc(ArcStr),
 }
 
-impl<'a> Default for Ciboulette2PostgresStr<'a> {
+impl<'store> Default for Ciboulette2PostgresStr<'store> {
     fn default() -> Self {
         Ciboulette2PostgresStr::Borrowed("")
     }
 }
 
-impl<'a> std::fmt::Display for Ciboulette2PostgresStr<'a> {
+impl<'store> std::fmt::Display for Ciboulette2PostgresStr<'store> {
     fn fmt(
         &self,
         f: &mut std::fmt::Formatter<'_>,
@@ -37,20 +37,20 @@ impl Deref for Ciboulette2PostgresStr<'_> {
     }
 }
 
-impl<'a> From<&'a str> for Ciboulette2PostgresStr<'a> {
-    fn from(other: &'a str) -> Self {
+impl<'store> From<&'store str> for Ciboulette2PostgresStr<'store> {
+    fn from(other: &'store str) -> Self {
         Ciboulette2PostgresStr::Borrowed(other)
     }
 }
 
-impl<'a> From<String> for Ciboulette2PostgresStr<'a> {
+impl<'store> From<String> for Ciboulette2PostgresStr<'store> {
     fn from(other: String) -> Self {
         Ciboulette2PostgresStr::Arc(ArcStr::from(other))
     }
 }
 
-impl<'a> From<Cow<'a, str>> for Ciboulette2PostgresStr<'a> {
-    fn from(other: Cow<'a, str>) -> Self {
+impl<'store> From<Cow<'store, str>> for Ciboulette2PostgresStr<'store> {
+    fn from(other: Cow<'store, str>) -> Self {
         match other {
             Cow::Borrowed(x) => Ciboulette2PostgresStr::Borrowed(x),
             Cow::Owned(x) => Ciboulette2PostgresStr::Arc(ArcStr::from(x)),
@@ -58,7 +58,7 @@ impl<'a> From<Cow<'a, str>> for Ciboulette2PostgresStr<'a> {
     }
 }
 
-impl<'a> From<ArcStr> for Ciboulette2PostgresStr<'a> {
+impl<'store> From<ArcStr> for Ciboulette2PostgresStr<'store> {
     fn from(other: ArcStr) -> Self {
         Ciboulette2PostgresStr::Arc(other)
     }

@@ -5,13 +5,19 @@ pub mod main;
 pub mod rel;
 pub mod utils;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Generate a normal update with a simple `WHERE` selecting a single id
     pub(crate) fn gen_update_normal(
         &mut self,
-        table: &Ciboulette2PostgresTable,
-        params: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
-        query: &'a CibouletteUpdateRequest<'a>,
+        table: &Ciboulette2PostgresTable<'store>,
+        params: Vec<(
+            Ciboulette2PostgresStr<'store>,
+            Ciboulette2SqlValue<'request>,
+        )>,
+        query: &'request CibouletteUpdateRequest<'request, 'store>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b"UPDATE ")?;
@@ -33,9 +39,14 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     /// Generate the CTE table for updating an object
     fn gen_update_cte_tables(
-        main_type: &'a Ciboulette2PostgresTable<'a>
-    ) -> Result<(Ciboulette2PostgresTable<'a>, Ciboulette2PostgresTable<'a>), Ciboulette2SqlError>
-    {
+        main_type: &'store Ciboulette2PostgresTable<'store>
+    ) -> Result<
+        (
+            Ciboulette2PostgresTable<'store>,
+            Ciboulette2PostgresTable<'store>,
+        ),
+        Ciboulette2SqlError,
+    > {
         let main_cte_update =
             main_type.to_cte(Cow::Owned(format!("cte_{}_update", main_type.name())))?;
         let main_cte_data =
@@ -44,9 +55,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
 
     pub fn gen_update(
-        ciboulette_store: &'a CibouletteStore<'a>,
-        ciboulette_table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        request: &'a CibouletteUpdateRequest<'a>,
+        ciboulette_store: &'store CibouletteStore<'store>,
+        ciboulette_table_store: &'store Ciboulette2PostgresTableStore<'store>,
+        request: &'request CibouletteUpdateRequest<'request, 'store>,
     ) -> Result<Self, Ciboulette2SqlError> {
         match request.path() {
             CiboulettePath::TypeId(_, _) => {

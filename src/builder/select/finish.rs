@@ -1,9 +1,12 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     pub(crate) fn finish_request(
         &mut self,
-        state: Ciboulette2PostgresBuilderState<'a>,
+        state: Ciboulette2PostgresBuilderState<'store, 'request>,
     ) -> Result<(), Ciboulette2SqlError> {
         let (main_cte_table, _) = self.working_tables.get(state.main_table()).ok_or_else(|| {
             CibouletteError::UnknownError("Can't find the main_cte_table".to_string())
@@ -69,16 +72,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
     pub(crate) fn gen_select_cte_final<'b, I>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        table: &Ciboulette2PostgresTable<'a>,
-        type_: Arc<CibouletteResourceType<'a>>,
-        relating_field: Option<Ciboulette2PostgresRelatingField<'a>>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        table: &Ciboulette2PostgresTable<'store>,
+        type_: Arc<CibouletteResourceType<'store>>,
+        relating_field: Option<Ciboulette2PostgresRelatingField<'store>>,
         additional_fields: I,
         include: bool,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        'a: 'b,
-        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'a>>,
+        'store: 'b,
+        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'store>>,
     {
         self.buf.write_all(b"SELECT ")?;
         self.insert_ident(

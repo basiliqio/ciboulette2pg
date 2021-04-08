@@ -7,10 +7,13 @@ mod insert;
 mod insert_normal;
 mod single_rel_cte;
 
-fn gen_req_create_people<'a>(
-    store: &'a CibouletteStore<'a>,
-    parsed_url: &'a Url,
-) -> CibouletteCreateRequest<'a> {
+fn gen_req_create_people<'store, 'request>(
+    store: &'store CibouletteStore<'store>,
+    parsed_url: &'store Url,
+) -> CibouletteCreateRequest<'request, 'store>
+where
+    'store: 'request,
+{
     const INTENTION: CibouletteIntention = CibouletteIntention::Create;
     const BODY: Option<&str> = Some(
         r#"

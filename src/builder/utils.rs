@@ -1,11 +1,14 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Create a list of relationships' id, to use as value for later inserting
     pub(crate) fn gen_rel_values(
         &mut self,
-        ids: Vec<value::Ciboulette2SqlValue<'a>>,
-        table: &'a Ciboulette2PostgresTable<'a>,
+        ids: Vec<value::Ciboulette2SqlValue<'request>>,
+        table: &'store Ciboulette2PostgresTable<'store>,
         id_param: &Ciboulette2PostgresId,
     ) -> Result<(), Ciboulette2SqlError> {
         // It's a logic error to have an empty id vector here
@@ -28,7 +31,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Finish building the query, setting the last ';' and then converting the
     /// final query to UTF-8
     #[inline]
-    pub fn build(mut self) -> Result<(String, Ciboulette2SqlArguments<'a>), Ciboulette2SqlError> {
+    pub fn build(
+        mut self
+    ) -> Result<(String, Ciboulette2SqlArguments<'request>), Ciboulette2SqlError> {
         self.buf.write_all(b";")?;
         Ok((
             String::from_utf8(self.buf.into_inner()?.into_inner())?, // TODO Is it the best way to handle that ?
@@ -43,7 +48,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn insert_ident_inner(
         buf: &mut Ciboulette2PostgresBuf,
         field: &Ciboulette2PostgresTableField,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PostgresTable<'store>,
         force_cast: Option<&'static str>,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::write_table_info_inner(buf, table)?;
@@ -80,7 +85,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn insert_ident(
         &mut self,
         field: &Ciboulette2PostgresTableField,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::insert_ident_inner(&mut self.buf, &field, table, None)
     }
@@ -121,7 +126,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn insert_params(
         &mut self,
-        param: Ciboulette2SqlValue<'a>,
+        param: Ciboulette2SqlValue<'request>,
         _table: &Ciboulette2PostgresTable<'_>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut buffer = [0u8; 20];
@@ -138,13 +143,13 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn handle_sorting_routine(
         mut buf: &mut Ciboulette2PostgresBuf,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_table: &Ciboulette2PostgresTable<'a>,
-        table: &Ciboulette2PostgresTable<'a>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        main_cte_table: &Ciboulette2PostgresTable<'store>,
+        table: &Ciboulette2PostgresTable<'store>,
         included_tables_map: &BTreeMap<
-            &'a Ciboulette2PostgresTable<'a>,
+            &'store Ciboulette2PostgresTable<'store>,
             (
-                Ciboulette2PostgresTable<'a>,
+                Ciboulette2PostgresTable<'store>,
                 Ciboulette2PostgresResponseType,
             ),
         >,
@@ -152,7 +157,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
         if main_cte_table != table {
             return Ok(());
         }
-        let mut included_tables: Vec<&Ciboulette2PostgresTable<'a>> =
+        let mut included_tables: Vec<&Ciboulette2PostgresTable<'store>> =
             Vec::with_capacity(state.query().sorting_map().len());
 
         for el in state.query().sorting() {
@@ -214,7 +219,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn write_table_info_inner(
         buf: &mut Ciboulette2PostgresBuf,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(POSTGRES_QUOTE)?;
         match table.schema() {
@@ -233,7 +238,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[inline]
     pub(crate) fn write_table_info(
         &mut self,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::write_table_info_inner(&mut self.buf, table)
     }
@@ -244,16 +249,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     pub(crate) fn write_list<I, F>(
         &mut self,
         arr: I,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PostgresTable<'store>,
         wrap_in_parenthesis: bool,
         f: F,
     ) -> Result<(), Ciboulette2SqlError>
     where
         I: std::iter::IntoIterator,
         F: for<'r> Fn(
-            &'r mut Ciboulette2PostgresBuilder<'a>,
+            &'r mut Ciboulette2PostgresBuilder<'store, 'request>,
             I::Item,
-            &Ciboulette2PostgresTable,
+            &Ciboulette2PostgresTable<'store>,
         ) -> Result<(), Ciboulette2SqlError>,
     {
         let mut iter = arr.into_iter().peekable();
@@ -276,9 +281,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Compare 2 fields, casting them to `TEXT` to be sure of type compatibility
     pub(crate) fn compare_fields(
         &mut self,
-        left_table: &Ciboulette2PostgresTable,
+        left_table: &Ciboulette2PostgresTable<'store>,
         left: &Ciboulette2PostgresTableField,
-        right_table: &Ciboulette2PostgresTable,
+        right_table: &Ciboulette2PostgresTable<'store>,
         right: &Ciboulette2PostgresTableField,
     ) -> Result<(), Ciboulette2SqlError> {
         Self::insert_ident_inner(&mut self.buf, left, &left_table, Some("TEXT"))?;

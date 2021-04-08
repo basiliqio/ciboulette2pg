@@ -1,17 +1,20 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Recursive function that walks a [MessyJsonObject](messy_json::MessyJsonObject) and create the final
     /// `JSON_BUILD_OBJECT` in the query
     pub(crate) fn gen_json_builder_routine<'b, I>(
         &mut self,
-        table: &Ciboulette2PostgresTable<'_>,
+        table: &Ciboulette2PostgresTable<'store>,
         obj: &MessyJsonObject<'b>,
         obj_name: ArcStr,
         mut fields: std::iter::Peekable<I>,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        I: std::iter::Iterator<Item = Ciboulette2PostgresStr<'a>>,
+        I: std::iter::Iterator<Item = Ciboulette2PostgresStr<'store>>,
     {
         // If there is nothing, return an empty JSON object
         if fields.peek().is_none() {
@@ -59,9 +62,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the function that'll create the final object JSON returned by the database
     pub(crate) fn gen_json_builder(
         &mut self,
-        table: &Ciboulette2PostgresTable<'_>,
-        type_: Arc<CibouletteResourceType<'a>>,
-        query: &'a CibouletteQueryParameters<'a>,
+        table: &Ciboulette2PostgresTable<'store>,
+        type_: Arc<CibouletteResourceType<'store>>,
+        query: &'request CibouletteQueryParameters<'request, 'store>,
         include: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         match (query.sparse().get(&*type_), include) {
@@ -73,7 +76,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                     type_.name().clone(),
                     fields
                         .iter()
-                        .map(Cow::as_ref)
+                        .cloned()
                         .map(Ciboulette2PostgresStr::from)
                         .peekable(),
                 )?;

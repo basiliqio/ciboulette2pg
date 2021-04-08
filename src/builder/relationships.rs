@@ -5,19 +5,19 @@ use super::*;
 /// also be present
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2SqlQueryRels<'a> {
-    multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
-    single_rels_keys: Vec<Ciboulette2PostgresStr<'a>>,
-    single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>>,
+pub(crate) struct Ciboulette2SqlQueryRels<'store, 'request> {
+    multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>>,
+    single_rels_keys: Vec<Ciboulette2PostgresStr<'store>>,
+    single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'store>>,
 }
 
-impl<'a> Ciboulette2SqlQueryRels<'a> {
+impl<'store, 'request> Ciboulette2SqlQueryRels<'store, 'request> {
     pub fn new(
-        type_: Arc<CibouletteResourceType<'a>>,
-        single_rels_keys: Vec<Ciboulette2PostgresStr<'a>>,
-        multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'a>>,
+        type_: Arc<CibouletteResourceType<'store>>,
+        single_rels_keys: Vec<Ciboulette2PostgresStr<'store>>,
+        multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'store, 'request>>,
     ) -> Result<Self, Ciboulette2SqlError> {
-        let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'a>> =
+        let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField<'store>> =
             Vec::with_capacity(single_rels_keys.len());
         for single_rel in single_rels_keys.iter() {
             single_rels_additional_fields.push(Ciboulette2SqlAdditionalField::new(

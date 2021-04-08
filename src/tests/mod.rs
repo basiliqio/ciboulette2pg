@@ -21,9 +21,9 @@ mod update;
 
 use test_sql::snapshot_table;
 
-fn check_uuid<'a, 'b>(
+fn check_uuid<'store, 'b>(
     value: insta::internals::Content,
-    _path: insta::internals::ContentPath<'a>,
+    _path: insta::internals::ContentPath<'store>,
 ) -> &'b str {
     assert_eq!(
         value

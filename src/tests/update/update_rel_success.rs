@@ -1,6 +1,6 @@
 use super::*;
 
-async fn test_update<'a>(
+async fn test_update<'store>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     body: &str,

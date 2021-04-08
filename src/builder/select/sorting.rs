@@ -1,12 +1,15 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     pub(crate) fn gen_sort_joins(
         buf: &mut Ciboulette2PostgresBuf,
-        rel_table: &Ciboulette2PostgresTable<'a>,
-        main_table: &Ciboulette2PostgresTable<'a>,
-        main_cte_table: &Ciboulette2PostgresTable<'a>,
-        opt: &CibouletteRelationshipOption<'a>,
+        rel_table: &Ciboulette2PostgresTable<'store>,
+        main_table: &Ciboulette2PostgresTable<'store>,
+        main_cte_table: &Ciboulette2PostgresTable<'store>,
+        opt: &CibouletteRelationshipOption<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         match opt {
             CibouletteRelationshipOption::ManyToOne(opt) => {
@@ -45,12 +48,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
     pub(crate) fn gen_cte_for_sort(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_data: &Ciboulette2PostgresTable<'a>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        main_cte_data: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         for (type_, sorting_elements) in state.query().sorting_map().iter() {
             let table = state.table_store().get(type_.name())?;
-            if &table == state.main_table() || table == main_cte_data {
+            if table == state.main_table() || table == main_cte_data {
                 continue;
             }
             match self.working_tables.get(&table) {
@@ -63,7 +66,7 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
                         .get_rel(state.main_type().name().as_str(), type_.name().as_str())?;
                     for el in sorting_elements.iter() {
                         fields.push(Ciboulette2PostgresTableField::new_owned(
-                            Ciboulette2PostgresSafeIdent::try_from(el.field().as_ref())?,
+                            Ciboulette2PostgresSafeIdent::try_from(el.field().clone())?,
                             None,
                             None,
                         ));
@@ -100,9 +103,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     }
     pub(crate) fn gen_sorting_keys(
         &mut self,
-        table: &Ciboulette2PostgresTable<'a>,
-        type_: Arc<CibouletteResourceType<'a>>,
-        query: &'a CibouletteQueryParameters<'a>,
+        table: &Ciboulette2PostgresTable<'store>,
+        type_: Arc<CibouletteResourceType<'store>>,
+        query: &'request CibouletteQueryParameters<'request, 'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         if let Some(sorting_arr) = query.sorting_map().get(&type_) {
             for el in sorting_arr {
@@ -125,9 +128,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the left join between the CTE table and the main table
     fn gen_left_join_single_main_table(
         buf: &mut Ciboulette2PostgresBuf,
-        main_table: &Ciboulette2PostgresTable,
-        main_cte_table_id: Ciboulette2SqlAdditionalField,
-        main_cte_table: &Ciboulette2PostgresTable,
+        main_table: &Ciboulette2PostgresTable<'store>,
+        main_cte_table_id: Ciboulette2SqlAdditionalField<'store>,
+        main_cte_table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
         Self::write_table_info_inner(&mut *buf, &main_table)?;
@@ -151,10 +154,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the left join between the main table and the single rel table
     fn gen_left_join_single_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
-        rel_table: &Ciboulette2PostgresTable,
+        rel_table: &Ciboulette2PostgresTable<'store>,
         rel_cte_table_id: Ciboulette2SqlAdditionalField,
-        opt: &CibouletteRelationshipOneToManyOption<'a>,
-        main_table: &Ciboulette2PostgresTable,
+        opt: &CibouletteRelationshipOneToManyOption<'store>,
+        main_table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
         Self::write_table_info_inner(buf, &rel_table)?;

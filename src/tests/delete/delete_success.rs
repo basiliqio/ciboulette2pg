@@ -1,6 +1,6 @@
 use super::*;
 
-async fn test_delete<'a>(
+async fn test_delete<'store>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
 ) -> Vec<sqlx::postgres::PgRow> {

@@ -1,11 +1,17 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Generate the update params in the form of `"column_1" = $0, "column_2" = $2`
     pub(super) fn gen_update_params(
         &mut self,
         table: &Ciboulette2PostgresTable,
-        params: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
+        params: Vec<(
+            Ciboulette2PostgresStr<'store>,
+            Ciboulette2SqlValue<'request>,
+        )>,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut iter = params.into_iter().peekable();
         while let Some((n, v)) = iter.next() {

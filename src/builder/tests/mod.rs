@@ -11,7 +11,9 @@ mod misc;
 mod select;
 mod update;
 
-pub fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2PostgresTableStore<'a> {
+pub fn gen_table_store<'store>(
+    store: &'store CibouletteStore<'store>
+) -> Ciboulette2PostgresTableStore<'store> {
     vec![
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
@@ -49,7 +51,7 @@ pub fn gen_table_store<'a>(store: &'a CibouletteStore<'a>) -> Ciboulette2Postgre
     .collect()
 }
 
-impl<'a> std::string::ToString for Ciboulette2SqlValue<'a> {
+impl<'store> std::string::ToString for Ciboulette2SqlValue<'store> {
     fn to_string(&self) -> String {
         let null = "<NULL>";
         match self {
@@ -121,7 +123,7 @@ impl<'a> std::string::ToString for Ciboulette2SqlValue<'a> {
     }
 }
 
-impl<'a> std::string::ToString for Ciboulette2SqlArguments<'a> {
+impl<'store> std::string::ToString for Ciboulette2SqlArguments<'store> {
     fn to_string(&self) -> String {
         self.inner.iter().cloned().map(|x| x.to_string()).collect()
     }

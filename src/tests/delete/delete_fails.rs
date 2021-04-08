@@ -1,6 +1,6 @@
 use super::*;
 
-async fn test_delete_fails<'a>(query_end: &str) -> Ciboulette2SqlError {
+async fn test_delete_fails<'store>(query_end: &str) -> Ciboulette2SqlError {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(format!("http://localhost{}", query_end).as_str()).unwrap();

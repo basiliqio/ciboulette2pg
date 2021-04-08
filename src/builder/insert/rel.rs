@@ -1,14 +1,17 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Generate the query to insert a new type relationship
     pub(super) fn gen_rel_insert(
         &mut self,
-        dest_table: &Ciboulette2PostgresTable,
+        dest_table: &Ciboulette2PostgresTable<'store>,
         main_key: &Ciboulette2PostgresSafeIdent,
         rel_key: &Ciboulette2PostgresSafeIdent,
-        main_table: &Ciboulette2PostgresTable,
-        rel_table: &Ciboulette2PostgresTable,
+        main_table: &Ciboulette2PostgresTable<'store>,
+        rel_table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b"INSERT INTO ")?;
         self.write_table_info(dest_table)?;
@@ -30,10 +33,10 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     fn gen_rel_insert_sub_select(
         &mut self,
         main_key: &Ciboulette2PostgresSafeIdent,
-        main_table: &Ciboulette2PostgresTable,
+        main_table: &Ciboulette2PostgresTable<'store>,
         rel_key: &Ciboulette2PostgresSafeIdent,
-        rel_table: &Ciboulette2PostgresTable,
-        dest_table: &Ciboulette2PostgresTable,
+        rel_table: &Ciboulette2PostgresTable<'store>,
+        dest_table: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b" SELECT ")?;
         self.insert_ident(
@@ -78,9 +81,9 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Handle inserting multiple relationships and selection them afterwards
     pub(super) fn inserts_handle_many_to_many_rels(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_data: &Ciboulette2PostgresTable<'a>,
-        rels: &[Ciboulette2PostgresMainResourceRelationships<'a>],
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        main_cte_data: &Ciboulette2PostgresTable<'store>,
+        rels: &[Ciboulette2PostgresMainResourceRelationships<'store, 'request>],
     ) -> Result<(), Ciboulette2SqlError> {
         let rel_iter = rels.iter().peekable();
         for Ciboulette2PostgresMainResourceRelationships {

@@ -6,7 +6,7 @@ mod update_rel_fails;
 mod update_rel_success;
 mod update_success;
 
-async fn test_update<'a>(
+async fn test_update<'store>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     _test_name: &str,
@@ -54,7 +54,7 @@ async fn test_update<'a>(
     raw_rows
 }
 
-async fn test_update_many_to_one<'a>(
+async fn test_update_many_to_one<'store>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     _test_name: &str,

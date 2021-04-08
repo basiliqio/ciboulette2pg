@@ -4,19 +4,22 @@ use std::convert::TryFrom;
 /// Informations about the main resource type, extracted from the request
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresMainResourceInformations<'a> {
-    pub insert_values: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
-    pub single_relationships: Vec<Ciboulette2PostgresStr<'a>>,
+pub(crate) struct Ciboulette2PostgresMainResourceInformations<'store, 'request> {
+    pub insert_values: Vec<(
+        Ciboulette2PostgresStr<'store>,
+        Ciboulette2SqlValue<'request>,
+    )>,
+    pub single_relationships: Vec<Ciboulette2PostgresStr<'store>>,
 }
 
 /// Check the informations of a one-to-many relationship
-fn check_one_to_many_relationships<'a>(
-    relationships: &'a BTreeMap<ArcStr, CibouletteRelationshipObject<'a>>,
-    from_type_: Arc<CibouletteResourceType<'a>>,
-    to_type_: Arc<CibouletteResourceType<'a>>,
-    to_type_alias: &Ciboulette2PostgresStr<'a>,
-    opt: &'a CibouletteRelationshipOneToManyOption,
-) -> Result<Option<(&'a str, Ciboulette2SqlValue<'a>)>, Ciboulette2SqlError> {
+fn check_one_to_many_relationships<'store, 'request>(
+    relationships: &'request BTreeMap<ArcStr, CibouletteRelationshipObject<'request>>,
+    from_type_: Arc<CibouletteResourceType<'store>>,
+    to_type_: Arc<CibouletteResourceType<'store>>,
+    to_type_alias: &Ciboulette2PostgresStr<'store>,
+    opt: &'store CibouletteRelationshipOneToManyOption,
+) -> Result<Option<(&'store str, Ciboulette2SqlValue<'request>)>, Ciboulette2SqlError> {
     match relationships
         .get(&**to_type_alias)
         .map(|x| x.data())
@@ -69,9 +72,12 @@ fn check_one_to_many_relationships<'a>(
 
 /// Extract attributes from the request and push them to an arguments vector
 /// compatible with SQLx for later execution
-pub fn fill_attributes<'a>(
-    args: &mut Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)>,
-    obj: &'a Option<MessyJsonObjectValue<'a>>,
+pub fn fill_attributes<'store, 'request>(
+    args: &mut Vec<(
+        Ciboulette2PostgresStr<'store>,
+        Ciboulette2SqlValue<'request>,
+    )>,
+    obj: &'request Option<MessyJsonObjectValue<'store>>,
 ) -> Result<(), Ciboulette2SqlError> {
     if let Some(obj) = obj {
         for (k, v) in obj.iter() {
@@ -90,16 +96,18 @@ pub fn fill_attributes<'a>(
 
 /// Extract attribute and single relationships from the query, allowing to build the
 /// request for the main resource
-pub(crate) fn extract_fields_and_values<'a>(
-    store: &'a CibouletteStore<'a>,
-    main_type: Arc<CibouletteResourceType<'a>>,
-    attributes: &'a Option<MessyJsonObjectValue<'a>>,
-    relationships: &'a BTreeMap<ArcStr, CibouletteRelationshipObject<'a>>,
+pub(crate) fn extract_fields_and_values<'store, 'request>(
+    store: &'store CibouletteStore<'store>,
+    main_type: Arc<CibouletteResourceType<'store>>,
+    attributes: &'request Option<MessyJsonObjectValue<'store>>,
+    relationships: &'request BTreeMap<ArcStr, CibouletteRelationshipObject<'request>>,
     fails_on_many: bool,
-) -> Result<Ciboulette2PostgresMainResourceInformations<'a>, Ciboulette2SqlError> {
-    let mut res_val: Vec<(Ciboulette2PostgresStr<'a>, Ciboulette2SqlValue<'a>)> =
-        Vec::with_capacity(128);
-    let mut res_rel: Vec<Ciboulette2PostgresStr<'a>> = Vec::with_capacity(128);
+) -> Result<Ciboulette2PostgresMainResourceInformations<'store, 'request>, Ciboulette2SqlError> {
+    let mut res_val: Vec<(
+        Ciboulette2PostgresStr<'store>,
+        Ciboulette2SqlValue<'request>,
+    )> = Vec::with_capacity(128);
+    let mut res_rel: Vec<Ciboulette2PostgresStr<'store>> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -139,11 +147,11 @@ pub(crate) fn extract_fields_and_values<'a>(
 }
 
 /// Get a list of a resource's single relationships (one-to-one)
-pub(crate) fn get_resource_single_rel<'a>(
-    store: &'a CibouletteStore<'a>,
-    main_type: Arc<CibouletteResourceType<'a>>,
-) -> Result<Vec<Ciboulette2PostgresStr<'a>>, Ciboulette2SqlError> {
-    let mut res: Vec<Ciboulette2PostgresStr<'a>> = Vec::with_capacity(128);
+pub(crate) fn get_resource_single_rel<'store>(
+    store: &'store CibouletteStore<'store>,
+    main_type: Arc<CibouletteResourceType<'store>>,
+) -> Result<Vec<Ciboulette2PostgresStr<'store>>, Ciboulette2SqlError> {
+    let mut res: Vec<Ciboulette2PostgresStr<'store>> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;

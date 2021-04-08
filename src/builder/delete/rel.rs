@@ -1,10 +1,13 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     pub(super) fn gen_delete_rel_one_to_many(
         &mut self,
-        table_store: &'a Ciboulette2PostgresTableStore<'a>,
-        query: &'a CibouletteDeleteRequest<'a>,
+        table_store: &'store Ciboulette2PostgresTableStore<'store>,
+        query: &'request CibouletteDeleteRequest<'request, 'store>,
         rel_opt: &CibouletteRelationshipOneToManyOption,
     ) -> Result<(), Ciboulette2SqlError> {
         let many_table = table_store.get(rel_opt.many_table().name().as_str())?;

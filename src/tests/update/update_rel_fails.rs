@@ -1,6 +1,6 @@
 use super::*;
 
-async fn test_update_fails<'a>(
+async fn test_update_fails<'store>(
     query_end: &str,
     body: &str,
 ) -> Ciboulette2SqlError {

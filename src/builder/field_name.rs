@@ -7,17 +7,17 @@ use std::convert::TryFrom;
 /// Also contains the alias and the cast to use in the query, if any
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresTableField<'a> {
-    pub(crate) name: Cow<'a, Ciboulette2PostgresSafeIdent<'a>>,
-    pub(crate) alias: Option<Cow<'a, Ciboulette2PostgresSafeIdent<'a>>>,
-    pub(crate) cast: Option<Cow<'a, Ciboulette2PostgresSafeIdent<'a>>>,
+pub(crate) struct Ciboulette2PostgresTableField<'store> {
+    pub(crate) name: Cow<'store, Ciboulette2PostgresSafeIdent<'store>>,
+    pub(crate) alias: Option<Cow<'store, Ciboulette2PostgresSafeIdent<'store>>>,
+    pub(crate) cast: Option<Cow<'store, Ciboulette2PostgresSafeIdent<'store>>>,
 }
 
-impl<'a> Ciboulette2PostgresTableField<'a> {
+impl<'store> Ciboulette2PostgresTableField<'store> {
     pub fn new_owned(
-        name: Ciboulette2PostgresSafeIdent<'a>,
-        alias: Option<Ciboulette2PostgresSafeIdent<'a>>,
-        cast: Option<Ciboulette2PostgresSafeIdent<'a>>,
+        name: Ciboulette2PostgresSafeIdent<'store>,
+        alias: Option<Ciboulette2PostgresSafeIdent<'store>>,
+        cast: Option<Ciboulette2PostgresSafeIdent<'store>>,
     ) -> Self {
         Ciboulette2PostgresTableField {
             name: Cow::Owned(name),
@@ -26,9 +26,9 @@ impl<'a> Ciboulette2PostgresTableField<'a> {
         }
     }
     pub fn new_ref(
-        name: &'a Ciboulette2PostgresSafeIdent<'a>,
-        alias: Option<&'a Ciboulette2PostgresSafeIdent<'a>>,
-        cast: Option<&'a Ciboulette2PostgresSafeIdent<'a>>,
+        name: &'store Ciboulette2PostgresSafeIdent<'store>,
+        alias: Option<&'store Ciboulette2PostgresSafeIdent<'store>>,
+        cast: Option<&'store Ciboulette2PostgresSafeIdent<'store>>,
     ) -> Self {
         Ciboulette2PostgresTableField {
             name: Cow::Borrowed(name),
@@ -38,14 +38,14 @@ impl<'a> Ciboulette2PostgresTableField<'a> {
     }
 
     pub fn new_cow(
-        name: Cow<'a, Ciboulette2PostgresSafeIdent<'a>>,
-        alias: Option<Cow<'a, Ciboulette2PostgresSafeIdent<'a>>>,
-        cast: Option<Cow<'a, Ciboulette2PostgresSafeIdent<'a>>>,
+        name: Cow<'store, Ciboulette2PostgresSafeIdent<'store>>,
+        alias: Option<Cow<'store, Ciboulette2PostgresSafeIdent<'store>>>,
+        cast: Option<Cow<'store, Ciboulette2PostgresSafeIdent<'store>>>,
     ) -> Self {
         Ciboulette2PostgresTableField { name, alias, cast }
     }
 
-    pub fn from_additional_field(id: Ciboulette2SqlAdditionalField<'a>) -> Self {
+    pub fn from_additional_field(id: Ciboulette2SqlAdditionalField<'store>) -> Self {
         Ciboulette2PostgresTableField {
             name: id.ident.name,
             alias: Some(Cow::Owned(id.name)),
@@ -53,7 +53,7 @@ impl<'a> Ciboulette2PostgresTableField<'a> {
         }
     }
 
-    pub fn from_additional_field_with_cast(id: Ciboulette2SqlAdditionalField<'a>) -> Self {
+    pub fn from_additional_field_with_cast(id: Ciboulette2SqlAdditionalField<'store>) -> Self {
         Ciboulette2PostgresTableField {
             name: Cow::Owned(id.name),
             alias: None,
@@ -62,8 +62,8 @@ impl<'a> Ciboulette2PostgresTableField<'a> {
     }
 }
 
-impl<'a> From<&Ciboulette2PostgresId<'a>> for Ciboulette2PostgresTableField<'a> {
-    fn from(id: &Ciboulette2PostgresId<'a>) -> Self {
+impl<'store> From<&Ciboulette2PostgresId<'store>> for Ciboulette2PostgresTableField<'store> {
+    fn from(id: &Ciboulette2PostgresId<'store>) -> Self {
         Ciboulette2PostgresTableField {
             name: Cow::Owned(Ciboulette2PostgresSafeIdent::from(id.get_ident())),
             alias: None,
@@ -74,10 +74,10 @@ impl<'a> From<&Ciboulette2PostgresId<'a>> for Ciboulette2PostgresTableField<'a> 
     }
 }
 
-impl<'a> TryFrom<&CibouletteSortingElement<'a>> for Ciboulette2PostgresTableField<'a> {
+impl<'store> TryFrom<&CibouletteSortingElement<'store>> for Ciboulette2PostgresTableField<'store> {
     type Error = Ciboulette2SqlError;
 
-    fn try_from(id: &CibouletteSortingElement<'a>) -> Result<Self, Self::Error> {
+    fn try_from(id: &CibouletteSortingElement<'store>) -> Result<Self, Self::Error> {
         Ok(Ciboulette2PostgresTableField {
             name: Cow::Owned(Ciboulette2PostgresSafeIdent::try_from(id.field().clone())?),
             alias: None,

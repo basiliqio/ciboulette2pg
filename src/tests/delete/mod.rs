@@ -4,7 +4,7 @@ mod delete_fails;
 mod delete_success;
 mod query_params;
 
-async fn test_delete<'a>(
+async fn test_delete<'store>(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     query_end: &str,
     _test_name: &str,

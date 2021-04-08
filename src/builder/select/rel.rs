@@ -1,19 +1,22 @@
 use super::*;
 
-impl<'a> Ciboulette2PostgresBuilder<'a> {
+impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
+where
+    'store: 'request,
+{
     /// Select into a new CTE a one-to-one relationship
     pub(crate) fn select_one_to_one_rels_routine<F>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        main_type: Arc<CibouletteResourceType<'a>>,
-        main_cte_data: &Ciboulette2PostgresTable<'a>,
-        rels: &Ciboulette2SqlQueryRels<'a>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        main_type: Arc<CibouletteResourceType<'store>>,
+        main_cte_data: &Ciboulette2PostgresTable<'store>,
+        rels: &Ciboulette2SqlQueryRels<'store, 'request>,
         is_needed_cb: F,
     ) -> Result<(), Ciboulette2SqlError>
     where
         F: Fn(
-            &Ciboulette2PostgresBuilderState<'a>,
-            &CibouletteResourceType<'a>,
+            &Ciboulette2PostgresBuilderState<'store, 'request>,
+            &CibouletteResourceType<'store>,
         ) -> Option<Ciboulette2PostgresResponseType>,
     {
         for (rel_key, additional_fields) in rels
@@ -48,8 +51,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     /// Create 2 additional fields to select containing the linking key of the related table in the bucket table
     fn gen_additional_params_many_to_many_rels(
-        rels: &'a CibouletteRelationshipManyToManyOption<'a>
-    ) -> Result<[Ciboulette2SqlAdditionalField<'a>; 2], Ciboulette2SqlError> {
+        rels: &'store CibouletteRelationshipManyToManyOption<'store>
+    ) -> Result<[Ciboulette2SqlAdditionalField<'store>; 2], Ciboulette2SqlError> {
         Ok([
             Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new_owned(
@@ -74,8 +77,8 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     /// Create 2 additional fields to select containing the linking key of the related table in the bucket table
     fn gen_additional_params_one_to_many_rels(
-        rels: &'a CibouletteRelationshipOneToManyOption<'a>
-    ) -> Result<[Ciboulette2SqlAdditionalField<'a>; 1], Ciboulette2SqlError> {
+        rels: &'store CibouletteRelationshipOneToManyOption<'store>
+    ) -> Result<[Ciboulette2SqlAdditionalField<'store>; 1], Ciboulette2SqlError> {
         Ok([Ciboulette2SqlAdditionalField::new(
             Ciboulette2PostgresTableField::new_owned(
                 Ciboulette2PostgresSafeIdent::try_from(rels.many_table_key().as_str())?,
@@ -90,15 +93,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Create new CTE with relationships data and relationships linking data
     pub(crate) fn select_multi_rels_routine<F>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        main_cte_data: &Ciboulette2PostgresTable<'a>,
-        rels: &[Ciboulette2PostgresMainResourceRelationships<'a>],
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        main_cte_data: &Ciboulette2PostgresTable<'store>,
+        rels: &[Ciboulette2PostgresMainResourceRelationships<'store, 'request>],
         is_needed_cb: F,
     ) -> Result<(), Ciboulette2SqlError>
     where
         F: Fn(
-            &Ciboulette2PostgresBuilderState<'a>,
-            &CibouletteResourceType<'a>,
+            &Ciboulette2PostgresBuilderState<'store, 'request>,
+            &CibouletteResourceType<'store>,
         ) -> Option<Ciboulette2PostgresResponseType>,
     {
         let rel_iter = rels.iter().peekable();
@@ -176,16 +179,16 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the CTE to include a relationship (many-to-many) linking data to the query
     fn gen_select_one_to_many_rels_data<'b, I>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        rel_table: &'a Ciboulette2PostgresTable<'a>,
-        main_cte_data: &Ciboulette2PostgresTable<'a>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        rel_table: &'store Ciboulette2PostgresTable<'store>,
+        main_cte_data: &Ciboulette2PostgresTable<'store>,
         additional_params: I,
-        opt: &'a CibouletteRelationshipOneToManyOption<'a>,
+        opt: &'store CibouletteRelationshipOneToManyOption<'store>,
         rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        'a: 'b,
-        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'a>>,
+        'store: 'b,
+        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'store>>,
     {
         let many_table_key_field =
             Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key().as_str())?;
@@ -222,12 +225,12 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     #[allow(clippy::too_many_arguments)] //FIXME
     fn gen_select_many_to_many_rels_rel_data(
         &mut self,
-        rel_cte_data: &Ciboulette2PostgresTable<'a>,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        rel_table: &Ciboulette2PostgresTable<'a>,
-        rel_cte_rel_data: &Ciboulette2PostgresTable<'a>,
-        left_additional_params: &Ciboulette2SqlAdditionalField<'a>,
-        right_additional_params: &Ciboulette2SqlAdditionalField<'a>,
+        rel_cte_data: &Ciboulette2PostgresTable<'store>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        rel_table: &Ciboulette2PostgresTable<'store>,
+        rel_cte_rel_data: &Ciboulette2PostgresTable<'store>,
+        left_additional_params: &Ciboulette2SqlAdditionalField<'store>,
+        right_additional_params: &Ciboulette2SqlAdditionalField<'store>,
         rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         let many_table_key = Ciboulette2PostgresTableField::new_owned(
@@ -269,15 +272,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate the CTE to include a relationship (many-to-many) data to the query
     fn gen_select_many_to_many_rels_data<'b, I>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        rel_rel_table: &Ciboulette2PostgresTable<'a>,
-        bucket: &Ciboulette2PostgresMultiRelationships<'a>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        rel_rel_table: &Ciboulette2PostgresTable<'store>,
+        bucket: &Ciboulette2PostgresMultiRelationships<'store>,
         additional_params: I,
-        main_cte_data: &Ciboulette2PostgresTable<'a>,
+        main_cte_data: &Ciboulette2PostgresTable<'store>,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        'a: 'b,
-        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'a>>,
+        'store: 'b,
+        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'store>>,
     {
         let dest_resource = state
             .store()
@@ -315,11 +318,11 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
     /// Generate a one-to-one relationship
     pub(crate) fn gen_select_cte_single_rel(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'a>,
-        table: &'a Ciboulette2PostgresTable<'a>,
-        type_: Arc<CibouletteResourceType<'a>>,
-        main_cte_table: &Ciboulette2PostgresTable<'a>,
-        field_id: &Ciboulette2PostgresSafeIdent<'a>,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        table: &'store Ciboulette2PostgresTable<'store>,
+        type_: Arc<CibouletteResourceType<'store>>,
+        main_cte_table: &Ciboulette2PostgresTable<'store>,
+        field_id: &Ciboulette2PostgresSafeIdent<'store>,
         requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         let table_field =
@@ -351,10 +354,15 @@ impl<'a> Ciboulette2PostgresBuilder<'a> {
 
     /// Generate the table that'll be used to in the query to select one-to-many relationships
     fn gen_rel_select_tables(
-        rel_rel_table: &'a Ciboulette2PostgresTable<'a>,
-        rel_table: &'a Ciboulette2PostgresTable<'a>,
-    ) -> Result<(Ciboulette2PostgresTable<'a>, Ciboulette2PostgresTable<'a>), Ciboulette2SqlError>
-    {
+        rel_rel_table: &'store Ciboulette2PostgresTable<'store>,
+        rel_table: &'store Ciboulette2PostgresTable<'store>,
+    ) -> Result<
+        (
+            Ciboulette2PostgresTable<'store>,
+            Ciboulette2PostgresTable<'store>,
+        ),
+        Ciboulette2SqlError,
+    > {
         let rel_cte_rel_data =
             rel_rel_table.to_cte(Cow::Owned(format!("cte_rel_{}_rel_data", rel_table.name())))?;
         let rel_cte_data =
