@@ -13,27 +13,27 @@ use std::{borrow::Cow, usize};
 /// Made of the object id, type and its data
 #[derive(Clone, Debug, Getters, sqlx::FromRow, Serialize)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresRow<'store> {
-    id: &'store str,
+pub struct Ciboulette2PostgresRow<'rows> {
+    id: &'rows str,
     #[sqlx(rename = "type")]
     #[serde(rename = "type")]
-    type_: &'store str,
+    type_: &'rows str,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<&'store serde_json::value::RawValue>, // TODO doesn't make it an option
+    data: Option<&'rows serde_json::value::RawValue>, // TODO doesn't make it an option
     #[serde(skip_serializing_if = "Option::is_none")]
-    related_type: Option<&'store str>,
+    related_type: Option<&'rows str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    related_id: Option<&'store str>,
+    related_id: Option<&'rows str>,
 }
 
-impl<'store> Ciboulette2PostgresRow<'store> {
+impl<'rows> Ciboulette2PostgresRow<'rows> {
     /// Extract an [Ciboulette2PostgresRow](Ciboulette2PostgresRow) for a slice of [PgRow](sqlx::postgres::PgRow)
     pub fn from_raw(
-        values: &'store [sqlx::postgres::PgRow]
+        values: &'rows [sqlx::postgres::PgRow]
     ) -> Result<Vec<Ciboulette2PostgresRow>, Ciboulette2SqlError>
     where
-        CibouletteId<'store>: sqlx::Decode<'store, sqlx::Postgres>,
-        CibouletteId<'store>: sqlx::Type<sqlx::Postgres>,
+        CibouletteId<'rows>: sqlx::Decode<'rows, sqlx::Postgres>,
+        CibouletteId<'rows>: sqlx::Type<sqlx::Postgres>,
     {
         let mut res = Vec::with_capacity(values.len());
 
@@ -43,20 +43,20 @@ impl<'store> Ciboulette2PostgresRow<'store> {
         Ok(res)
     }
 
-    pub fn build_response_elements<'request, I>(
+    pub fn build_response_elements<'store, I>(
         rows: I,
         store: &'store CibouletteStore<'store>,
         hint_size: Option<usize>,
     ) -> Result<
-        Vec<CibouletteResponseElement<'request, 'store, &'store serde_json::value::RawValue>>,
+        Vec<CibouletteResponseElement<'rows, 'store, &'rows serde_json::value::RawValue>>,
         Ciboulette2SqlError,
     >
     where
-        'store: 'request,
-        I: IntoIterator<Item = Ciboulette2PostgresRow<'store>>,
+        'store: 'rows,
+        I: IntoIterator<Item = Ciboulette2PostgresRow<'rows>>,
     {
         let mut res: Vec<
-            CibouletteResponseElement<'request, 'store, &'store serde_json::value::RawValue>,
+            CibouletteResponseElement<'rows, 'store, &'rows serde_json::value::RawValue>,
         > = Vec::with_capacity(hint_size.unwrap_or_default());
 
         for row in rows.into_iter() {
