@@ -15,7 +15,7 @@ mod value;
 pub use crate::str::Ciboulette2PostgresStr;
 use arcstr::ArcStr;
 pub use builder::Ciboulette2PostgresBuilder;
-use builder::Ciboulette2SqlArguments;
+pub use builder::Ciboulette2SqlArguments;
 use ciboulette::*;
 pub use ciboulette_row::Ciboulette2PostgresRow;
 pub use errors::Ciboulette2SqlError;
@@ -33,5 +33,4 @@ pub use table_store::{
     Ciboulette2PostgresId, Ciboulette2PostgresTable, Ciboulette2PostgresTableStore,
 };
 pub use value::Ciboulette2SqlValue;
-
 const POSTGRES_QUOTE: &[u8] = b"\"";
