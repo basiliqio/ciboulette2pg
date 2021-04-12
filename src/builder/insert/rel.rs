@@ -91,8 +91,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                         .table_store()
                         .get(bucket.bucket_resource().name().as_str())?; // FIXME
                     self.buf.write_all(b", ")?;
-                    let rel_cte_id = rel_table.to_cte(CIBOULETTE_ID_SUFFIX)?;
-                    let rel_cte_insert = rel_table.to_cte(CIBOULETTE_INSERT_SUFFIX)?;
+                    let rel_cte_id =
+                        rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_ID_SUFFIX)?;
+                    let rel_cte_insert =
+                        rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_INSERT_SUFFIX)?;
                     self.write_table_info(&rel_cte_id)?;
                     self.buf.write_all(b" AS (VALUES ")?;
                     self.gen_rel_values(rel_ids.clone(), &rel_table, rel_table.id())?; // FIXME The clone

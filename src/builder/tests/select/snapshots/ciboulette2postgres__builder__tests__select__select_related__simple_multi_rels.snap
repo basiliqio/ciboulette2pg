@@ -22,7 +22,7 @@ WITH "cte_articles_data" AS (
   WHERE
     "public"."peoples"."id" = $4
 ),
-"cte_rel_peoples_rel_data" AS (
+"cte_rel_people-article_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
     "public"."people-article"."article_id" AS "rel_article_id",
@@ -36,11 +36,11 @@ WITH "cte_articles_data" AS (
     "public"."peoples"."id" :: TEXT AS "id",
     $5 :: TEXT AS "type",
     NULL :: json AS "data",
-    "cte_rel_peoples_rel_data"."rel_article_id" :: TEXT AS "related_id",
+    "cte_rel_people-article_rel_data"."rel_article_id" :: TEXT AS "related_id",
     $6 :: TEXT AS "related_type"
   FROM
     "public"."peoples"
-    INNER JOIN "cte_rel_peoples_rel_data" ON "cte_rel_peoples_rel_data"."rel_people_id" :: TEXT = "public"."peoples"."id" :: TEXT
+    INNER JOIN "cte_rel_people-article_rel_data" ON "cte_rel_people-article_rel_data"."rel_people_id" :: TEXT = "public"."peoples"."id" :: TEXT
 )(
   SELECT
     "cte_articles_data"."id",

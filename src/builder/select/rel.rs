@@ -28,7 +28,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 let rel_table: &Ciboulette2PostgresTable =
                     state.table_store().get(rel_type.name().as_str())?;
                 let rel_table_cte: Ciboulette2PostgresTable =
-                    rel_table.to_cte(CIBOULETTE_DATA_SUFFIX)?;
+                    rel_table.to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
                 self.buf.write_all(b", ")?;
                 self.write_table_info(&rel_table_cte)?;
                 self.buf.write_all(b" AS (")?;
@@ -154,7 +154,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                         self.buf.write_all(b", ")?;
                         let additional_params = Self::gen_additional_params_one_to_many_rels(opt)?;
                         let rel_table = state.table_store().get(rel_type.name().as_str())?;
-                        let rel_cte_data = rel_table.to_cte(CIBOULETTE_DATA_SUFFIX)?;
+                        let rel_cte_data =
+                            rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_DATA_SUFFIX)?;
                         self.write_table_info(&rel_cte_data)?;
                         self.buf.write_all(b" AS (")?;
                         self.gen_select_one_to_many_rels_data(
@@ -353,8 +354,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         rel_rel_table: &Ciboulette2PostgresTable,
         rel_table: &Ciboulette2PostgresTable,
     ) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
-        let rel_cte_rel_data = rel_rel_table.to_cte(CIBOULETTE_REL_DATA_SUFFIX)?;
-        let rel_cte_data = rel_table.to_cte(CIBOULETTE_DATA_SUFFIX)?;
+        let rel_cte_rel_data =
+            rel_rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_REL_DATA_SUFFIX)?;
+        let rel_cte_data = rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_DATA_SUFFIX)?;
         Ok((rel_cte_rel_data, rel_cte_data))
     }
 }

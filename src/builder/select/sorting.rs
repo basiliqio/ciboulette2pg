@@ -68,7 +68,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                             None,
                         ));
                     }
-                    let table_cte = table.to_cte(CIBOULETTE_DATA_SUFFIX)?;
+                    let table_cte = table.to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
                     self.write_table_info(&table_cte)?;
                     self.buf.write_all(b" AS (SELECT ")?;
                     self.insert_ident(

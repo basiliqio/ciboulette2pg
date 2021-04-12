@@ -35,8 +35,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     fn gen_update_cte_tables(
         main_type: &Ciboulette2PostgresTable
     ) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
-        let main_cte_update = main_type.to_cte(CIBOULETTE_UPDATE_SUFFIX)?;
-        let main_cte_data = main_type.to_cte(CIBOULETTE_DATA_SUFFIX)?;
+        let main_cte_update = main_type.to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_UPDATE_SUFFIX)?;
+        let main_cte_data = main_type.to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
         Ok((main_cte_update, main_cte_data))
     }
 

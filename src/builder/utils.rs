@@ -18,7 +18,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             se.buf.write_all(b"(")?;
             se.insert_params(curr, t)?;
             se.buf.write_all(b"::")?;
-            se.buf.write_all(id_param.get_type().as_bytes())?;
+            id_param.get_type().to_writer(&mut se.buf)?;
             se.buf.write_all(b")")?;
             Ok(())
         })?;
@@ -51,7 +51,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Self::write_table_info_inner(buf, table)?;
         buf.write_all(b".")?;
         buf.write_all(POSTGRES_QUOTE)?;
-        buf.write_all(field.name().as_bytes())?;
+        field.name().to_writer(&mut *buf)?;
         buf.write_all(POSTGRES_QUOTE)?;
         if let Some(force_cast) = force_cast {
             buf.write_all(b"::")?;
@@ -60,7 +60,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             match field.cast() {
                 Some(cast) => {
                     buf.write_all(b"::")?;
-                    buf.write_all(cast.as_bytes())?;
+                    cast.to_writer(&mut *buf)?;
                 }
                 None => (),
             };
@@ -69,7 +69,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             Some(alias) => {
                 buf.write_all(b" AS ")?;
                 buf.write_all(POSTGRES_QUOTE)?;
-                buf.write_all(alias.as_bytes())?;
+                alias.to_writer(&mut *buf)?;
                 buf.write_all(POSTGRES_QUOTE)?;
             }
             None => (),
@@ -97,12 +97,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         _table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(POSTGRES_QUOTE)?;
-        self.buf.write_all(field.name().as_bytes())?;
+        field.name().to_writer(&mut self.buf)?;
         self.buf.write_all(POSTGRES_QUOTE)?;
         match field.cast() {
             Some(cast) => {
                 self.buf.write_all(b"::")?;
-                self.buf.write_all(cast.as_bytes())?;
+                cast.to_writer(&mut self.buf)?;
             }
             None => (),
         };
@@ -110,7 +110,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             Some(alias) => {
                 self.buf.write_all(b" AS ")?;
                 self.buf.write_all(POSTGRES_QUOTE)?;
-                self.buf.write_all(alias.as_bytes())?;
+                alias.to_writer(&mut self.buf)?;
                 self.buf.write_all(POSTGRES_QUOTE)?;
             }
             None => (),
@@ -218,12 +218,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(POSTGRES_QUOTE)?;
         match table.schema() {
             Some(x) => {
-                buf.write_all(x.as_bytes())?;
+                x.to_writer(&mut *buf)?;
                 buf.write_all(b"\".\"")?;
             }
             None => (),
         };
-        buf.write_all(table.name().as_bytes())?;
+        table.to_writer(&mut *buf)?;
         buf.write_all(POSTGRES_QUOTE)?;
         Ok(())
     }

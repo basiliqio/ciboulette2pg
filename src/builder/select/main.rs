@@ -13,7 +13,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let mut se = Self::default();
         let state: Ciboulette2PostgresBuilderState<'store, 'request> =
             get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
-        let main_cte_data = state.main_table().to_cte(CIBOULETTE_DATA_SUFFIX)?;
+        let main_cte_data = state
+            .main_table()
+            .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
         let rels = Self::get_relationships(&ciboulette_store, state.main_type().clone())?;
 
         se.buf.write_all(b"WITH \n")?;

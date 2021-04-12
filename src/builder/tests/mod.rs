@@ -11,9 +11,7 @@ mod misc;
 mod select;
 mod update;
 
-pub fn gen_table_store<'store>(
-    store: &'store CibouletteStore<'store>
-) -> Ciboulette2PostgresTableStore<'store> {
+pub fn gen_table_store<'store>(store: &'store CibouletteStore) -> Ciboulette2PostgresTableStore {
     vec![
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
@@ -68,6 +66,10 @@ impl<'store> std::string::ToString for Ciboulette2SqlValue<'store> {
                 .map(|x| x.to_string())
                 .unwrap_or_else(|| null.to_string()),
             Ciboulette2SqlValue::Text(x) => x
+                .clone()
+                .map(|x| x.to_string())
+                .unwrap_or_else(|| null.to_string()),
+            Ciboulette2SqlValue::ArcStr(x) => x
                 .clone()
                 .map(|x| x.to_string())
                 .unwrap_or_else(|| null.to_string()),

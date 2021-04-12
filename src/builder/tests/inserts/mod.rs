@@ -8,9 +8,9 @@ mod insert_normal;
 mod single_rel_cte;
 
 fn gen_req_create_people<'store, 'request>(
-    store: &'store CibouletteStore<'store>,
+    store: &'store CibouletteStore,
     parsed_url: &'store Url,
-) -> CibouletteCreateRequest<'request, 'store>
+) -> CibouletteCreateRequest<'request>
 where
     'store: 'request,
 {

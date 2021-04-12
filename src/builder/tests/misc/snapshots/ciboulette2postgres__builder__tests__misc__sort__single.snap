@@ -21,7 +21,7 @@ WITH "cte_peoples_data" AS (
     ) AS "data",
     NULL :: TEXT AS "related_id",
     NULL :: TEXT AS "related_type",
-    "public"."peoples"."id" :: UUID AS "_id",
+    "public"."peoples"."id" :: UUID AS "main_id",
     "public"."peoples"."favorite_color" AS "rel_favorite_color"
   FROM
     "public"."peoples"
@@ -33,7 +33,7 @@ WITH "cte_peoples_data" AS (
     NULL :: json AS "data",
     "cte_peoples_data"."id" :: TEXT AS "related_id",
     $8 :: TEXT AS "related_type",
-    "public"."favorite_color"."id" :: UUID AS "_id",
+    "public"."favorite_color"."id" :: UUID AS "main_id",
     "public"."favorite_color"."color" AS "sort_color"
   FROM
     "public"."favorite_color"
@@ -47,8 +47,8 @@ WITH "cte_peoples_data" AS (
     "cte_peoples_data"."related_id"
   FROM
     "cte_peoples_data"
-    LEFT JOIN "public"."peoples" ON "public"."peoples"."id" = "cte_peoples_data"."_id"
-    LEFT JOIN "cte_favorite_color_data" ON "cte_favorite_color_data"."_id" = "public"."peoples"."favorite_color"
+    LEFT JOIN "public"."peoples" ON "public"."peoples"."id" = "cte_peoples_data"."main_id"
+    LEFT JOIN "cte_favorite_color_data" ON "cte_favorite_color_data"."main_id" = "public"."peoples"."favorite_color"
   ORDER BY
     "cte_favorite_color_data"."sort_color" ASC
 );

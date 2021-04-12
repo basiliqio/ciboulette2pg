@@ -99,8 +99,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 fn gen_insert_cte_tables(
     state: &Ciboulette2PostgresBuilderState
 ) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
-    let main_cte_insert = state.main_table().to_cte(CIBOULETTE_INSERT_SUFFIX)?;
-    let main_cte_data = state.main_table().to_cte(CIBOULETTE_DATA_SUFFIX)?;
+    let main_cte_insert = state
+        .main_table()
+        .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_INSERT_SUFFIX)?;
+    let main_cte_data = state
+        .main_table()
+        .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
     Ok((main_cte_insert, main_cte_data))
 }
 

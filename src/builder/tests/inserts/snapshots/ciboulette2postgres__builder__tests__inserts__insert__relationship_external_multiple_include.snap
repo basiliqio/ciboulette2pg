@@ -48,7 +48,7 @@ WITH "cte_peoples_insert" AS (
     "public"."people-article"."article_id",
     "public"."people-article"."people_id"
 ),
-"cte_rel_articles_rel_data" AS (
+"cte_rel_people-article_rel_data" AS (
   SELECT
     "public"."people-article"."id" :: TEXT AS "id",
     "public"."people-article"."article_id" AS "rel_article_id",
@@ -67,11 +67,11 @@ WITH "cte_peoples_insert" AS (
       $13,
       "public"."articles"."title"
     ) AS "data",
-    "cte_rel_articles_rel_data"."rel_people_id" :: TEXT AS "related_id",
+    "cte_rel_people-article_rel_data"."rel_people_id" :: TEXT AS "related_id",
     $14 :: TEXT AS "related_type"
   FROM
     "public"."articles"
-    INNER JOIN "cte_rel_articles_rel_data" ON "cte_rel_articles_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
+    INNER JOIN "cte_rel_people-article_rel_data" ON "cte_rel_people-article_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
 ) (
   SELECT
     "cte_rel_articles_data"."id",

@@ -17,14 +17,14 @@ safe_ident!(TEXT_IDENT, "TEXT");
 safe_ident!(INTEGER_IDENT, "INTEGER");
 safe_ident!(CIBOULETTE_ID_IDENT, "id");
 safe_ident!(CIBOULETTE_REL_PREFIX, "rel");
-safe_ident!(CIBOULETTE_CTE_PREFIX, "cte");
 safe_ident!(CIBOULETTE_INSERT_SUFFIX, "insert");
 safe_ident!(CIBOULETTE_REL_DATA_SUFFIX, "rel_data");
 safe_ident!(CIBOULETTE_UPDATE_SUFFIX, "update");
 safe_ident!(CIBOULETTE_DATA_SUFFIX, "data");
 safe_ident!(CIBOULETTE_ID_SUFFIX, "id");
 safe_ident!(CIBOULETTE_SORT_PREFIX, "sort");
-safe_ident!(CIBOULETTE_MAIN_IDENTIFIER_PREFIX, "");
+safe_ident!(CIBOULETTE_MAIN_IDENTIFIER_PREFIX, "main");
+safe_ident!(CIBOULETTE_EMPTY_IDENT, "");
 safe_ident!(CIBOULETTE_TYPE_IDENT, "type");
 safe_ident!(CIBOULETTE_DATA_IDENT, "data");
 safe_ident!(CIBOULETTE_RELATED_ID_IDENT, "related_id");
@@ -50,7 +50,12 @@ impl std::fmt::Display for Ciboulette2PostgresSafeIdent {
         &self,
         f: &mut std::fmt::Formatter<'_>,
     ) -> std::fmt::Result {
-        write!(f, "{}", self.inner)
+        match (self.prefix.is_empty(), self.suffix.is_empty()) {
+            (false, false) => write!(f, "{}_{}_{}", self.prefix, self.inner, self.suffix),
+            (false, true) => write!(f, "{}_{}", self.prefix, self.inner),
+            (true, false) => write!(f, "{}_{}", self.inner, self.suffix),
+            (true, true) => write!(f, "{}", self.inner),
+        }
     }
 }
 
@@ -89,13 +94,18 @@ impl Ciboulette2PostgresSafeIdent {
         };
         self
     }
-}
 
-impl std::ops::Deref for Ciboulette2PostgresSafeIdent {
-    type Target = ArcStr;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
+    pub(crate) fn to_writer(
+        &self,
+        writer: &mut dyn std::io::Write,
+    ) -> Result<(), Ciboulette2SqlError> {
+        match (self.prefix.is_empty(), self.suffix.is_empty()) {
+            (false, false) => write!(writer, "{}_{}_{}", self.prefix, self.inner, self.suffix)?,
+            (false, true) => write!(writer, "{}_{}", self.prefix, self.inner)?,
+            (true, false) => write!(writer, "{}_{}", self.inner, self.suffix)?,
+            (true, true) => write!(writer, "{}", self.inner)?,
+        };
+        Ok(())
     }
 }
 
@@ -112,6 +122,14 @@ impl std::convert::TryFrom<&ArcStr> for Ciboulette2PostgresSafeIdent {
 
     fn try_from(value: &ArcStr) -> Result<Self, Self::Error> {
         Ciboulette2PostgresSafeIdent::check(value.clone())
+    }
+}
+
+impl std::convert::TryFrom<&'static str> for Ciboulette2PostgresSafeIdent {
+    type Error = Ciboulette2SqlError;
+
+    fn try_from(value: &'static str) -> Result<Self, Self::Error> {
+        Ciboulette2PostgresSafeIdent::check(ArcStr::from(value))
     }
 }
 

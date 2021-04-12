@@ -93,6 +93,7 @@ pub struct Ciboulette2PostgresTable {
     schema: Option<Ciboulette2PostgresSafeIdent>,
     ciboulette_type: Arc<CibouletteResourceType>,
     name: Ciboulette2PostgresSafeIdent,
+    is_cte: bool,
 }
 
 impl Ciboulette2PostgresTable {
@@ -108,12 +109,14 @@ impl Ciboulette2PostgresTable {
             schema,
             name,
             ciboulette_type,
+            is_cte: false,
         }
     }
 
     /// Create a new CTE from the current table
     pub fn to_cte(
         &self,
+        prefix: Ciboulette2PostgresSafeIdent,
         suffix: Ciboulette2PostgresSafeIdent,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTable {
@@ -123,29 +126,34 @@ impl Ciboulette2PostgresTable {
             name: self
                 .name()
                 .clone()
-                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
-                    CIBOULETTE_CTE_PREFIX,
-                ))
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(prefix))
                 .add_modifier(Ciboulette2PostgresSafeIdentModifier::Suffix(suffix)),
+            is_cte: true,
         })
     }
 
     /// Create a new CTE
     pub fn new_cte(
         id: Ciboulette2PostgresId,
-        name: ArcStr,
+        name: Ciboulette2PostgresSafeIdent,
         ciboulette_type: Arc<CibouletteResourceType>,
-        suffix: Ciboulette2PostgresSafeIdent,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTable {
             id,
             schema: None,
             ciboulette_type,
-            name: Ciboulette2PostgresSafeIdent::try_from(name)?
-                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
-                    CIBOULETTE_CTE_PREFIX,
-                ))
-                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Suffix(suffix)),
+            name,
+            is_cte: true,
         })
+    }
+
+    pub fn to_writer(
+        &self,
+        writer: &mut dyn std::io::Write,
+    ) -> Result<(), Ciboulette2SqlError> {
+        if self.is_cte {
+            write!(writer, "cte_")?;
+        }
+        self.name().to_writer(&mut *writer)
     }
 }
