@@ -7,6 +7,7 @@ use sqlx::types::Uuid;
 use sqlx::Arguments;
 use sqlx::Type;
 use std::convert::TryFrom;
+use std::ops::Deref;
 
 /// An [SQLx](sqlx) compatible value that'll contains the parameters of the queries
 #[derive(Clone, Debug)]
@@ -14,19 +15,20 @@ pub enum Ciboulette2SqlValue<'request> {
     Integer(Option<i64>),
     Float(Option<f32>),
     Double(Option<f64>),
-    Text(Option<Ciboulette2PostgresStr<'request>>),
-    Enum(Option<Ciboulette2PostgresStr<'request>>),
+    Text(Option<Cow<'request, str>>),
+    Enum(Option<Cow<'request, str>>),
     Bytes(Option<Cow<'request, [u8]>>),
     Boolean(Option<bool>),
     Char(Option<char>),
     Array(Option<Vec<Ciboulette2SqlValue<'request>>>),
     Numeric(Option<BigDecimal>),
     Json(Option<serde_json::Value>),
-    Xml(Option<Ciboulette2PostgresStr<'request>>),
+    Xml(Option<Cow<'request, str>>),
     Uuid(Option<Uuid>),
     DateTime(Option<DateTime<Utc>>),
     Date(Option<NaiveDate>),
     Time(Option<NaiveTime>),
+    ArcStr(Option<ArcStr>),
 }
 
 impl<'store> TryFrom<&MessyJsonValue<'store>> for Ciboulette2SqlValue<'store> {
@@ -37,21 +39,23 @@ impl<'store> TryFrom<&MessyJsonValue<'store>> for Ciboulette2SqlValue<'store> {
     ) -> Result<Ciboulette2SqlValue<'store>, Ciboulette2SqlError> {
         Ok(match val {
             MessyJsonValue::Bool(val) => Ciboulette2SqlValue::Boolean(Some(*val)),
-            MessyJsonValue::Null(_, schema) => match schema.as_ref() {
-                MessyJson::Bool(_) => Ciboulette2SqlValue::Boolean(None),
-                MessyJson::Number(_) => Ciboulette2SqlValue::Numeric(None),
-                MessyJson::String(_) => Ciboulette2SqlValue::Text(None),
-                MessyJson::Array(_) => Ciboulette2SqlValue::Array(None),
-                MessyJson::Uuid(_) => Ciboulette2SqlValue::Uuid(None),
-                MessyJson::Obj(_) => unimplemented!(),
+            MessyJsonValue::Null(_, schema) => match schema {
+                MessyJsonExpected::Root(root) => match root.deref() {
+                    MessyJsonInner::Bool(_) => Ciboulette2SqlValue::Boolean(None),
+                    MessyJsonInner::Number(_) => Ciboulette2SqlValue::Numeric(None),
+                    MessyJsonInner::String(_) => Ciboulette2SqlValue::Text(None),
+                    MessyJsonInner::Array(_) => Ciboulette2SqlValue::Array(None),
+                    MessyJsonInner::Uuid(_) => Ciboulette2SqlValue::Uuid(None),
+                    MessyJsonInner::Obj(_) => unimplemented!(),
+                },
+
+                MessyJsonExpected::Obj(_) => unimplemented!(), // FIXME
             },
             MessyJsonValue::Number(val) => Ciboulette2SqlValue::Numeric(Some(
                 bigdecimal::FromPrimitive::from_u128(*val)
                     .ok_or_else(|| Ciboulette2SqlError::BigDecimal(*val))?,
             )),
-            MessyJsonValue::String(val) => {
-                Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from(val.clone())))
-            }
+            MessyJsonValue::String(val) => Ciboulette2SqlValue::Text(Some(val.clone())),
             MessyJsonValue::Uuid(val) => Ciboulette2SqlValue::Uuid(Some(**val)),
             MessyJsonValue::Array(arr) => {
                 let mut arr_res: Vec<Ciboulette2SqlValue<'_>> = Vec::with_capacity(arr.len());
@@ -71,9 +75,7 @@ impl<'request> From<&CibouletteId<'request>> for Ciboulette2SqlValue<'request> {
     fn from(val: &CibouletteId<'request>) -> Ciboulette2SqlValue<'request> {
         match val {
             CibouletteId::Number(x) => Ciboulette2SqlValue::Numeric(BigDecimal::from_u64(*x)),
-            CibouletteId::Text(x) => {
-                Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from(x.clone())))
-            }
+            CibouletteId::Text(x) => Ciboulette2SqlValue::Text(Some(x.clone())),
             CibouletteId::Uuid(x) => Ciboulette2SqlValue::Uuid(Some(*x)),
         }
     }
@@ -81,13 +83,13 @@ impl<'request> From<&CibouletteId<'request>> for Ciboulette2SqlValue<'request> {
 
 impl<'request> From<&'request str> for Ciboulette2SqlValue<'request> {
     fn from(val: &'request str) -> Ciboulette2SqlValue<'request> {
-        Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from(val)))
+        Ciboulette2SqlValue::Text(Some(Cow::Borrowed(val)))
     }
 }
 
 impl<'request> From<Cow<'request, str>> for Ciboulette2SqlValue<'request> {
     fn from(val: Cow<'request, str>) -> Ciboulette2SqlValue<'request> {
-        Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::from(val)))
+        Ciboulette2SqlValue::Text(Some(val))
     }
 }
 
@@ -104,6 +106,7 @@ impl<'store, 'q> sqlx::Encode<'q, sqlx::Postgres> for Ciboulette2SqlValue<'store
             Ciboulette2SqlValue::Boolean(x) => x.encode(buf),
             Ciboulette2SqlValue::Json(x) => x.encode(buf),
             Ciboulette2SqlValue::Text(x) => x.map(|x| x.to_string()).encode(buf),
+            Ciboulette2SqlValue::ArcStr(x) => x.map(|x| x.to_string()).encode(buf),
             Ciboulette2SqlValue::Enum(x) => x.map(|x| x.to_string()).encode(buf),
             Ciboulette2SqlValue::Bytes(x) => x.map(|x| x.into_owned()).encode(buf),
             Ciboulette2SqlValue::Char(x) => x.map(|x| x.to_string()).encode(buf),
@@ -142,6 +145,7 @@ impl<'store, 'q> sqlx::Encode<'q, sqlx::Postgres> for Ciboulette2SqlValue<'store
             Ciboulette2SqlValue::Float(x) => std::mem::size_of_val(&x),
             Ciboulette2SqlValue::Double(x) => std::mem::size_of_val(&x),
             Ciboulette2SqlValue::Text(x) => std::mem::size_of_val(&x),
+            Ciboulette2SqlValue::ArcStr(x) => std::mem::size_of_val(&x),
             Ciboulette2SqlValue::Enum(x) => std::mem::size_of_val(&x),
             Ciboulette2SqlValue::Bytes(x) => std::mem::size_of_val(&x),
             Ciboulette2SqlValue::Boolean(x) => std::mem::size_of_val(&x),
@@ -163,6 +167,7 @@ impl<'store, 'q> sqlx::Encode<'q, sqlx::Postgres> for Ciboulette2SqlValue<'store
             Ciboulette2SqlValue::Integer(_) => Some(i64::type_info()),
             Ciboulette2SqlValue::Float(_) => Some(f32::type_info()),
             Ciboulette2SqlValue::Double(_) => Some(f64::type_info()),
+            Ciboulette2SqlValue::ArcStr(_) => Some(<&str>::type_info()),
             Ciboulette2SqlValue::Text(_) => Some(<&str>::type_info()),
             Ciboulette2SqlValue::Enum(_) => Some(<&str>::type_info()),
             Ciboulette2SqlValue::Bytes(_) => Some(<[u8]>::type_info()),
@@ -172,6 +177,7 @@ impl<'store, 'q> sqlx::Encode<'q, sqlx::Postgres> for Ciboulette2SqlValue<'store
                 Ciboulette2SqlValue::Integer(_) => Some(<[i64]>::type_info()),
                 Ciboulette2SqlValue::Float(_) => Some(<[f32]>::type_info()),
                 Ciboulette2SqlValue::Double(_) => Some(<[f64]>::type_info()),
+                Ciboulette2SqlValue::ArcStr(_) => Some(<[&str]>::type_info()),
                 Ciboulette2SqlValue::Text(_) => Some(<[&str]>::type_info()),
                 Ciboulette2SqlValue::Enum(_) => Some(<[&str]>::type_info()),
                 Ciboulette2SqlValue::Bytes(_) => None,

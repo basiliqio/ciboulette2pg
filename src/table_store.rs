@@ -3,16 +3,16 @@ use super::*;
 /// Store of the available tables
 #[derive(Getters, Clone, Debug, Default)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresTableStore<'store> {
-    map: BTreeMap<String, Arc<Ciboulette2PostgresTable<'store>>>,
+pub struct Ciboulette2PostgresTableStore {
+    map: BTreeMap<String, Arc<Ciboulette2PostgresTable>>,
 }
 
-impl<'store> Ciboulette2PostgresTableStore<'store> {
+impl Ciboulette2PostgresTableStore {
     /// Add a new table
     pub fn add_table(
         &mut self,
         key: String,
-        val: Arc<Ciboulette2PostgresTable<'store>>,
+        val: Arc<Ciboulette2PostgresTable>,
     ) {
         self.map.insert(key, val);
     }
@@ -21,20 +21,19 @@ impl<'store> Ciboulette2PostgresTableStore<'store> {
     pub fn get(
         &self,
         key: &str,
-    ) -> Result<&Ciboulette2PostgresTable<'store>, Ciboulette2SqlError> {
+    ) -> Result<&Arc<Ciboulette2PostgresTable>, Ciboulette2SqlError> {
         self.map
             .get(key)
-            .map(Arc::as_ref)
             .ok_or_else(|| Ciboulette2SqlError::UnknownTable(key.to_string()))
     }
 }
 
-impl<'store> std::iter::FromIterator<(String, Arc<Ciboulette2PostgresTable<'store>>)>
-    for Ciboulette2PostgresTableStore<'store>
+impl std::iter::FromIterator<(String, Arc<Ciboulette2PostgresTable>)>
+    for Ciboulette2PostgresTableStore
 {
-    fn from_iter<I: IntoIterator<Item = (String, Arc<Ciboulette2PostgresTable<'store>>)>>(
+    fn from_iter<I: IntoIterator<Item = (String, Arc<Ciboulette2PostgresTable>)>>(
         iter: I
-    ) -> Ciboulette2PostgresTableStore<'store> {
+    ) -> Ciboulette2PostgresTableStore {
         Ciboulette2PostgresTableStore {
             map: iter.into_iter().collect(),
         }
@@ -43,15 +42,15 @@ impl<'store> std::iter::FromIterator<(String, Arc<Ciboulette2PostgresTable<'stor
 
 /// Type of table id
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub enum Ciboulette2PostgresId<'store> {
-    Number(Ciboulette2PostgresSafeIdent<'store>),
-    Uuid(Ciboulette2PostgresSafeIdent<'store>),
-    Text(Ciboulette2PostgresSafeIdent<'store>),
+pub enum Ciboulette2PostgresId {
+    Number(Ciboulette2PostgresSafeIdent),
+    Uuid(Ciboulette2PostgresSafeIdent),
+    Text(Ciboulette2PostgresSafeIdent),
 }
 
-impl<'store> Ciboulette2PostgresId<'store> {
+impl Ciboulette2PostgresId {
     /// Get the ident of an id
-    pub fn get_ident(&self) -> &Ciboulette2PostgresSafeIdent<'store> {
+    pub fn get_ident(&self) -> &Ciboulette2PostgresSafeIdent {
         match self {
             Ciboulette2PostgresId::Number(x) => x,
             Ciboulette2PostgresId::Uuid(x) => x,
@@ -60,28 +59,28 @@ impl<'store> Ciboulette2PostgresId<'store> {
     }
 
     /// Get the type of a id
-    pub fn get_type(&self) -> &Ciboulette2PostgresSafeIdent<'static> {
+    pub fn get_type(&self) -> Ciboulette2PostgresSafeIdent {
         match self {
-            Ciboulette2PostgresId::Number(_) => &safe_ident::INTEGER_IDENT,
-            Ciboulette2PostgresId::Uuid(_) => &safe_ident::UUID_IDENT,
-            Ciboulette2PostgresId::Text(_) => &safe_ident::TEXT_IDENT,
+            Ciboulette2PostgresId::Number(_) => safe_ident::INTEGER_IDENT,
+            Ciboulette2PostgresId::Uuid(_) => safe_ident::UUID_IDENT,
+            Ciboulette2PostgresId::Text(_) => safe_ident::TEXT_IDENT,
         }
     }
 
     pub fn new_from_ciboulette_id_type(
         type_: CibouletteIdType,
-        name: &str,
+        name: &ArcStr,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(match type_ {
-            CibouletteIdType::Number => Ciboulette2PostgresId::Number(
-                Ciboulette2PostgresSafeIdent::try_from(name.to_string())?,
-            ),
-            CibouletteIdType::Text => Ciboulette2PostgresId::Text(
-                Ciboulette2PostgresSafeIdent::try_from(name.to_string())?,
-            ),
-            CibouletteIdType::Uuid => Ciboulette2PostgresId::Uuid(
-                Ciboulette2PostgresSafeIdent::try_from(name.to_string())?,
-            ),
+            CibouletteIdType::Number => {
+                Ciboulette2PostgresId::Number(Ciboulette2PostgresSafeIdent::try_from(name.clone())?)
+            }
+            CibouletteIdType::Text => {
+                Ciboulette2PostgresId::Text(Ciboulette2PostgresSafeIdent::try_from(name.clone())?)
+            }
+            CibouletteIdType::Uuid => {
+                Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from(name.clone())?)
+            }
         })
     }
 }
@@ -89,20 +88,20 @@ impl<'store> Ciboulette2PostgresId<'store> {
 /// A Postgres table
 #[derive(Getters, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresTable<'store> {
-    id: Ciboulette2PostgresId<'store>,
-    schema: Option<Ciboulette2PostgresSafeIdent<'store>>,
-    ciboulette_type: Arc<CibouletteResourceType<'store>>,
-    name: Ciboulette2PostgresSafeIdent<'store>,
+pub struct Ciboulette2PostgresTable {
+    id: Ciboulette2PostgresId,
+    schema: Option<Ciboulette2PostgresSafeIdent>,
+    ciboulette_type: Arc<CibouletteResourceType>,
+    name: Ciboulette2PostgresSafeIdent,
 }
 
-impl<'store> Ciboulette2PostgresTable<'store> {
+impl Ciboulette2PostgresTable {
     /// Create a new table
     pub fn new(
-        id: Ciboulette2PostgresId<'store>,
-        schema: Option<Ciboulette2PostgresSafeIdent<'store>>,
-        name: Ciboulette2PostgresSafeIdent<'store>,
-        ciboulette_type: Arc<CibouletteResourceType<'store>>,
+        id: Ciboulette2PostgresId,
+        schema: Option<Ciboulette2PostgresSafeIdent>,
+        name: Ciboulette2PostgresSafeIdent,
+        ciboulette_type: Arc<CibouletteResourceType>,
     ) -> Self {
         Ciboulette2PostgresTable {
             id,
@@ -114,28 +113,39 @@ impl<'store> Ciboulette2PostgresTable<'store> {
 
     /// Create a new CTE from the current table
     pub fn to_cte(
-        &'store self,
-        name: Cow<'store, str>,
+        &self,
+        suffix: Ciboulette2PostgresSafeIdent,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTable {
             id: self.id.clone(),
             ciboulette_type: self.ciboulette_type.clone(),
             schema: None,
-            name: Ciboulette2PostgresSafeIdent::try_from(name)?,
+            name: self
+                .name()
+                .clone()
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
+                    CIBOULETTE_CTE_PREFIX,
+                ))
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Suffix(suffix)),
         })
     }
 
     /// Create a new CTE
     pub fn new_cte(
-        id: Ciboulette2PostgresId<'store>,
-        name: Cow<'store, str>,
-        ciboulette_type: Arc<CibouletteResourceType<'store>>,
+        id: Ciboulette2PostgresId,
+        name: ArcStr,
+        ciboulette_type: Arc<CibouletteResourceType>,
+        suffix: Ciboulette2PostgresSafeIdent,
     ) -> Result<Self, Ciboulette2SqlError> {
         Ok(Ciboulette2PostgresTable {
-            id: id.clone(),
+            id,
             schema: None,
             ciboulette_type,
-            name: Ciboulette2PostgresSafeIdent::try_from(name)?,
+            name: Ciboulette2PostgresSafeIdent::try_from(name)?
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
+                    CIBOULETTE_CTE_PREFIX,
+                ))
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Suffix(suffix)),
         })
     }
 }

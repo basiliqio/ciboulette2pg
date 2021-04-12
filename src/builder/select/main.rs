@@ -1,22 +1,19 @@
 use super::*;
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate a SQL query to handle a `SELECT` request
-    pub fn gen_select(
-        ciboulette_store: &'store CibouletteStore<'store>,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore<'store>,
-        request: &'request CibouletteReadRequest<'request, 'store>,
-    ) -> Result<Self, Ciboulette2SqlError> {
+    pub fn gen_select<'store>(
+        ciboulette_store: &'store CibouletteStore,
+        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        request: &'request CibouletteReadRequest<'request>,
+    ) -> Result<Self, Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         let mut se = Self::default();
         let state: Ciboulette2PostgresBuilderState<'store, 'request> =
             get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
-        let main_cte_data = state.main_table().to_cte(Cow::Owned(format!(
-            "cte_{}_data",
-            state.main_table().name()
-        )))?;
+        let main_cte_data = state.main_table().to_cte(CIBOULETTE_DATA_SUFFIX)?;
         let rels = Self::get_relationships(&ciboulette_store, state.main_type().clone())?;
 
         se.buf.write_all(b"WITH \n")?;
@@ -47,20 +44,23 @@ where
     }
 
     /// Insert `INNER JOIN`s and `WHERE` close into the query for selecting related object
-    fn gen_matcher_for_related_select(
+    fn gen_matcher_for_related_select<'store>(
         &mut self,
-        ciboulette_table_store: &Ciboulette2PostgresTableStore<'store>,
-        left_type: Arc<CibouletteResourceType<'store>>,
-        right_type: Arc<CibouletteResourceType<'store>>,
+        ciboulette_table_store: &Ciboulette2PostgresTableStore,
+        left_type: Arc<CibouletteResourceType>,
+        right_type: Arc<CibouletteResourceType>,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         let left_table = ciboulette_table_store.get(left_type.name().as_str())?;
         let right_table = ciboulette_table_store.get(right_type.name().as_str())?;
         Self::gen_inner_join(&mut self.buf, state, &left_table, &right_table)?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(left_table.id().get_ident(), None, None),
+            &Ciboulette2PostgresTableField::new(left_table.id().get_ident().clone(), None, None),
             &left_table,
         )?;
         self.buf.write_all(b" = ")?;
@@ -69,15 +69,18 @@ where
     }
 
     /// Insert `WHERE` close into the query for selecting main object or relationships
-    fn gen_matcher_for_normal_select(
+    fn gen_matcher_for_normal_select<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_ref(
-                state.main_table().id().get_ident(),
+            &Ciboulette2PostgresTableField::new(
+                state.main_table().id().get_ident().clone(),
                 None,
                 None,
             ),
@@ -89,12 +92,15 @@ where
     }
 
     /// Generate the main `SELECT` of the query
-    fn gen_main_select(
+    fn gen_main_select<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: &Ciboulette2PostgresTable<'store>,
-        rels: &Ciboulette2SqlQueryRels<'store, 'request>,
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_cte_data: &Ciboulette2PostgresTable,
+        rels: &Ciboulette2SqlQueryRels<'request>,
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         self.write_table_info(main_cte_data)?;
         self.buf.write_all(b" AS (")?;
         self.gen_select_cte_final(

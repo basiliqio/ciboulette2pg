@@ -1,16 +1,16 @@
 use super::*;
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
-    pub(crate) fn finish_request(
+impl<'request> Ciboulette2PostgresBuilder<'request> {
+    pub(crate) fn finish_request<'store>(
         &mut self,
         state: Ciboulette2PostgresBuilderState<'store, 'request>,
     ) -> Result<(), Ciboulette2SqlError> {
-        let (main_cte_table, _) = self.working_tables.get(state.main_table()).ok_or_else(|| {
-            CibouletteError::UnknownError("Can't find the main_cte_table".to_string())
-        })?;
+        let (main_cte_table, _) = self
+            .working_tables
+            .get(state.main_table().name())
+            .ok_or_else(|| {
+                CibouletteError::UnknownError("Can't find the main_cte_table".to_string())
+            })?;
         let mut first_one = true;
         for (table, is_needed) in self.working_tables.values() {
             if matches!(is_needed, Ciboulette2PostgresResponseType::None) {
@@ -24,35 +24,35 @@ where
             self.buf.write_all(b"(SELECT ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
-                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_ID_IDENT, None, None),
+                &Ciboulette2PostgresTableField::new(CIBOULETTE_ID_IDENT, None, None),
                 table,
                 None,
             )?;
             self.buf.write_all(b", ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
-                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_TYPE_IDENT, None, None),
+                &Ciboulette2PostgresTableField::new(CIBOULETTE_TYPE_IDENT, None, None),
                 table,
                 None,
             )?;
             self.buf.write_all(b", ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
-                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_DATA_IDENT, None, None),
+                &Ciboulette2PostgresTableField::new(CIBOULETTE_DATA_IDENT, None, None),
                 table,
                 None,
             )?;
             self.buf.write_all(b", ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
-                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_RELATED_TYPE_IDENT, None, None),
+                &Ciboulette2PostgresTableField::new(CIBOULETTE_RELATED_TYPE_IDENT, None, None),
                 table,
                 None,
             )?;
             self.buf.write_all(b", ")?;
             Self::insert_ident_inner(
                 &mut self.buf,
-                &Ciboulette2PostgresTableField::new_ref(&CIBOULETTE_RELATED_ID_IDENT, None, None),
+                &Ciboulette2PostgresTableField::new(CIBOULETTE_RELATED_ID_IDENT, None, None),
                 table,
                 None,
             )?;
@@ -70,31 +70,30 @@ where
         }
         Ok(())
     }
-    pub(crate) fn gen_select_cte_final<'b, I>(
+    pub(crate) fn gen_select_cte_final<'store, 'b, I>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        table: &Ciboulette2PostgresTable<'store>,
-        type_: Arc<CibouletteResourceType<'store>>,
-        relating_field: Option<Ciboulette2PostgresRelatingField<'store>>,
+        table: &Ciboulette2PostgresTable,
+        type_: Arc<CibouletteResourceType>,
+        relating_field: Option<Ciboulette2PostgresRelatingField>,
         additional_fields: I,
         include: bool,
     ) -> Result<(), Ciboulette2SqlError>
     where
-        'store: 'b,
-        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField<'store>>,
+        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField>,
     {
         self.buf.write_all(b"SELECT ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new_cow(
-                Cow::Borrowed(table.id().get_ident()),
-                Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("id")?)),
-                Some(Cow::Owned(Ciboulette2PostgresSafeIdent::try_from("TEXT")?)),
+            &Ciboulette2PostgresTableField::new(
+                table.id().get_ident().clone(),
+                Some(CIBOULETTE_ID_IDENT),
+                Some(TEXT_IDENT),
             ),
             table,
         )?;
         self.buf.write_all(b", ")?;
         self.insert_params(
-            Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::Arc(type_.name().clone()))),
+            Ciboulette2SqlValue::ArcStr(Some(type_.name().clone())),
             table,
         )?;
         self.buf.write_all(b"::TEXT AS \"type\", ")?;
@@ -105,9 +104,7 @@ where
                 self.insert_ident(relating_field.field(), relating_field.table())?;
                 self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::Text(Some(Ciboulette2PostgresStr::Arc(
-                        relating_field.related_type().name().clone(),
-                    ))), // TODO do better
+                    Ciboulette2SqlValue::ArcStr(Some(relating_field.related_type().name().clone())),
                     relating_field.table(),
                 )?;
                 self.buf.write_all(b"::TEXT AS \"related_type\"")?;
@@ -118,7 +115,7 @@ where
             }
         }
         self.handle_additionnal_params(&state, &table, additional_fields)?;
-        self.gen_sorting_keys(&table, type_.clone(), &state.query())?;
+        self.gen_sorting_keys(&table, type_, &state.query())?;
         self.buf.write_all(b" FROM ")?;
         self.write_table_info(table)?;
         Ok(())

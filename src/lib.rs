@@ -5,14 +5,12 @@ mod errors;
 pub mod graph_walker;
 mod response_type;
 mod safe_ident;
-mod str;
 mod table_store;
 #[cfg(test)]
 mod tests;
 
 mod value;
 
-pub use crate::str::Ciboulette2PostgresStr;
 use arcstr::ArcStr;
 pub use builder::Ciboulette2PostgresBuilder;
 pub use builder::Ciboulette2SqlArguments;
@@ -21,10 +19,19 @@ pub use ciboulette_row::Ciboulette2PostgresRow;
 pub use errors::Ciboulette2SqlError;
 use getset::Getters;
 use messy_json::{
-    MessyJson, MessyJsonNullType, MessyJsonObject, MessyJsonObjectValue, MessyJsonValue,
+    MessyJsonExpected, MessyJsonInner, MessyJsonNullType, MessyJsonObject, MessyJsonObjectValue,
+    MessyJsonValue,
 };
 use response_type::Ciboulette2PostgresResponseType;
 pub use safe_ident::Ciboulette2PostgresSafeIdent;
+use safe_ident::Ciboulette2PostgresSafeIdentModifier;
+use safe_ident::{
+    CIBOULETTE_CTE_PREFIX, CIBOULETTE_DATA_IDENT, CIBOULETTE_DATA_SUFFIX, CIBOULETTE_ID_IDENT,
+    CIBOULETTE_ID_SUFFIX, CIBOULETTE_INSERT_SUFFIX, CIBOULETTE_MAIN_IDENTIFIER_PREFIX,
+    CIBOULETTE_RELATED_ID_IDENT, CIBOULETTE_RELATED_TYPE_IDENT, CIBOULETTE_REL_DATA_SUFFIX,
+    CIBOULETTE_REL_PREFIX, CIBOULETTE_SORT_PREFIX, CIBOULETTE_TYPE_IDENT, CIBOULETTE_UPDATE_SUFFIX,
+    TEXT_IDENT,
+};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;

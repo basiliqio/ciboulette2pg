@@ -1,32 +1,23 @@
 use super::*;
 
 //// Extract the relationships object from a request, fails if the request contains a main type
-fn extract_rels<'store, 'request>(
-    request: &'request CibouletteUpdateRequest<'request, 'store>
-) -> Result<&'request CibouletteUpdateRelationship<'request, 'store>, Ciboulette2SqlError>
-where
-    'store: 'request,
-{
+fn extract_rels<'request>(
+    request: &'request CibouletteUpdateRequest<'request>
+) -> Result<&'request CibouletteUpdateRelationship<'request>, Ciboulette2SqlError> {
     match request.data() {
         CibouletteUpdateRequestType::MainType(_) => Err(Ciboulette2SqlError::UpdatingMainObject),
         CibouletteUpdateRequestType::Relationship(rels) => Ok(rels),
     }
 }
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate the relationship update CTE
     pub fn gen_update_rel_update(
         &mut self,
-        request: &'request CibouletteUpdateRequest<'request, 'store>,
-        main_table: &Ciboulette2PostgresTable<'store>,
-        main_cte_update: &Ciboulette2PostgresTable<'store>,
-        values: Vec<(
-            Ciboulette2PostgresStr<'store>,
-            Ciboulette2SqlValue<'request>,
-        )>,
+        request: &'request CibouletteUpdateRequest<'request>,
+        main_table: &Ciboulette2PostgresTable,
+        main_cte_update: &Ciboulette2PostgresTable,
+        values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_update)?;
         self.buf.write_all(b" AS (")?;
@@ -36,20 +27,20 @@ where
     }
 
     /// Generate the relationship data select from the relationship update CTE
-    pub(crate) fn gen_update_rel_data(
+    pub(crate) fn gen_update_rel_data<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        type_: Arc<CibouletteResourceType<'store>>,
-        main_cte_update: &Ciboulette2PostgresTable<'store>,
-        main_cte_data: &Ciboulette2PostgresTable<'store>,
-        rels: &Ciboulette2SqlQueryRels<'store, 'request>,
+        type_: Arc<CibouletteResourceType>,
+        main_cte_update: &Ciboulette2PostgresTable,
+        main_cte_data: &Ciboulette2PostgresTable,
+        rels: &Ciboulette2SqlQueryRels<'request>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
         self.gen_select_cte_final(
             &state,
             &main_cte_update,
-            type_.clone(),
+            type_,
             None,
             rels.single_rels_additional_fields().iter(),
             true,
@@ -62,17 +53,19 @@ where
     ///
     /// Update the relationships (one-to-one only) of an object
     /// Fails if trying to update one-to-many relationships
-    pub(crate) fn gen_update_rel(
-        ciboulette_store: &'store CibouletteStore<'store>,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore<'store>,
-        request: &'request CibouletteUpdateRequest<'request, 'store>,
-        main_type: Arc<CibouletteResourceType<'store>>,
-    ) -> Result<Self, Ciboulette2SqlError> {
+    pub(crate) fn gen_update_rel<'store>(
+        ciboulette_store: &'store CibouletteStore,
+        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        request: &'request CibouletteUpdateRequest<'request>,
+        main_type: Arc<CibouletteResourceType>,
+    ) -> Result<Self, Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         let main_table = ciboulette_table_store.get(&main_type.name().as_str())?;
         let mut se = Self::default();
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
-        let rels: &'request CibouletteUpdateRelationship<'request, 'store> =
-            extract_rels(&request)?;
+        let rels: &'request CibouletteUpdateRelationship<'request> = extract_rels(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&main_table)?;
         let Ciboulette2PostgresMainResourceInformations {
             insert_values: rel_values,

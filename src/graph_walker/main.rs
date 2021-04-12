@@ -4,22 +4,19 @@ use std::convert::TryFrom;
 /// Informations about the main resource type, extracted from the request
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresMainResourceInformations<'store, 'request> {
-    pub insert_values: Vec<(
-        Ciboulette2PostgresStr<'store>,
-        Ciboulette2SqlValue<'request>,
-    )>,
-    pub single_relationships: Vec<Ciboulette2PostgresStr<'store>>,
+pub(crate) struct Ciboulette2PostgresMainResourceInformations<'request> {
+    pub insert_values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
+    pub single_relationships: Vec<ArcStr>,
 }
 
 /// Check the informations of a one-to-many relationship
-fn check_one_to_many_relationships<'store, 'request>(
+fn check_one_to_many_relationships<'request>(
     relationships: &'request BTreeMap<ArcStr, CibouletteRelationshipObject<'request>>,
-    from_type_: Arc<CibouletteResourceType<'store>>,
-    to_type_: Arc<CibouletteResourceType<'store>>,
-    to_type_alias: &Ciboulette2PostgresStr<'store>,
-    opt: &'store CibouletteRelationshipOneToManyOption,
-) -> Result<Option<(&'store str, Ciboulette2SqlValue<'request>)>, Ciboulette2SqlError> {
+    from_type_: Arc<CibouletteResourceType>,
+    to_type_: Arc<CibouletteResourceType>,
+    to_type_alias: &ArcStr,
+    opt: &CibouletteRelationshipOneToManyOption,
+) -> Result<Option<(ArcStr, Ciboulette2SqlValue<'request>)>, Ciboulette2SqlError> {
     match relationships
         .get(&**to_type_alias)
         .map(|x| x.data())
@@ -27,7 +24,7 @@ fn check_one_to_many_relationships<'store, 'request>(
     {
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
             Ok(Some((
-                opt.many_table_key().as_str(),
+                opt.many_table_key().clone(),
                 Ciboulette2SqlValue::from(rel_id.id()),
             )))
         }
@@ -45,15 +42,15 @@ fn check_one_to_many_relationships<'store, 'request>(
             }
             match opt.one_table().id_type() {
                 CibouletteIdType::Number => Ok(Some((
-                    opt.many_table_key().as_str(),
+                    opt.many_table_key().clone(),
                     Ciboulette2SqlValue::Numeric(None),
                 ))),
                 CibouletteIdType::Uuid => Ok(Some((
-                    opt.many_table_key().as_str(),
+                    opt.many_table_key().clone(),
                     Ciboulette2SqlValue::Uuid(None),
                 ))),
                 CibouletteIdType::Text => Ok(Some((
-                    opt.many_table_key().as_str(),
+                    opt.many_table_key().clone(),
                     Ciboulette2SqlValue::Text(None),
                 ))),
             }
@@ -73,10 +70,7 @@ fn check_one_to_many_relationships<'store, 'request>(
 /// Extract attributes from the request and push them to an arguments vector
 /// compatible with SQLx for later execution
 pub fn fill_attributes<'store, 'request>(
-    args: &mut Vec<(
-        Ciboulette2PostgresStr<'store>,
-        Ciboulette2SqlValue<'request>,
-    )>,
+    args: &mut Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
     obj: &'request Option<MessyJsonObjectValue<'store>>,
 ) -> Result<(), Ciboulette2SqlError> {
     if let Some(obj) = obj {
@@ -85,10 +79,7 @@ pub fn fill_attributes<'store, 'request>(
                 continue;
             }
             // Iterate over every attribute
-            args.push((
-                Ciboulette2PostgresStr::from(k.clone()),
-                Ciboulette2SqlValue::try_from(v)?,
-            ));
+            args.push((k.clone(), Ciboulette2SqlValue::try_from(v)?));
         }
     }
     Ok(())
@@ -97,17 +88,17 @@ pub fn fill_attributes<'store, 'request>(
 /// Extract attribute and single relationships from the query, allowing to build the
 /// request for the main resource
 pub(crate) fn extract_fields_and_values<'store, 'request>(
-    store: &'store CibouletteStore<'store>,
-    main_type: Arc<CibouletteResourceType<'store>>,
-    attributes: &'request Option<MessyJsonObjectValue<'store>>,
+    store: &'store CibouletteStore,
+    main_type: Arc<CibouletteResourceType>,
+    attributes: &'request Option<MessyJsonObjectValue<'request>>,
     relationships: &'request BTreeMap<ArcStr, CibouletteRelationshipObject<'request>>,
     fails_on_many: bool,
-) -> Result<Ciboulette2PostgresMainResourceInformations<'store, 'request>, Ciboulette2SqlError> {
-    let mut res_val: Vec<(
-        Ciboulette2PostgresStr<'store>,
-        Ciboulette2SqlValue<'request>,
-    )> = Vec::with_capacity(128);
-    let mut res_rel: Vec<Ciboulette2PostgresStr<'store>> = Vec::with_capacity(128);
+) -> Result<Ciboulette2PostgresMainResourceInformations<'request>, Ciboulette2SqlError>
+where
+    'store: 'request,
+{
+    let mut res_val: Vec<(ArcStr, Ciboulette2SqlValue<'request>)> = Vec::with_capacity(128);
+    let mut res_rel: Vec<ArcStr> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -120,8 +111,7 @@ pub(crate) fn extract_fields_and_values<'store, 'request>(
     while let Some((edge_index, node_index)) = walker.next(&store.graph()) {
         // For each connect edge outgoing from the original node
         let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
-        let alias =
-            Ciboulette2PostgresStr::from(main_type.get_alias(node_weight.name().as_str())?.clone()); // Get the alias translation of that resource
+        let alias = main_type.get_alias(node_weight.name().as_str())?.clone(); // Get the alias translation of that resource
 
         match store.graph().edge_weight(edge_index).unwrap() // FIXME
 		{
@@ -129,7 +119,7 @@ pub(crate) fn extract_fields_and_values<'store, 'request>(
 				if let Some(v) =
                 check_one_to_many_relationships(&relationships, main_type.clone(), node_weight.clone(), &alias, opt)?
             {
-                res_val.push((Ciboulette2PostgresStr::from(v.0), v.1)); // Insert the relationship values
+                res_val.push((v.0, v.1)); // Insert the relationship values
             }
             res_rel.push(alias);
 			},
@@ -147,11 +137,11 @@ pub(crate) fn extract_fields_and_values<'store, 'request>(
 }
 
 /// Get a list of a resource's single relationships (one-to-one)
-pub(crate) fn get_resource_single_rel<'store>(
-    store: &'store CibouletteStore<'store>,
-    main_type: Arc<CibouletteResourceType<'store>>,
-) -> Result<Vec<Ciboulette2PostgresStr<'store>>, Ciboulette2SqlError> {
-    let mut res: Vec<Ciboulette2PostgresStr<'store>> = Vec::with_capacity(128);
+pub(crate) fn get_resource_single_rel(
+    store: &CibouletteStore,
+    main_type: Arc<CibouletteResourceType>,
+) -> Result<Vec<ArcStr>, Ciboulette2SqlError> {
+    let mut res: Vec<ArcStr> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -167,7 +157,7 @@ pub(crate) fn get_resource_single_rel<'store>(
             store.graph().edge_weight(edge_index).unwrap()
         {
             let alias = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
-            res.push(Ciboulette2PostgresStr::from(alias.clone()));
+            res.push(alias.clone());
         }
     }
     Ok(res)

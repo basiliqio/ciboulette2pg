@@ -30,32 +30,6 @@ macro_rules! get_state {
     };
 }
 
-lazy_static::lazy_static! {
-    static ref CIBOULETTE_ID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
-        Ciboulette2PostgresSafeIdent::try_from("id").unwrap()
-    };
-
-    static ref CIBOULETTE_RAW_ID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
-        Ciboulette2PostgresSafeIdent::try_from("_id").unwrap()
-    };
-
-    static ref CIBOULETTE_TYPE_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
-        Ciboulette2PostgresSafeIdent::try_from("type").unwrap()
-    };
-
-    static ref CIBOULETTE_DATA_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
-        Ciboulette2PostgresSafeIdent::try_from("data").unwrap()
-    };
-
-    static ref CIBOULETTE_RELATED_ID_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
-        Ciboulette2PostgresSafeIdent::try_from("related_id").unwrap()
-    };
-
-    static ref CIBOULETTE_RELATED_TYPE_IDENT: Ciboulette2PostgresSafeIdent<'static> = {
-        Ciboulette2PostgresSafeIdent::try_from("related_type").unwrap()
-    };
-}
-
 #[cfg(test)]
 pub mod tests;
 
@@ -104,23 +78,17 @@ impl<'request> std::ops::DerefMut for Ciboulette2SqlArguments<'request> {
 
 #[derive(Debug, Getters, MutGetters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresBuilder<'store, 'request> {
+pub struct Ciboulette2PostgresBuilder<'request> {
     buf: Ciboulette2PostgresBuf,
     params: Ciboulette2SqlArguments<'request>,
     #[getset(get_mut = "pub")]
     working_tables: BTreeMap<
-        &'store Ciboulette2PostgresTable<'store>,
-        (
-            Ciboulette2PostgresTable<'store>,
-            Ciboulette2PostgresResponseType,
-        ),
+        Ciboulette2PostgresSafeIdent,
+        (Ciboulette2PostgresTable, Ciboulette2PostgresResponseType),
     >,
 }
 
-impl<'store, 'request> Default for Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Default for Ciboulette2PostgresBuilder<'request> {
     fn default() -> Self {
         Ciboulette2PostgresBuilder {
             buf: Ciboulette2PostgresBuf::new_ringbuf(std::io::Cursor::new(Vec::with_capacity(
@@ -132,18 +100,12 @@ where
     }
 }
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn add_working_table(
         &mut self,
-        main_table: &'store Ciboulette2PostgresTable<'store>,
-        val: (
-            Ciboulette2PostgresTable<'store>,
-            Ciboulette2PostgresResponseType,
-        ),
+        main_table: &Ciboulette2PostgresTable,
+        val: (Ciboulette2PostgresTable, Ciboulette2PostgresResponseType),
     ) {
-        self.working_tables.insert(main_table, val);
+        self.working_tables.insert(main_table.name().clone(), val);
     }
 }

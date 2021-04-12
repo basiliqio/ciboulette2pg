@@ -7,5 +7,3 @@ pub mod main;
 pub mod rel;
 pub mod sorting;
 pub mod utils;
-
-const EMPTY_LIST: [Cow<'static, str>; 0] = [];

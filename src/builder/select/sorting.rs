@@ -1,15 +1,12 @@
 use super::*;
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn gen_sort_joins(
         buf: &mut Ciboulette2PostgresBuf,
-        rel_table: &Ciboulette2PostgresTable<'store>,
-        main_table: &Ciboulette2PostgresTable<'store>,
-        main_cte_table: &Ciboulette2PostgresTable<'store>,
-        opt: &CibouletteRelationshipOption<'store>,
+        rel_table: &Ciboulette2PostgresTable,
+        main_table: &Ciboulette2PostgresTable,
+        main_cte_table: &Ciboulette2PostgresTable,
+        opt: &CibouletteRelationshipOption,
     ) -> Result<(), Ciboulette2SqlError> {
         match opt {
             CibouletteRelationshipOption::ManyToOne(opt) => {
@@ -46,17 +43,17 @@ where
         }
         Ok(())
     }
-    pub(crate) fn gen_cte_for_sort(
+    pub(crate) fn gen_cte_for_sort<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: &Ciboulette2PostgresTable<'store>,
+        main_cte_data: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         for (type_, sorting_elements) in state.query().sorting_map().iter() {
             let table = state.table_store().get(type_.name())?;
-            if table == state.main_table() || table == main_cte_data {
+            if table == state.main_table() || table.as_ref() == main_cte_data {
                 continue;
             }
-            match self.working_tables.get(&table) {
+            match self.working_tables.get(table.name()) {
                 Some(_cte_table) => continue,
                 None => {
                     let mut fields: Vec<Ciboulette2PostgresTableField> =
@@ -65,19 +62,18 @@ where
                         .store()
                         .get_rel(state.main_type().name().as_str(), type_.name().as_str())?;
                     for el in sorting_elements.iter() {
-                        fields.push(Ciboulette2PostgresTableField::new_owned(
+                        fields.push(Ciboulette2PostgresTableField::new(
                             Ciboulette2PostgresSafeIdent::try_from(el.field().clone())?,
                             None,
                             None,
                         ));
                     }
-                    let table_cte =
-                        table.to_cte(Cow::Owned(format!("cte_{}_data", table.name())))?;
+                    let table_cte = table.to_cte(CIBOULETTE_DATA_SUFFIX)?;
                     self.write_table_info(&table_cte)?;
                     self.buf.write_all(b" AS (SELECT ")?;
                     self.insert_ident(
-                        &Ciboulette2PostgresTableField::new_ref(
-                            main_cte_data.id().get_ident(),
+                        &Ciboulette2PostgresTableField::new(
+                            main_cte_data.id().get_ident().clone(),
                             None,
                             None,
                         ),
@@ -92,7 +88,7 @@ where
                     Self::gen_sort_joins(
                         &mut self.buf,
                         &table,
-                        state.main_table(),
+                        state.main_table().as_ref(),
                         &main_cte_data,
                         &opt,
                     )?;
@@ -103,9 +99,9 @@ where
     }
     pub(crate) fn gen_sorting_keys(
         &mut self,
-        table: &Ciboulette2PostgresTable<'store>,
-        type_: Arc<CibouletteResourceType<'store>>,
-        query: &'request CibouletteQueryParameters<'request, 'store>,
+        table: &Ciboulette2PostgresTable,
+        type_: Arc<CibouletteResourceType>,
+        query: &'request CibouletteQueryParameters<'request>,
     ) -> Result<(), Ciboulette2SqlError> {
         if let Some(sorting_arr) = query.sorting_map().get(&type_) {
             for el in sorting_arr {
@@ -128,23 +124,23 @@ where
     /// Generate the left join between the CTE table and the main table
     fn gen_left_join_single_main_table(
         buf: &mut Ciboulette2PostgresBuf,
-        main_table: &Ciboulette2PostgresTable<'store>,
-        main_cte_table_id: Ciboulette2SqlAdditionalField<'store>,
-        main_cte_table: &Ciboulette2PostgresTable<'store>,
+        main_table: &Ciboulette2PostgresTable,
+        main_cte_table_id: Ciboulette2SqlAdditionalField,
+        main_cte_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
         Self::write_table_info_inner(&mut *buf, &main_table)?;
         buf.write_all(b" ON ")?;
         Self::insert_ident_inner(
             &mut *buf,
-            &Ciboulette2PostgresTableField::new_ref(main_table.id().get_ident(), None, None),
+            &Ciboulette2PostgresTableField::new(main_table.id().get_ident().clone(), None, None),
             main_table,
             None,
         )?;
         buf.write_all(b" = ")?;
         Self::insert_ident_inner(
             &mut *buf,
-            &Ciboulette2PostgresTableField::new_ref(main_cte_table_id.name(), None, None),
+            &Ciboulette2PostgresTableField::new(main_cte_table_id.name().clone(), None, None),
             main_cte_table,
             None,
         )?;
@@ -154,25 +150,25 @@ where
     /// Generate the left join between the main table and the single rel table
     fn gen_left_join_single_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
-        rel_table: &Ciboulette2PostgresTable<'store>,
+        rel_table: &Ciboulette2PostgresTable,
         rel_cte_table_id: Ciboulette2SqlAdditionalField,
-        opt: &CibouletteRelationshipOneToManyOption<'store>,
-        main_table: &Ciboulette2PostgresTable<'store>,
+        opt: &CibouletteRelationshipOneToManyOption,
+        main_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
         Self::write_table_info_inner(buf, &rel_table)?;
         buf.write_all(b" ON ")?;
         Self::insert_ident_inner(
             buf,
-            &Ciboulette2PostgresTableField::new_ref(rel_cte_table_id.name(), None, None),
+            &Ciboulette2PostgresTableField::new(rel_cte_table_id.name().clone(), None, None),
             rel_table,
             None,
         )?;
         buf.write_all(b" = ")?;
         Self::insert_ident_inner(
             buf,
-            &Ciboulette2PostgresTableField::new_owned(
-                Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key().as_str())?,
+            &Ciboulette2PostgresTableField::new(
+                Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?,
                 None,
                 None,
             ),

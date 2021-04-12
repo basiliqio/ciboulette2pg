@@ -6,18 +6,18 @@ use getset::CopyGetters;
 /// allowing to pass fewer arguments per functions
 pub(crate) struct Ciboulette2PostgresBuilderState<'store, 'request> {
     #[getset(get_copy = "pub")]
-    store: &'store CibouletteStore<'store>,
+    store: &'store CibouletteStore,
     #[getset(get_copy = "pub")]
-    table_store: &'store Ciboulette2PostgresTableStore<'store>,
+    table_store: &'store Ciboulette2PostgresTableStore,
     #[getset(get_copy = "pub")]
-    path: &'request CiboulettePath<'request, 'store>,
+    path: &'request CiboulettePath<'request>,
     #[getset(get_copy = "pub")]
-    query: &'request CibouletteQueryParameters<'request, 'store>,
+    query: &'request CibouletteQueryParameters<'request>,
     #[getset(get = "pub")]
-    main_type: Arc<CibouletteResourceType<'store>>,
-    #[getset(get_copy = "pub")]
-    main_table: &'store Ciboulette2PostgresTable<'store>,
+    main_type: Arc<CibouletteResourceType>,
     #[getset(get = "pub")]
+    main_table: Arc<Ciboulette2PostgresTable>,
+    #[getset(get_copy = "pub")]
     expected_response_type: Ciboulette2PostgresResponseType,
 }
 
@@ -28,9 +28,9 @@ where
     /// Check if a relationship is needed in the response.
     pub(crate) fn check_if_rel_is_needed(
         &self,
-        other: &CibouletteResourceType<'store>,
-        x: &CibouletteResourceType<'store>,
-        y: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
+        x: &CibouletteResourceType,
+        y: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         self.store()
             .get_rel(x.name(), y.name())
@@ -56,14 +56,14 @@ where
 
     /// Create a new state
     pub fn new(
-        store: &'store CibouletteStore<'store>,
-        table_store: &'store Ciboulette2PostgresTableStore<'store>,
-        path: &'request CiboulettePath<'request, 'store>,
-        query: &'request CibouletteQueryParameters<'request, 'store>,
+        store: &'store CibouletteStore,
+        table_store: &'store Ciboulette2PostgresTableStore,
+        path: &'request CiboulettePath<'request>,
+        query: &'request CibouletteQueryParameters<'request>,
         expected_response_type: Ciboulette2PostgresResponseType,
     ) -> Result<Self, Ciboulette2SqlError> {
         let main_type = path.main_type().clone();
-        let main_table = table_store.get(main_type.name().as_str())?;
+        let main_table = table_store.get(main_type.name().as_str())?.clone();
 
         Ok(Ciboulette2PostgresBuilderState {
             store,

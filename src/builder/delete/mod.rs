@@ -2,19 +2,19 @@ use super::*;
 pub mod main;
 pub mod rel;
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'store, 'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate a SQL query to handle a `DELETE` request
     ///
     /// Fails if trying to delete an one-to-many relationships.
     /// Fails if trying to delete a non optional one-to-one relationships.
     pub fn gen_delete(
-        store: &'store CibouletteStore<'store>,
-        table_store: &'store Ciboulette2PostgresTableStore<'store>,
-        request: &'request CibouletteDeleteRequest<'request, 'store>,
-    ) -> Result<Self, Ciboulette2SqlError> {
+        store: &'store CibouletteStore,
+        table_store: &'store Ciboulette2PostgresTableStore,
+        request: &'request CibouletteDeleteRequest<'request>,
+    ) -> Result<Self, Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         let mut se = Ciboulette2PostgresBuilder::default();
         match request.related_type() {
             Some(related_type) => {

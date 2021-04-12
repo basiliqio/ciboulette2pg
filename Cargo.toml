@@ -10,7 +10,7 @@ edition = "2018"
 # ciboulette = { path = "../ciboulette", features = [ "sqlx_postgres" ], package = "ciboulette" }
 ciboulette = { git = "https://gitlab.com/basiliq/ciboulette.git", features = [ "sqlx_postgres" ], package = "ciboulette" }
 thiserror = "1.0.17"
-messy_json = { git = "https://gitlab.com/basiliq/messy_json.git", features = [ "uuid", "arcstr" ] }
+messy_json = { git = "https://gitlab.com/basiliq/messy_json.git", features = [ "uuid" ] }
 serde_json = { version = "1.0", default-features = false, features = ["raw_value"] }
 serde = { version = "1", features = [ "derive" ] }
 bigdecimal = "0.2"
@@ -19,7 +19,6 @@ sqlx = { version = "0.5", features = [ "postgres", "runtime-tokio-rustls", "json
 buf_redux = { version = "0.8", features = [ "slice-deque" ] }
 getset = "0.1"
 numtoa = "0.2.3"
-lazy_static = "1.4"
 itertools = "0.10.0"
 uuid = { version = "0.8", features = ["v4"] }
 arcstr = { version = "1.0.0", features = [ "std" ] }

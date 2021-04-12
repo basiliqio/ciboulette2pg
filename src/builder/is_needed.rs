@@ -6,17 +6,17 @@ where
 {
     fn is_needed_included(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.query().include().contains(other) {
-            true => Some(*self.expected_response_type()),
+            true => Some(self.expected_response_type()),
             false => None,
         }
     }
 
     fn is_needed_path(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.path() {
             CiboulettePath::Type(x) | CiboulettePath::TypeId(x, _) => match x.as_ref() == other {
@@ -47,7 +47,7 @@ where
 
     fn is_needed_main_type(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match other == self.main_type().as_ref() {
             true => Some(Ciboulette2PostgresResponseType::Object),
@@ -57,7 +57,7 @@ where
 
     pub(crate) fn is_needed_updating_relationships(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match other == self.main_type().as_ref() {
             true => Some(Ciboulette2PostgresResponseType::Id),
@@ -67,7 +67,7 @@ where
 
     fn is_needed_sorting(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match self.query().sorting_map().contains_key(other) {
             true => Some(Ciboulette2PostgresResponseType::None),
@@ -77,7 +77,7 @@ where
 
     pub(crate) fn is_needed_all_for_relationships(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         self.is_needed_main_type(other)
             .or_else(|| self.is_needed_sorting(other))
@@ -85,7 +85,7 @@ where
 
     pub(crate) fn is_needed_all(
         &self,
-        other: &CibouletteResourceType<'store>,
+        other: &CibouletteResourceType,
     ) -> Option<Ciboulette2PostgresResponseType> {
         self.is_needed_included(other)
             .or_else(|| self.is_needed_path(other))

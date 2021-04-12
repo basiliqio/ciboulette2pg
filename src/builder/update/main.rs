@@ -2,13 +2,12 @@ use super::*;
 
 /// Extract the data object from a request, fails if the request doesn't contain a main type
 #[inline]
-fn extract_data<'store, 'request>(
-    request: &'request CibouletteUpdateRequest<'request, 'store>
+fn extract_data<'request>(
+    request: &'request CibouletteUpdateRequest<'request>
 ) -> Result<
     &'request CibouletteResource<
         'request,
-        'store,
-        MessyJsonObjectValue<'store>,
+        MessyJsonObjectValue<'request>,
         CibouletteResourceIdentifier<'request>,
     >,
     Ciboulette2SqlError,
@@ -21,21 +20,15 @@ fn extract_data<'store, 'request>(
     }
 }
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate the main type update CTE
     #[inline]
     fn gen_update_main_update(
         &mut self,
-        request: &'request CibouletteUpdateRequest<'request, 'store>,
-        main_table: &'store Ciboulette2PostgresTable<'store>,
-        main_update_cte: &Ciboulette2PostgresTable<'store>,
-        values: Vec<(
-            Ciboulette2PostgresStr<'store>,
-            Ciboulette2SqlValue<'request>,
-        )>,
+        request: &'request CibouletteUpdateRequest<'request>,
+        main_table: &Ciboulette2PostgresTable,
+        main_update_cte: &Ciboulette2PostgresTable,
+        values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_update_cte)?;
         self.buf.write_all(b" AS (")?;
@@ -46,13 +39,13 @@ where
 
     /// Generate the main type data fetch CTE from the update CTE
     #[inline]
-    fn gen_update_main_update_data(
+    fn gen_update_main_update_data<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        request: &'request CibouletteUpdateRequest<'request, 'store>,
-        main_update_cte: &Ciboulette2PostgresTable<'store>,
-        main_data_cte: &Ciboulette2PostgresTable<'store>,
-        rels: &Ciboulette2SqlQueryRels<'store, 'request>,
+        request: &'request CibouletteUpdateRequest<'request>,
+        main_update_cte: &Ciboulette2PostgresTable,
+        main_data_cte: &Ciboulette2PostgresTable,
+        rels: &Ciboulette2SqlQueryRels<'request>,
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_data_cte)?;
         self.buf.write_all(b" AS (")?;
@@ -72,11 +65,14 @@ where
     ///
     /// Update the main objects and its one-to-one relationships
     /// Fails if trying to update one-to-many relationships
-    pub(crate) fn gen_update_main(
-        ciboulette_store: &'store CibouletteStore<'store>,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore<'store>,
-        request: &'request CibouletteUpdateRequest<'request, 'store>,
-    ) -> Result<Self, Ciboulette2SqlError> {
+    pub(crate) fn gen_update_main<'store>(
+        ciboulette_store: &'store CibouletteStore,
+        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        request: &'request CibouletteUpdateRequest<'request>,
+    ) -> Result<Self, Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let mut se = Self::default();
         let main_attrs = extract_data(&request)?;

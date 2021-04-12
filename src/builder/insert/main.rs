@@ -1,17 +1,11 @@
 use super::*;
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'store, 'request>
-where
-    'store: 'request,
-{
+impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate a insert query for `POST` requests
     pub(crate) fn gen_insert_normal(
         &mut self,
-        table: &Ciboulette2PostgresTable<'store>,
-        params: Vec<(
-            Ciboulette2PostgresStr<'store>,
-            Ciboulette2SqlValue<'request>,
-        )>,
+        table: &Ciboulette2PostgresTable,
+        params: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
         returning: bool,
     ) -> Result<(), Ciboulette2SqlError> {
         self.buf.write_all(b"INSERT INTO ")?;
@@ -34,16 +28,13 @@ where
     /// Generate columns name before the "VALUES" and insert the parameters after that
     fn gen_normal_insert_values(
         &mut self,
-        params: Vec<(
-            Ciboulette2PostgresStr<'store>,
-            Ciboulette2SqlValue<'request>,
-        )>,
-        table: &Ciboulette2PostgresTable<'store>,
+        params: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
+        table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         let mut param_ident: Vec<Ciboulette2PostgresTableField> = Vec::with_capacity(params.len());
         let mut param_value: Vec<Ciboulette2SqlValue<'request>> = Vec::with_capacity(params.len());
         for (n, v) in params.into_iter() {
-            param_ident.push(Ciboulette2PostgresTableField::new_owned(
+            param_ident.push(Ciboulette2PostgresTableField::new(
                 Ciboulette2PostgresSafeIdent::try_from(n)?,
                 None,
                 None,

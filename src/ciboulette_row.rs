@@ -43,21 +43,19 @@ impl<'rows> Ciboulette2PostgresRow<'rows> {
         Ok(res)
     }
 
-    pub fn build_response_elements<'store, I>(
+    pub fn build_response_elements<I>(
         rows: I,
-        store: &'store CibouletteStore<'store>,
+        store: &CibouletteStore,
         hint_size: Option<usize>,
     ) -> Result<
-        Vec<CibouletteResponseElement<'rows, 'store, &'rows serde_json::value::RawValue>>,
+        Vec<CibouletteResponseElement<'rows, &'rows serde_json::value::RawValue>>,
         Ciboulette2SqlError,
     >
     where
-        'store: 'rows,
         I: IntoIterator<Item = Ciboulette2PostgresRow<'rows>>,
     {
-        let mut res: Vec<
-            CibouletteResponseElement<'rows, 'store, &'rows serde_json::value::RawValue>,
-        > = Vec::with_capacity(hint_size.unwrap_or_default());
+        let mut res: Vec<CibouletteResponseElement<'rows, &'rows serde_json::value::RawValue>> =
+            Vec::with_capacity(hint_size.unwrap_or_default());
 
         for row in rows.into_iter() {
             let type_ = store.get_type(&row.type_)?;
