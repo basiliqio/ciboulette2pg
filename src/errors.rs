@@ -1,5 +1,6 @@
 use thiserror::Error;
-
+pub type Ciboulette2SqlBufError =
+    buf_redux::IntoInnerError<buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>>;
 /// An error throwable by this library
 #[derive(Error, Debug)]
 pub enum Ciboulette2SqlError {
@@ -27,8 +28,6 @@ pub enum Ciboulette2SqlError {
     BulkRelationshipDelete,
     #[error("One of the needed relation for ordering couldn't be found : `{0}`")]
     MissingRelationForOrdering(String),
-    #[error("Non optional relationship `{1}` for type `{0}`")]
-    RequiredRelationship(String, String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
     #[error("Client provided `id`s are forbidden for inserts")]
@@ -44,9 +43,7 @@ pub enum Ciboulette2SqlError {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
-    BufReaderInto(
-        #[from] buf_redux::IntoInnerError<buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>>,
-    ),
+    BufReaderInto(#[from] Ciboulette2SqlBufError),
     #[error(transparent)]
     Utf8(#[from] std::string::FromUtf8Error),
     #[error("An unknown error occurred")]

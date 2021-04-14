@@ -38,7 +38,7 @@ impl<'store, 'request> Ciboulette2PostgresBuilder<'request> {
                         if opt.many_table().as_ref() == request.resource_type().as_ref()
                             && opt.one_table().as_ref() == related_type.as_ref() =>
                     {
-                        return Err(Ciboulette2SqlError::RequiredRelationship(
+                        return Err(Ciboulette2SqlError::MissingRelationship(
                             request.resource_type().name().to_string(),
                             opt.one_table().name().to_string(),
                         ));

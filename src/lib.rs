@@ -16,6 +16,7 @@ pub use builder::Ciboulette2PostgresBuilder;
 pub use builder::Ciboulette2SqlArguments;
 use ciboulette::*;
 pub use ciboulette_row::Ciboulette2PostgresRow;
+pub use errors::Ciboulette2SqlBufError;
 pub use errors::Ciboulette2SqlError;
 use getset::Getters;
 use messy_json::{
