@@ -7,7 +7,7 @@ mod update_rel_success;
 mod update_success;
 
 async fn test_update<'store>(
-    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    pool: &mut sqlx::PgPool,
     query_end: &str,
     _test_name: &str,
     data: &BTreeMap<String, Vec<Uuid>>,
@@ -42,11 +42,11 @@ async fn test_update<'store>(
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
-        .fetch_all(&mut *transaction)
+        .fetch_all(&mut pool.acquire().await.unwrap())
         .await
         .unwrap();
     snapshot_table(
-        &mut *transaction,
+        &mut *pool,
         "db_snapshot_update_main_while_testing_query_params",
         &["peoples", "people-article", "favorite_color"],
     )
@@ -55,7 +55,7 @@ async fn test_update<'store>(
 }
 
 async fn test_update_many_to_one<'store>(
-    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    pool: &mut sqlx::PgPool,
     query_end: &str,
     _test_name: &str,
     data: &BTreeMap<String, Vec<Uuid>>,
@@ -86,11 +86,11 @@ async fn test_update_many_to_one<'store>(
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
-        .fetch_all(&mut *transaction)
+        .fetch_all(&mut pool.acquire().await.unwrap())
         .await
         .unwrap();
     snapshot_table(
-        &mut *transaction,
+        &mut *pool,
         "db_snapshot_update_rels_while_testing_query_params",
         &["comments"],
     )

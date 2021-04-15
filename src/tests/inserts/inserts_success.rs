@@ -1,7 +1,7 @@
 use super::*;
 
 async fn test_insert<'store>(
-    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    pool: &mut sqlx::PgPool,
     query_end: &str,
     body: &str,
 ) -> Vec<sqlx::postgres::PgRow> {
@@ -23,16 +23,16 @@ async fn test_insert<'store>(
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
-        .fetch_all(&mut *transaction)
+        .fetch_all(&mut pool.acquire().await.unwrap())
         .await
         .unwrap();
     raw_rows
 }
 
-#[ciboulette2postgres_test]
-async fn insert_main_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+#[basiliq_test(run_migrations)]
+async fn insert_main_all_fields(mut pool: sqlx::PgPool) {
     let raw_rows = test_insert(
-        &mut transaction,
+        &mut pool,
         "/peoples",
         json!({
             "data": json!({
@@ -52,17 +52,17 @@ async fn insert_main_all_fields(mut transaction: sqlx::Transaction<'_, sqlx::Pos
     .await;
     Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
-        &mut transaction,
+        &mut pool,
         "insert_main_all_fields",
         &["peoples", "people-article", "favorite_color"],
     )
     .await;
 }
 
-#[ciboulette2postgres_test]
-async fn insert_main_required_only(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+#[basiliq_test(run_migrations)]
+async fn insert_main_required_only(mut pool: sqlx::PgPool) {
     let raw_rows = test_insert(
-        &mut transaction,
+        &mut pool,
         "/peoples",
         json!({
             "data": json!({
@@ -79,17 +79,17 @@ async fn insert_main_required_only(mut transaction: sqlx::Transaction<'_, sqlx::
     .await;
     Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
-        &mut transaction,
+        &mut pool,
         "insert_main_required_fields",
         &["peoples", "people-article", "favorite_color"],
     )
     .await;
 }
 
-#[ciboulette2postgres_test]
-async fn insert_main_with_favorite_color(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+#[basiliq_test(run_migrations)]
+async fn insert_main_with_favorite_color(mut pool: sqlx::PgPool) {
     let raw_rows_color = test_insert(
-        &mut transaction,
+        &mut pool,
         "/favorite_color",
         json!({
             "data": json!({
@@ -106,7 +106,7 @@ async fn insert_main_with_favorite_color(mut transaction: sqlx::Transaction<'_, 
     let color_rows = Ciboulette2PostgresRow::from_raw(&raw_rows_color)
         .expect("to deserialize the returned rows");
     let raw_rows_main = test_insert(
-        &mut transaction,
+        &mut pool,
         "/peoples",
         json!({
             "data": json!({
@@ -131,7 +131,7 @@ async fn insert_main_with_favorite_color(mut transaction: sqlx::Transaction<'_, 
     .await;
     Ciboulette2PostgresRow::from_raw(&raw_rows_main).expect("to deserialize the returned rows");
     snapshot_table(
-        &mut transaction,
+        &mut pool,
         "insert_main_with_color",
         &["peoples", "people-article", "favorite_color"],
     )

@@ -1,13 +1,11 @@
 use super::select::test_select;
 use super::*;
 
-#[ciboulette2postgres_test]
-async fn convert_multiple_field_without_related(
-    mut transaction: sqlx::Transaction<'_, sqlx::Postgres>
-) {
+#[basiliq_test(run_migrations)]
+async fn convert_multiple_field_without_related(mut pool: sqlx::PgPool) {
     let store = gen_bag();
-    let data = init_values::init_values(&mut transaction).await;
-    let raw_rows = test_select(&mut transaction, "/peoples", "", &data).await;
+    let data = init_values::init_values(&mut pool).await;
+    let raw_rows = test_select(&mut pool, "/peoples", "", &data).await;
     let res =
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     let hint_size = res.len();
@@ -16,15 +14,13 @@ async fn convert_multiple_field_without_related(
     check_response_elements!(res_built);
 }
 
-#[ciboulette2postgres_test]
-async fn convert_multiple_field_with_related(
-    mut transaction: sqlx::Transaction<'_, sqlx::Postgres>
-) {
+#[basiliq_test(run_migrations)]
+async fn convert_multiple_field_with_related(mut pool: sqlx::PgPool) {
     let store = gen_bag();
-    let data = init_values::init_values(&mut transaction).await;
+    let data = init_values::init_values(&mut pool).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_select(
-        &mut transaction,
+        &mut pool,
         format!("/peoples/{}/articles?include=peoples", people_id).as_str(),
         "",
         &data,

@@ -14,8 +14,8 @@ fn test_insert_failing(body: String) -> Ciboulette2SqlError {
         .unwrap_err()
 }
 
-#[ciboulette2postgres_test]
-async fn providing_id(_transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+#[basiliq_test(run_migrations)]
+async fn providing_id(_pool: sqlx::PgPool) {
     let err = test_insert_failing(
         json!({
             "data": json!({
@@ -38,8 +38,8 @@ async fn providing_id(_transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
     );
 }
 
-#[ciboulette2postgres_test]
-async fn missing_attributes(_transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
+#[basiliq_test(run_migrations)]
+async fn missing_attributes(_pool: sqlx::PgPool) {
     let err = test_insert_failing(
         json!({
             "data": json!({

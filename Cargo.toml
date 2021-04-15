@@ -26,7 +26,11 @@ arcstr = { version = "1.0.0", features = [ "std" ] }
 [dev-dependencies]
 # ciboulette_test_helper = { path = "../ciboulette/ciboulette_test_helper", package = "ciboulette_test_helper" }
 ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git",  package = "ciboulette_test_helper" }
-ciboulette2postgres_test_proc_macro = { path = "./ciboulette2postgres_test_proc_macro" }
+basiliq_db_test_utils = { git = "https://gitlab.com/basiliq/basiliq_db_test_utils.git",  package = "basiliq_db_test_utils" }
+# basiliq_db_test_utils = { path = "../basiliq_db_test_utils/basiliq_db_test_utils",  package = "basiliq_db_test_utils" }
+basiliq_db_test_proc_macro = { git = "https://gitlab.com/basiliq/basiliq_db_test_utils.git",  package = "basiliq_db_test_proc_macro" }
+# basiliq_db_test_proc_macro = { path = "../basiliq_db_test_utils/basiliq_db_test_proc_macro",  package = "basiliq_db_test_proc_macro" }
+
 url = "2.2.0"
 tokio = { version = "1", features = ["full"] }
 insta = { version = "1.7", features = [ "redactions" ] }

@@ -1,9 +1,9 @@
 use super::*;
 use crate::builder::tests::*;
-use ciboulette2postgres_test_proc_macro::ciboulette2postgres_test;
+use basiliq_db_test_proc_macro::basiliq_test;
 use ciboulette_test_helper::ciboulette::*;
 use ciboulette_test_helper::*;
-use run_migrations::*;
+// use run_migrations::*;
 use serde_json::json;
 use std::convert::TryFrom;
 use url::Url;
@@ -14,7 +14,7 @@ mod inserts;
 mod query_params;
 mod response_elements;
 #[allow(clippy::mutex_atomic)]
-mod run_migrations;
+// mod run_migrations;
 mod select;
 mod test_sql;
 mod update;

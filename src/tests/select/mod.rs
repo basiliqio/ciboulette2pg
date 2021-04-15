@@ -4,7 +4,7 @@ mod query_params;
 mod select_success;
 
 pub(crate) async fn test_select<'store>(
-    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    pool: &mut sqlx::PgPool,
     query_end: &str,
     _name: &str,
     _data: &BTreeMap<String, Vec<Uuid>>,
@@ -33,7 +33,7 @@ pub(crate) async fn test_select<'store>(
         )
     );
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
-        .fetch_all(&mut *transaction)
+        .fetch_all(&mut pool.acquire().await.unwrap())
         .await
         .unwrap();
     raw_rows

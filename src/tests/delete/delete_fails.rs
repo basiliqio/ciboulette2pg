@@ -12,9 +12,9 @@ async fn test_delete_fails<'store>(query_end: &str) -> Ciboulette2SqlError {
     Ciboulette2PostgresBuilder::gen_delete(&ciboulette_store, &table_store, &ciboulette_request)
         .unwrap_err()
 }
-#[ciboulette2postgres_test]
-async fn one_to_many(mut transaction: sqlx::Transaction<'_, sqlx::Postgres>) {
-    let data = init_values::init_values(&mut transaction).await;
+#[basiliq_test(run_migrations)]
+async fn one_to_many(mut pool: sqlx::PgPool) {
+    let data = init_values::init_values(&mut pool).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let err =
         test_delete_fails(format!("/peoples/{}/relationships/articles", people_id).as_str()).await;

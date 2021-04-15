@@ -27,6 +27,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.40"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28b2cd92db5cbd74e8e5028f7e27dd7aa3090e89e4f2a197cc7c8dfb69c7063b"
+
+[[package]]
 name = "arcstr"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -43,9 +49,9 @@ checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
 name = "async-trait"
-version = "0.1.48"
+version = "0.1.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36ea56748e10732c49404c153638a15ec3d6211ec5ff35d9bb20e13b93576adf"
+checksum = "589652ce7ccb335d1e7ecb3be145425702b290dbcb7029bbeaae263fc1d87b48"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -72,6 +78,32 @@ name = "base64"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
+
+[[package]]
+name = "basiliq_db_test_proc_macro"
+version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#fe79390005eac7b4cf0cdd6a68bb39524a8447b3"
+dependencies = [
+ "basiliq_db_test_utils",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "basiliq_db_test_utils"
+version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#fe79390005eac7b4cf0cdd6a68bb39524a8447b3"
+dependencies = [
+ "anyhow",
+ "ciboulette2postgres_test_proc_macro",
+ "lazy_static",
+ "num_cpus",
+ "refinery",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
 
 [[package]]
 name = "bigdecimal"
@@ -207,7 +239,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#f782e06607be736d3bf03a54a0f79f18a84c6c1a"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#1388037106769407d443ff41a03ee9c68f7adcd3"
 dependencies = [
  "arcstr",
  "getset",
@@ -229,11 +261,12 @@ name = "ciboulette2postgres"
 version = "0.1.0"
 dependencies = [
  "arcstr",
+ "basiliq_db_test_proc_macro",
+ "basiliq_db_test_utils",
  "bigdecimal",
  "buf_redux",
  "cargo-husky",
  "ciboulette",
- "ciboulette2postgres_test_proc_macro",
  "ciboulette_test_helper",
  "getset",
  "insta",
@@ -257,6 +290,7 @@ dependencies = [
 [[package]]
 name = "ciboulette2postgres_test_proc_macro"
 version = "0.1.0"
+source = "git+https://gitlab.com/basiliq/ciboulette2postgres.git#bfc973c9b54b4f1a919ece7c50052ff8117c6b82"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -266,7 +300,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#f782e06607be736d3bf03a54a0f79f18a84c6c1a"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#1388037106769407d443ff41a03ee9c68f7adcd3"
 dependencies = [
  "arcstr",
  "ciboulette",
@@ -1185,9 +1219,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94341e4e44e24f6b591b59e47a8a027df12e008d73fd5672dbea9cc22f4507d9"
+checksum = "8270314b5ccceb518e7e578952f0b72b88222d02e8f77f5ecf7abbb673539041"
 dependencies = [
  "bitflags",
 ]
@@ -1676,9 +1710,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.4.0"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134af885d758d645f0f0505c9a8b3f9bf8a348fd822e112ab5248138348f1722"
+checksum = "83f0c8e7c0addab50b663055baf787d0af7f413a46e6e7fb9559a4e4db7137a5"
 dependencies = [
  "autocfg",
  "bytes",
@@ -1752,9 +1786,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-util"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5143d049e85af7fbc36f5454d990e62c2df705b3589f123b71f441b6b59f443f"
+checksum = "940a12c99365c31ea8dd9ba04ec1be183ffe4920102bb7122c2f515437601e8e"
 dependencies = [
  "bytes",
  "futures-core",

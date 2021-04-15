@@ -5,7 +5,7 @@ mod inserts_success;
 mod query_params;
 
 async fn test_insert<'store>(
-    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    pool: &mut sqlx::PgPool,
     query_end: &str,
     _test_name: &str,
     _data: &BTreeMap<String, Vec<Uuid>>,
@@ -41,11 +41,11 @@ async fn test_insert<'store>(
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
-        .fetch_all(&mut *transaction)
+        .fetch_all(&mut pool.acquire().await.unwrap())
         .await
         .unwrap();
     snapshot_table(
-        &mut *transaction,
+        &mut *pool,
         "db_snapshot_insert_while_testing_query_params",
         &["peoples", "people-article", "favorite_color"],
     )

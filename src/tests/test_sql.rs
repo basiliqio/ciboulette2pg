@@ -1,6 +1,6 @@
 use super::*;
 pub async fn snapshot_table(
-    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    pool: &mut sqlx::PgPool,
     name: &str,
     tables: &[&str],
 ) {
@@ -14,7 +14,7 @@ pub async fn snapshot_table(
             )
             .as_str(),
         )
-        .fetch_one(&mut *transaction)
+        .fetch_one(&mut pool.acquire().await.unwrap())
         .await
         .expect("to result the database snapshot");
         match snap.0 {
