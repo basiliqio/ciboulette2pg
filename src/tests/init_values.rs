@@ -1,5 +1,4 @@
 use super::*;
-use sqlx::PgPool;
 use uuid::Uuid;
 
 const FAVORITE_COLOR_INIT_FILES: [&str; 3] = [
