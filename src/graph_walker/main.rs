@@ -150,14 +150,12 @@ pub(crate) fn get_resource_single_rel(
         .graph()
         .neighbors_directed(*main_type_index, petgraph::Direction::Outgoing)
         .detach(); // Create a graph walker
-    while let Some((edge_index, node_index)) = walker.next(&store.graph()) {
+    while let Some((edge_index, _node_index)) = walker.next(&store.graph()) {
         // For each connect edge outgoing from the original node
-        let node_weight = store.graph().node_weight(node_index).unwrap(); // Get the node weight
-        if let CibouletteRelationshipOption::ManyToOne(_) =
+        if let CibouletteRelationshipOption::ManyToOne(opt) =
             store.graph().edge_weight(edge_index).unwrap()
         {
-            let alias = main_type.get_alias(node_weight.name().as_str())?; // Get the alias translation of that resource
-            res.push(alias.clone());
+            res.push(opt.many_table_key().clone());
         }
     }
     Ok(res)

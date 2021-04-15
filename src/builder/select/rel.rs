@@ -22,6 +22,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             .iter()
             .zip(rels.single_rels_additional_fields().iter())
         {
+            println!("Key : {} - {}", main_type.name(), rel_key);
             let rel_type: Arc<CibouletteResourceType> =
                 main_type.get_relationship(&state.store(), rel_key)?;
             if let Some(requirement_type) = is_needed_cb(&state, &rel_type) {

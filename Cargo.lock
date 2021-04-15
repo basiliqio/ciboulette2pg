@@ -82,7 +82,7 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 [[package]]
 name = "basiliq_db_test_proc_macro"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#1fcdf141ff448a0b6fe63fb92d09621e84a05ad3"
+source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#be0608a04ed858bdebe3059cf1052f0c6d3f1147"
 dependencies = [
  "basiliq_db_test_utils",
  "proc-macro2",
@@ -93,7 +93,7 @@ dependencies = [
 [[package]]
 name = "basiliq_db_test_utils"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#1fcdf141ff448a0b6fe63fb92d09621e84a05ad3"
+source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#be0608a04ed858bdebe3059cf1052f0c6d3f1147"
 dependencies = [
  "anyhow",
  "lazy_static",
@@ -238,7 +238,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#1388037106769407d443ff41a03ee9c68f7adcd3"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#a4f57a18340cad3df71786c9132a23c8fcdb1651"
 dependencies = [
  "arcstr",
  "getset",
@@ -289,7 +289,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#1388037106769407d443ff41a03ee9c68f7adcd3"
+source = "git+https://gitlab.com/basiliq/ciboulette.git#a4f57a18340cad3df71786c9132a23c8fcdb1651"
 dependencies = [
  "arcstr",
  "ciboulette",
