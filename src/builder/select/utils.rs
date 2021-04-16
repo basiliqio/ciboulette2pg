@@ -4,27 +4,17 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Add additional fields to a final CTE select
     pub(super) fn handle_additionnal_params<'store, 'b, I>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         table: &Ciboulette2PostgresTable,
         additional_fields: I,
     ) -> Result<(), Ciboulette2SqlError>
     where
         I: Iterator<Item = &'b Ciboulette2SqlAdditionalField>,
     {
-        if !state.query().sorting().is_empty() {
-            let id_as_additional = Ciboulette2SqlAdditionalField::try_from(table)?;
+        for field in additional_fields {
             self.buf.write_all(b", ")?;
-            self.insert_ident(&id_as_additional.ident(), table)?;
+            self.insert_ident(&field.ident(), table)?;
             self.buf
-                .write_all(format!(" AS \"{}\"", id_as_additional.name()).as_bytes())?;
-        }
-        {
-            for field in additional_fields {
-                self.buf.write_all(b", ")?;
-                self.insert_ident(&field.ident(), table)?;
-                self.buf
-                    .write_all(format!(" AS \"{}\"", field.name()).as_bytes())?;
-            }
+                .write_all(format!(" AS \"{}\"", field.name()).as_bytes())?;
         }
         Ok(())
     }

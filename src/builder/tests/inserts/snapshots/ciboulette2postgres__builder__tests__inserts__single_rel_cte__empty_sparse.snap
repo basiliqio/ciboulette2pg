@@ -5,6 +5,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 ---
 SELECT
   "public"."favorite_color"."id" :: TEXT AS "id",
+  "public"."favorite_color"."id" AS "main_id",
   $1 :: TEXT AS "type",
   NULL :: json AS "data",
   "public"."cte_peoples"."id" :: TEXT AS "related_id",

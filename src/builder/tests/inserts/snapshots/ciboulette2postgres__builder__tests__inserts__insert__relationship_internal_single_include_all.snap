@@ -12,6 +12,7 @@ WITH "cte_peoples_insert" AS (
 "cte_peoples_data" AS (
   SELECT
     "cte_peoples_insert"."id" :: TEXT AS "id",
+    "cte_peoples_insert"."id" AS "main_id",
     $4 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $5,
@@ -34,6 +35,7 @@ WITH "cte_peoples_insert" AS (
 "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
+    "public"."favorite_color"."id" AS "main_id",
     $10 :: TEXT AS "type",
     JSON_BUILD_OBJECT($11, "public"."favorite_color"."color") AS "data",
     "cte_peoples_data"."id" :: TEXT AS "related_id",
@@ -54,6 +56,7 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
     $13 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $14,
@@ -70,6 +73,7 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_comments_data" AS (
   SELECT
     "public"."comments"."id" :: TEXT AS "id",
+    "public"."comments"."id" AS "main_id",
     $17 :: TEXT AS "type",
     JSON_BUILD_OBJECT($18, "public"."comments"."body") AS "data",
     "public"."comments"."author" :: TEXT AS "related_id",
@@ -78,7 +82,7 @@ WITH "cte_peoples_insert" AS (
   FROM
     "public"."comments"
   WHERE
-    "public"."comments"."author" = "cte_peoples_data"."id"
+    "public"."comments"."author" = "cte_peoples_data"."main_id"
 ) (
   SELECT
     "cte_rel_articles_data"."id",

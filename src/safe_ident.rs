@@ -23,7 +23,7 @@ safe_ident!(CIBOULETTE_UPDATE_SUFFIX, "update");
 safe_ident!(CIBOULETTE_DATA_SUFFIX, "data");
 safe_ident!(CIBOULETTE_ID_SUFFIX, "id");
 safe_ident!(CIBOULETTE_SORT_PREFIX, "sort");
-safe_ident!(CIBOULETTE_MAIN_IDENTIFIER_PREFIX, "main");
+safe_ident!(CIBOULETTE_MAIN_IDENTIFIER, "main_id");
 safe_ident!(CIBOULETTE_EMPTY_IDENT, "");
 safe_ident!(CIBOULETTE_TYPE_IDENT, "type");
 safe_ident!(CIBOULETTE_DATA_IDENT, "data");

@@ -10,29 +10,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     ) -> Result<(), Ciboulette2SqlError> {
         match opt {
             CibouletteRelationshipOption::ManyToOne(opt) => {
-                let main_cte_table_id = Ciboulette2SqlAdditionalField::new(
-                    Ciboulette2PostgresTableField::from(main_table.id()),
-                    Ciboulette2SqlAdditionalFieldType::MainIdentifier,
-                    main_table.ciboulette_type().clone(),
-                )?;
-                let rel_cte_table_id = Ciboulette2SqlAdditionalField::new(
-                    Ciboulette2PostgresTableField::from(rel_table.id()),
-                    Ciboulette2SqlAdditionalFieldType::MainIdentifier,
-                    rel_table.ciboulette_type().clone(),
-                )?;
-                Self::gen_left_join_single_main_table(
-                    &mut *buf,
-                    main_table,
-                    main_cte_table_id,
-                    main_cte_table,
-                )?;
-                Self::gen_left_join_single_rel_table(
-                    &mut *buf,
-                    rel_table,
-                    rel_cte_table_id,
-                    opt,
-                    main_table,
-                )?;
+                Self::gen_left_join_single_main_table(&mut *buf, main_table, main_cte_table)?;
+                Self::gen_left_join_single_rel_table(&mut *buf, rel_table, opt, main_table)?;
             }
             _ => {
                 return Err(Ciboulette2SqlError::SortingByMultiRel(
@@ -112,7 +91,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                             Ciboulette2PostgresTableField::try_from(el)?,
                             Ciboulette2SqlAdditionalFieldType::Sorting,
                             type_.clone(),
-                        )?,
+                        ),
                     ),
                     table,
                 )?;
@@ -125,7 +104,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     fn gen_left_join_single_main_table(
         buf: &mut Ciboulette2PostgresBuf,
         main_table: &Ciboulette2PostgresTable,
-        main_cte_table_id: Ciboulette2SqlAdditionalField,
         main_cte_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
         buf.write_all(b" LEFT JOIN ")?;
@@ -140,7 +118,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(b" = ")?;
         Self::insert_ident_inner(
             &mut *buf,
-            &Ciboulette2PostgresTableField::new(main_cte_table_id.name().clone(), None, None),
+            &Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
             main_cte_table,
             None,
         )?;
@@ -151,7 +129,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     fn gen_left_join_single_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
         rel_table: &Ciboulette2PostgresTable,
-        rel_cte_table_id: Ciboulette2SqlAdditionalField,
         opt: &CibouletteRelationshipOneToManyOption,
         main_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
@@ -160,7 +137,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(b" ON ")?;
         Self::insert_ident_inner(
             buf,
-            &Ciboulette2PostgresTableField::new(rel_cte_table_id.name().clone(), None, None),
+            &Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
             rel_table,
             None,
         )?;

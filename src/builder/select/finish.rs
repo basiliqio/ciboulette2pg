@@ -92,6 +92,15 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             table,
         )?;
         self.buf.write_all(b", ")?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new(
+                table.id().get_ident().clone(),
+                Some(CIBOULETTE_MAIN_IDENTIFIER),
+                None,
+            ),
+            table,
+        )?;
+        self.buf.write_all(b", ")?;
         self.insert_params(
             Ciboulette2SqlValue::ArcStr(Some(type_.name().clone())),
             table,
@@ -114,7 +123,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     .write_all(b"NULL::TEXT AS \"related_id\", NULL::TEXT AS \"related_type\"")?;
             }
         }
-        self.handle_additionnal_params(&state, &table, additional_fields)?;
+        self.handle_additionnal_params(&table, additional_fields)?;
         self.gen_sorting_keys(&table, type_, &state.query())?;
         self.buf.write_all(b" FROM ")?;
         self.write_table_info(table)?;

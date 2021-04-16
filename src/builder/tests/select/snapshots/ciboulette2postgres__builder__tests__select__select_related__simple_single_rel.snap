@@ -6,6 +6,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 WITH "cte_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
+    "public"."favorite_color"."id" AS "main_id",
     $1 :: TEXT AS "type",
     JSON_BUILD_OBJECT($2, "public"."favorite_color"."color") AS "data",
     NULL :: TEXT AS "related_id",

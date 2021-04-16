@@ -13,7 +13,6 @@ where
         query: &'request CibouletteDeleteRequest<'request>,
     ) -> Result<(), Ciboulette2SqlError> {
         let main_table = table_store.get(query.resource_type().name().as_str())?;
-
         self.buf.write_all(b"DELETE FROM ")?;
         self.write_table_info(main_table)?;
         self.buf.write_all(b" WHERE ")?;

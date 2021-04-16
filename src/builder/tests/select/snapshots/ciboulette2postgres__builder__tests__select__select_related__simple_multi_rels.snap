@@ -6,6 +6,7 @@ expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n 
 WITH "cte_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
     $1 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $2,
@@ -34,6 +35,7 @@ WITH "cte_articles_data" AS (
 "cte_rel_peoples_data" AS (
   SELECT
     "public"."peoples"."id" :: TEXT AS "id",
+    "public"."peoples"."id" AS "main_id",
     $5 :: TEXT AS "type",
     NULL :: json AS "data",
     "cte_rel_people-article_rel_data"."rel_article_id" :: TEXT AS "related_id",

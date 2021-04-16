@@ -6,8 +6,6 @@ use std::convert::TryFrom;
 pub enum Ciboulette2SqlAdditionalFieldType {
     /// A field required to link a relationship
     Relationship,
-    /// A field required to link compare with another identifier of the same type
-    MainIdentifier,
     /// A field required for sorting
     Sorting,
 }
@@ -21,9 +19,6 @@ impl Ciboulette2SqlAdditionalFieldType {
             }
             Ciboulette2SqlAdditionalFieldType::Sorting => {
                 Ciboulette2PostgresSafeIdentModifier::Prefix(CIBOULETTE_SORT_PREFIX)
-            }
-            Ciboulette2SqlAdditionalFieldType::MainIdentifier => {
-                Ciboulette2PostgresSafeIdentModifier::Prefix(CIBOULETTE_MAIN_IDENTIFIER_PREFIX)
             }
         }
     }
@@ -43,25 +38,13 @@ impl Ciboulette2SqlAdditionalField {
         ident: Ciboulette2PostgresTableField,
         type_: Ciboulette2SqlAdditionalFieldType,
         ciboulette_type: Arc<CibouletteResourceType>,
-    ) -> Result<Self, Ciboulette2SqlError> {
-        Ok(Ciboulette2SqlAdditionalField {
+    ) -> Self {
+        Ciboulette2SqlAdditionalField {
             name: ident.name().clone().add_modifier(type_.to_safe_modifier()),
             ident,
             type_,
             ciboulette_type,
-        })
-    }
-}
-
-impl TryFrom<&Ciboulette2PostgresTable> for Ciboulette2SqlAdditionalField {
-    type Error = Ciboulette2SqlError;
-
-    fn try_from(table: &Ciboulette2PostgresTable) -> Result<Self, Self::Error> {
-        Ciboulette2SqlAdditionalField::new(
-            Ciboulette2PostgresTableField::from(table.id()),
-            Ciboulette2SqlAdditionalFieldType::MainIdentifier,
-            table.ciboulette_type().clone(),
-        )
+        }
     }
 }
 
@@ -74,10 +57,10 @@ impl TryFrom<&CibouletteSortingElement> for Ciboulette2SqlAdditionalField {
             None,
             None,
         );
-        Ciboulette2SqlAdditionalField::new(
+        Ok(Ciboulette2SqlAdditionalField::new(
             table_field,
             Ciboulette2SqlAdditionalFieldType::Sorting,
             el.type_().clone(),
-        )
+        ))
     }
 }

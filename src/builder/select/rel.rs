@@ -60,7 +60,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 ),
                 Ciboulette2SqlAdditionalFieldType::Relationship,
                 rels.keys()[0].0.clone(),
-            )?,
+            ),
             Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new(
                     Ciboulette2PostgresSafeIdent::try_from(rels.keys()[1].1.clone())?,
@@ -69,7 +69,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 ),
                 Ciboulette2SqlAdditionalFieldType::Relationship,
                 rels.keys()[1].0.clone(),
-            )?,
+            ),
         ])
     }
 
@@ -85,7 +85,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             ),
             Ciboulette2SqlAdditionalFieldType::Relationship,
             rels.many_table().clone(),
-        )?])
+        )])
     }
 
     /// Create new CTE with relationships data and relationships linking data
@@ -211,7 +211,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.insert_ident(&many_table_key, rel_table)?;
         self.buf.write_all(b" = ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(main_cte_data.id().get_ident().clone(), None, None),
+            &Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
             main_cte_data,
         )?;
         self.buf.write_all(b")")?;
@@ -292,7 +292,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             ),
             rel_rel_table,
         )?;
-        self.handle_additionnal_params(&state, &rel_rel_table, additional_params)?;
+        self.handle_additionnal_params(&rel_rel_table, additional_params)?;
         self.gen_sorting_keys(&rel_rel_table, dest_resource.clone(), &state.query())?;
         self.buf.write_all(b" FROM ")?;
         self.write_table_info(rel_rel_table)?;

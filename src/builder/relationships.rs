@@ -28,7 +28,7 @@ impl<'store, 'request> Ciboulette2SqlQueryRels<'request> {
                 ),
                 Ciboulette2SqlAdditionalFieldType::Relationship,
                 type_.clone(),
-            )?)
+            ))
         }
         Ok(Ciboulette2SqlQueryRels {
             single_rels_keys,

@@ -15,6 +15,7 @@ WITH "cte_peoples_update" AS (
 "cte_peoples_data" AS (
   SELECT
     "cte_peoples_update"."id" :: TEXT AS "id",
+    "cte_peoples_update"."id" AS "main_id",
     $4 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $5,

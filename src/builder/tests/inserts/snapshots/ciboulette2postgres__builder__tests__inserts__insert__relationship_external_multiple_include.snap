@@ -12,6 +12,7 @@ WITH "cte_peoples_insert" AS (
 "cte_peoples_data" AS (
   SELECT
     "cte_peoples_insert"."id" :: TEXT AS "id",
+    "cte_peoples_insert"."id" AS "main_id",
     $3 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $4,
@@ -60,6 +61,7 @@ WITH "cte_peoples_insert" AS (
 "cte_rel_articles_data" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
     $11 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $12,

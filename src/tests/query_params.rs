@@ -213,6 +213,11 @@ macro_rules! ciboulette_query_test_single {
 			"/peoples/{}?include=peoples.articles,people-article",
 			"peoples"
 		);
-		ciboulette_query_test_routine!(include_multiple_resources_with_sparsing, $transform_function, "/peoples/{}?include=peoples.articles,people-article&fields[peoples]=last-name&fields[articles]=title&fields[people-article]=article_id,people_id", "peoples");
+		ciboulette_query_test_routine!(
+			include_multiple_resources_with_sparsing,
+			$transform_function,
+			"/peoples/{}?include=peoples.articles,people-article&fields[peoples]=last-name&fields[articles]=title&fields[people-article]=article_id,people_id",
+			"peoples"
+		);
     };
 }
