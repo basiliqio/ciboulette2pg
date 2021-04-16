@@ -7,7 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ciboulette = { git = "https://gitlab.com/basiliq/ciboulette.git", features = [ "sqlx_postgres" ], package = "ciboulette" }
+ciboulette = { path = "../ciboulette", features = [ "sqlx_postgres" ], package = "ciboulette" }
+# ciboulette = { git = "https://gitlab.com/basiliq/ciboulette.git", features = [ "sqlx_postgres" ], package = "ciboulette" }
 thiserror = "1.0.17"
 messy_json = { git = "https://gitlab.com/basiliq/messy_json.git", features = [ "uuid" ] }
 serde_json = { version = "1.0", default-features = false, features = ["raw_value"] }
@@ -23,7 +24,8 @@ uuid = { version = "0.8", features = ["v4"] }
 arcstr = { version = "1.0.0", features = [ "std" ] }
 
 [dev-dependencies]
-ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git",  package = "ciboulette_test_helper" }
+ciboulette_test_helper = { path = "../ciboulette/ciboulette_test_helper",  package = "ciboulette_test_helper" }
+# ciboulette_test_helper = { git = "https://gitlab.com/basiliq/ciboulette.git",  package = "ciboulette_test_helper" }
 basiliq_db_test_utils = { git = "https://gitlab.com/basiliq/basiliq_db_test_utils.git",  package = "basiliq_db_test_utils" }
 basiliq_db_test_proc_macro = { git = "https://gitlab.com/basiliq/basiliq_db_test_utils.git",  package = "basiliq_db_test_proc_macro" }
 

@@ -26,7 +26,7 @@ WITH "cte_peoples_data" AS (
   FROM
     "public"."peoples"
 ),
-"cte_favorite_color_data" AS (
+"cte_rel_favorite_color_data" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     "public"."favorite_color"."id" AS "main_id",
@@ -48,7 +48,7 @@ WITH "cte_peoples_data" AS (
   FROM
     "cte_peoples_data"
     LEFT JOIN "public"."peoples" ON "public"."peoples"."id" = "cte_peoples_data"."main_id"
-    LEFT JOIN "cte_favorite_color_data" ON "cte_favorite_color_data"."main_id" = "public"."peoples"."favorite_color"
+    LEFT JOIN "cte_rel_favorite_color_data" ON "cte_rel_favorite_color_data"."main_id" = "public"."peoples"."favorite_color"
   ORDER BY
-    "cte_favorite_color_data"."sort_color" ASC
+    "cte_rel_favorite_color_data"."sort_color" ASC
 );

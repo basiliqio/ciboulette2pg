@@ -6,7 +6,15 @@ use std::convert::TryFrom;
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2PostgresMainResourceInformations<'request> {
     pub insert_values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
-    pub single_relationships: Vec<ArcStr>,
+    pub single_relationships: Vec<Ciboulette2PostgresMainResourceSingleRels>,
+}
+
+/// Informations about the main resource type, extracted from the request
+#[derive(Clone, Debug, Getters)]
+#[getset(get = "pub")]
+pub(crate) struct Ciboulette2PostgresMainResourceSingleRels {
+    pub type_: Arc<CibouletteResourceType>,
+    pub key: ArcStr,
 }
 
 /// Check the informations of a one-to-many relationship
@@ -98,7 +106,7 @@ where
     'store: 'request,
 {
     let mut res_val: Vec<(ArcStr, Ciboulette2SqlValue<'request>)> = Vec::with_capacity(128);
-    let mut res_rel: Vec<ArcStr> = Vec::with_capacity(128);
+    let mut res_rel: Vec<Ciboulette2PostgresMainResourceSingleRels> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -121,7 +129,13 @@ where
             {
                 res_val.push((v.0, v.1)); // Insert the relationship values
             }
-            res_rel.push(alias);
+            res_rel.push({
+				Ciboulette2PostgresMainResourceSingleRels
+				{
+					type_: opt.one_table().clone(),
+					key: opt.many_table_key().clone()
+				}
+			});
 			},
 			_ => {
 				if fails_on_many  && relationships.contains_key(&*alias){
@@ -140,8 +154,8 @@ where
 pub(crate) fn get_resource_single_rel(
     store: &CibouletteStore,
     main_type: Arc<CibouletteResourceType>,
-) -> Result<Vec<ArcStr>, Ciboulette2SqlError> {
-    let mut res: Vec<ArcStr> = Vec::with_capacity(128);
+) -> Result<Vec<Ciboulette2PostgresMainResourceSingleRels>, Ciboulette2SqlError> {
+    let mut res: Vec<Ciboulette2PostgresMainResourceSingleRels> = Vec::with_capacity(128);
     let main_type_index = store
         .get_type_index(main_type.name())
         .ok_or_else(|| CibouletteError::UnknownType(main_type.name().to_string()))?;
@@ -155,7 +169,10 @@ pub(crate) fn get_resource_single_rel(
         if let CibouletteRelationshipOption::ManyToOne(opt) =
             store.graph().edge_weight(edge_index).unwrap()
         {
-            res.push(opt.many_table_key().clone());
+            res.push(Ciboulette2PostgresMainResourceSingleRels {
+                type_: opt.one_table().clone(),
+                key: opt.many_table_key().clone(),
+            });
         }
     }
     Ok(res)

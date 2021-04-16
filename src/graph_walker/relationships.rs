@@ -1,5 +1,7 @@
 use super::*;
-use main::Ciboulette2PostgresMainResourceInformations;
+use main::{
+    Ciboulette2PostgresMainResourceInformations, Ciboulette2PostgresMainResourceSingleRels,
+};
 /// Extract informations concerning the main resource's one-to-many relationships
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
@@ -50,7 +52,10 @@ fn extract_many_to_one_relationships_from_ressource_identifiers<'request>(
                     rel_opt.many_table_key().clone(),
                     Ciboulette2SqlValue::from(rel_id.id()),
                 )],
-                single_relationships: vec![rel_opt.many_table_key().clone()],
+                single_relationships: vec![Ciboulette2PostgresMainResourceSingleRels {
+                    type_: rel_opt.one_table().clone(),
+                    key: rel_opt.many_table_key().clone(),
+                }],
             })
         }
         CibouletteOptionalData::Object(_) => {
@@ -65,7 +70,10 @@ fn extract_many_to_one_relationships_from_ressource_identifiers<'request>(
                     CibouletteIdType::Uuid => Ciboulette2SqlValue::Uuid(None),
                 },
             )],
-            single_relationships: vec![rel_opt.many_table_key().clone()],
+            single_relationships: vec![Ciboulette2PostgresMainResourceSingleRels {
+                type_: rel_opt.one_table().clone(),
+                key: rel_opt.many_table_key().clone(),
+            }],
         }),
         CibouletteOptionalData::Null(_) => {
             Ok(Ciboulette2PostgresMainResourceInformations::default())

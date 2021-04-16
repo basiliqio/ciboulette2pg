@@ -20,25 +20,48 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 
         se.buf.write_all(b"WITH \n")?;
         se.gen_main_select(&state, &main_cte_data, &rels)?;
-
+        println!(
+            "{:#?}",
+            se.working_tables()
+                .keys()
+                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
+        );
         let is_needed_cb = match request.path() {
             CiboulettePath::TypeIdRelationship(_, _, _) => {
                 Ciboulette2PostgresBuilderState::is_needed_all_for_relationships
             }
             _ => Ciboulette2PostgresBuilderState::is_needed_all,
         };
-        se.select_one_to_one_rels_routine(
-            &state,
-            state.main_type().clone(),
-            &main_cte_data,
-            &rels,
-            is_needed_cb,
-        )?;
+        println!(
+            "{:#?}",
+            se.working_tables()
+                .keys()
+                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
+        );
+        se.select_one_to_one_rels_routine(&state, &main_cte_data, &rels, is_needed_cb)?;
+        println!(
+            "{:#?}",
+            se.working_tables()
+                .keys()
+                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
+        );
         se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels(), is_needed_cb)?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;
+        println!(
+            "{:#?}",
+            se.working_tables()
+                .keys()
+                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
+        );
         se.add_working_table(
             &state.main_table(),
             (main_cte_data, Ciboulette2PostgresResponseType::Object),
+        );
+        println!(
+            "{:#?}",
+            se.working_tables()
+                .keys()
+                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
         );
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;

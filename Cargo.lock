@@ -255,7 +255,6 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#901fbd6cad4cbfe7a1abc6e06eb35192de234270"
 dependencies = [
  "arcstr",
  "getset",
@@ -306,7 +305,6 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#901fbd6cad4cbfe7a1abc6e06eb35192de234270"
 dependencies = [
  "arcstr",
  "ciboulette",

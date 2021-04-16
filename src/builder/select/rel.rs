@@ -5,7 +5,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn select_one_to_one_rels_routine<'store, F>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_type: Arc<CibouletteResourceType>,
         main_cte_data: &Ciboulette2PostgresTable,
         rels: &Ciboulette2SqlQueryRels<'request>,
         is_needed_cb: F,
@@ -18,24 +17,23 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         ) -> Option<Ciboulette2PostgresResponseType>,
     {
         for (rel_key, additional_fields) in rels
-            .single_rels_keys()
+            .single_rels()
             .iter()
             .zip(rels.single_rels_additional_fields().iter())
         {
-            let rel_type: Arc<CibouletteResourceType> =
-                main_type.get_relationship(&state.store(), rel_key)?;
-            if let Some(requirement_type) = is_needed_cb(&state, &rel_type) {
+            if let Some(requirement_type) = is_needed_cb(&state, &rel_key.type_()) {
+                println!("{:#?}", rel_key);
                 let rel_table: &Ciboulette2PostgresTable =
-                    state.table_store().get(rel_type.name().as_str())?;
+                    state.table_store().get(rel_key.type_().name().as_str())?;
                 let rel_table_cte: Ciboulette2PostgresTable =
-                    rel_table.to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
+                    rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_DATA_SUFFIX)?;
                 self.buf.write_all(b", ")?;
                 self.write_table_info(&rel_table_cte)?;
                 self.buf.write_all(b" AS (")?;
                 self.gen_select_cte_single_rel(
                     &state,
                     &rel_table,
-                    rel_type.clone(),
+                    rel_key.type_().clone(),
                     &main_cte_data,
                     &additional_fields.name(),
                     &requirement_type,

@@ -42,7 +42,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         se.write_main_table_select(&main_cte_data, &state, main_cte_insert, &rels)?;
         se.select_one_to_one_rels_routine(
             &state,
-            state.main_type().clone(),
             &main_cte_data,
             &rels,
             Ciboulette2PostgresBuilderState::is_needed_all,

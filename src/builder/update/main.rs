@@ -107,7 +107,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         se.gen_update_main_update_data(&state, &request, &main_cte_update, &main_cte_data, &rels)?;
         se.select_one_to_one_rels_routine(
             &state,
-            state.main_type().clone(),
             &main_cte_data,
             &rels,
             Ciboulette2PostgresBuilderState::is_needed_all,

@@ -1,5 +1,5 @@
 use super::*;
-
+use graph_walker::main::Ciboulette2PostgresMainResourceSingleRels;
 /// Represents relationships of a resource type.
 /// The values of the relationships to create/update extracted from the request will
 /// also be present
@@ -7,14 +7,14 @@ use super::*;
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2SqlQueryRels<'request> {
     multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'request>>,
-    single_rels_keys: Vec<ArcStr>,
+    single_rels: Vec<Ciboulette2PostgresMainResourceSingleRels>,
     single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField>,
 }
 
 impl<'store, 'request> Ciboulette2SqlQueryRels<'request> {
     pub fn new(
         type_: Arc<CibouletteResourceType>,
-        single_rels_keys: Vec<ArcStr>,
+        single_rels_keys: Vec<Ciboulette2PostgresMainResourceSingleRels>,
         multi_rels: Vec<Ciboulette2PostgresMainResourceRelationships<'request>>,
     ) -> Result<Self, Ciboulette2SqlError> {
         let mut single_rels_additional_fields: Vec<Ciboulette2SqlAdditionalField> =
@@ -22,7 +22,7 @@ impl<'store, 'request> Ciboulette2SqlQueryRels<'request> {
         for single_rel in single_rels_keys.iter() {
             single_rels_additional_fields.push(Ciboulette2SqlAdditionalField::new(
                 Ciboulette2PostgresTableField::new(
-                    Ciboulette2PostgresSafeIdent::try_from(single_rel.clone())?,
+                    Ciboulette2PostgresSafeIdent::try_from(single_rel.key().clone())?,
                     None,
                     None,
                 ),
@@ -31,7 +31,7 @@ impl<'store, 'request> Ciboulette2SqlQueryRels<'request> {
             ))
         }
         Ok(Ciboulette2SqlQueryRels {
-            single_rels_keys,
+            single_rels: single_rels_keys,
             multi_rels,
             single_rels_additional_fields,
         })
