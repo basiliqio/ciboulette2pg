@@ -6,7 +6,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         main_cte_data: &Ciboulette2PostgresTable,
-        rels: &Ciboulette2SqlQueryRels<'request>,
+        single_rels: &[Ciboulette2PostgresResourceSingleRelationships],
+        single_rels_additional_fields: &[Ciboulette2SqlAdditionalField],
         is_needed_cb: F,
     ) -> Result<(), Ciboulette2SqlError>
     where
@@ -16,13 +17,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &CibouletteResourceType,
         ) -> Option<Ciboulette2PostgresResponseType>,
     {
-        for (rel_key, additional_fields) in rels
-            .single_rels()
-            .iter()
-            .zip(rels.single_rels_additional_fields().iter())
+        for (rel_key, additional_fields) in
+            single_rels.iter().zip(single_rels_additional_fields.iter())
         {
             if let Some(requirement_type) = is_needed_cb(&state, &rel_key.type_()) {
-                println!("{:#?}", rel_key);
                 let rel_table: &Ciboulette2PostgresTable =
                     state.table_store().get(rel_key.type_().name().as_str())?;
                 let rel_table_cte: Ciboulette2PostgresTable =
@@ -36,6 +34,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     rel_key.type_().clone(),
                     &main_cte_data,
                     &additional_fields.name(),
+                    rel_key.key().clone(),
                     &requirement_type,
                 )?;
                 self.buf.write_all(b")")?;
@@ -91,7 +90,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         main_cte_data: &Ciboulette2PostgresTable,
-        rels: &[Ciboulette2PostgresMainResourceRelationships<'request>],
+        rels: &BTreeMap<ArcStr, Ciboulette2PostgresMultiRelationships<'request>>,
         is_needed_cb: F,
     ) -> Result<(), Ciboulette2SqlError>
     where
@@ -102,21 +101,17 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         ) -> Option<Ciboulette2PostgresResponseType>,
     {
         let rel_iter = rels.iter().peekable();
-        for Ciboulette2PostgresMainResourceRelationships {
-            type_: rel_type,
-            rel_opt: bucket,
-            values: _rel_ids,
-        } in rel_iter
-        {
-            if let Some(rel_requirement_type) = is_needed_cb(&state, &rel_type) {
-                match bucket {
-                    Ciboulette2PostgresMultiRelationships::ManyToMany(opt) => {
+        for (rel_alias, multi_rel) in rel_iter {
+            if let Some(rel_requirement_type) = is_needed_cb(&state, &multi_rel.type_()) {
+                match multi_rel.rel_opt() {
+                    Ciboulette2PostgresMultiRelationshipsType::ManyToMany(opt) => {
                         self.buf.write_all(b", ")?;
                         let additional_params = Self::gen_additional_params_many_to_many_rels(opt)?;
-                        let rel_table = state.table_store().get(rel_type.name().as_str())?;
+                        let rel_table =
+                            state.table_store().get(multi_rel.type_().name().as_str())?;
                         let rel_rel_table = state
                             .table_store()
-                            .get(bucket.dest_resource().name().as_str())?;
+                            .get(multi_rel.rel_opt().dest_resource().name().as_str())?;
                         let (rel_cte_rel_data, rel_cte_data) =
                             Self::gen_rel_select_tables(rel_rel_table, rel_table)?;
                         self.write_table_info(&rel_cte_rel_data)?;
@@ -124,7 +119,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                         self.gen_select_many_to_many_rels_data(
                             state,
                             rel_rel_table,
-                            bucket,
+                            &multi_rel,
                             additional_params.iter(),
                             main_cte_data,
                         )?;
@@ -143,15 +138,17 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                             &left_additional_param,
                             &right_additional_param,
                             &rel_requirement_type,
+                            rel_alias.clone(),
                         )?;
                         self.add_working_table(&rel_table, (rel_cte_data, rel_requirement_type));
                     }
-                    Ciboulette2PostgresMultiRelationships::ManyToOne(opt)
+                    Ciboulette2PostgresMultiRelationshipsType::OneToMany(opt)
                         if opt.part_of_many_to_many().is_none() =>
                     {
                         self.buf.write_all(b", ")?;
                         let additional_params = Self::gen_additional_params_one_to_many_rels(opt)?;
-                        let rel_table = state.table_store().get(rel_type.name().as_str())?;
+                        let rel_table =
+                            state.table_store().get(multi_rel.type_().name().as_str())?;
                         let rel_cte_data =
                             rel_table.to_cte(CIBOULETTE_REL_PREFIX, CIBOULETTE_DATA_SUFFIX)?;
                         self.write_table_info(&rel_cte_data)?;
@@ -162,11 +159,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                             &main_cte_data,
                             additional_params.iter(),
                             &opt,
+                            rel_alias.clone(),
                             &rel_requirement_type,
                         )?;
                         self.add_working_table(&rel_table, (rel_cte_data, rel_requirement_type));
                     }
-                    _ => continue,
+                    _ => {
+                        continue;
+                    }
                 }
             }
         }
@@ -181,6 +181,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         main_cte_data: &Ciboulette2PostgresTable,
         additional_params: I,
         opt: &CibouletteRelationshipOneToManyOption,
+        rel_alias: ArcStr,
         rel_requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError>
     where
@@ -192,6 +193,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let relating_field = Ciboulette2PostgresRelatingField::new(
             many_table_key.clone(),
             rel_table.clone(),
+            rel_alias,
             main_cte_data.ciboulette_type().clone(),
         );
         self.gen_select_cte_final(
@@ -205,6 +207,16 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 Ciboulette2PostgresResponseType::Object
             ),
         )?;
+        self.buf.write_all(b" INNER JOIN ")?;
+        self.write_table_info(&main_cte_data)?;
+        self.buf.write_all(b" ON ")?;
+        self.insert_ident(
+            &Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
+            main_cte_data,
+        )?;
+        self.buf.write_all(b" = ")?;
+        self.insert_ident(&many_table_key, rel_table)?;
+
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(&many_table_key, rel_table)?;
         self.buf.write_all(b" = ")?;
@@ -227,6 +239,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         left_additional_params: &Ciboulette2SqlAdditionalField,
         right_additional_params: &Ciboulette2SqlAdditionalField,
         rel_requirement_type: &Ciboulette2PostgresResponseType,
+        rel_alias: ArcStr,
     ) -> Result<(), Ciboulette2SqlError>
     where
         'store: 'request,
@@ -236,6 +249,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let relating_field = Ciboulette2PostgresRelatingField::new(
             many_table_key,
             rel_cte_rel_data.clone(),
+            rel_alias,
             state.main_type().clone(),
         );
         self.write_table_info(rel_cte_data)?;
@@ -279,7 +293,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     {
         let dest_resource = state
             .store()
-            .get_type(bucket.dest_resource().name().as_str())
+            .get_type(bucket.rel_opt().dest_resource().name().as_str())
             .unwrap(); //FIXME
         self.buf.write_all(b"SELECT ")?;
         self.insert_ident(
@@ -300,7 +314,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.compare_fields(
             &rel_rel_table,
             &Ciboulette2PostgresTableField::new(
-                Ciboulette2PostgresSafeIdent::try_from(bucket.dest_key(state.main_type())?)?,
+                Ciboulette2PostgresSafeIdent::try_from(
+                    bucket.rel_opt().dest_key(state.main_type())?,
+                )?,
                 None,
                 None,
             ),
@@ -318,6 +334,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         type_: Arc<CibouletteResourceType>,
         main_cte_table: &Ciboulette2PostgresTable,
         field_id: &Ciboulette2PostgresSafeIdent,
+        rel_alias: ArcStr,
         requirement_type: &Ciboulette2PostgresResponseType,
     ) -> Result<(), Ciboulette2SqlError> {
         let table_field =
@@ -325,6 +342,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let relating_field = Ciboulette2PostgresRelatingField::new(
             table_field.clone(),
             main_cte_table.clone(),
+            rel_alias,
             main_cte_table.ciboulette_type().clone(),
         );
         self.gen_select_cte_final(

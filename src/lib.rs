@@ -2,7 +2,7 @@
 mod builder;
 mod ciboulette_row;
 mod errors;
-pub mod graph_walker;
+// pub mod graph_walker;
 mod response_type;
 mod safe_ident;
 mod table_store;

@@ -30,28 +30,25 @@ where
         &self,
         other: &CibouletteResourceType,
         x: &CibouletteResourceType,
-        y: &CibouletteResourceType,
+        y: &CibouletteResourceRelationshipDetails,
     ) -> Option<Ciboulette2PostgresResponseType> {
-        self.store()
-            .get_rel(x.name(), y.name())
-            .ok()
-            .and_then(|(_rel_other_type, edge_weight)| match edge_weight {
-                CibouletteRelationshipOption::ManyToMany(opt) => {
-                    if opt.bucket_resource().as_ref() == other {
-                        Some(Ciboulette2PostgresResponseType::Object)
-                    } else {
-                        None
-                    }
+        match y.relation_option() {
+            CibouletteRelationshipOption::ManyToMany(opt) => {
+                if opt.bucket_resource().as_ref() == other {
+                    Some(Ciboulette2PostgresResponseType::Object)
+                } else {
+                    None
                 }
-                CibouletteRelationshipOption::ManyToOne(opt)
-                | CibouletteRelationshipOption::OneToMany(opt) => {
-                    if opt.one_table().as_ref() == other || opt.many_table().as_ref() == other {
-                        Some(Ciboulette2PostgresResponseType::Object)
-                    } else {
-                        None
-                    }
+            }
+            CibouletteRelationshipOption::ManyToOne(opt)
+            | CibouletteRelationshipOption::OneToMany(opt) => {
+                if opt.one_table().as_ref() == other || opt.many_table().as_ref() == other {
+                    Some(Ciboulette2PostgresResponseType::Object)
+                } else {
+                    None
                 }
-            })
+            }
+        }
     }
 
     /// Create a new state

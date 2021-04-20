@@ -16,52 +16,37 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let main_cte_data = state
             .main_table()
             .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
-        let rels = Self::get_relationships(&ciboulette_store, state.main_type().clone())?;
+        let rels = extract_data_no_body(&ciboulette_store, state.main_type().clone())?;
 
         se.buf.write_all(b"WITH \n")?;
-        se.gen_main_select(&state, &main_cte_data, &rels)?;
-        println!(
-            "{:#?}",
-            se.working_tables()
-                .keys()
-                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
-        );
+        se.gen_main_select(
+            &state,
+            &main_cte_data,
+            rels.single_relationships_additional_fields(),
+        )?;
         let is_needed_cb = match request.path() {
             CiboulettePath::TypeIdRelationship(_, _, _) => {
                 Ciboulette2PostgresBuilderState::is_needed_all_for_relationships
             }
             _ => Ciboulette2PostgresBuilderState::is_needed_all,
         };
-        println!(
-            "{:#?}",
-            se.working_tables()
-                .keys()
-                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
-        );
-        se.select_one_to_one_rels_routine(&state, &main_cte_data, &rels, is_needed_cb)?;
-        println!(
-            "{:#?}",
-            se.working_tables()
-                .keys()
-                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
-        );
-        se.select_multi_rels_routine(&state, &main_cte_data, &rels.multi_rels(), is_needed_cb)?;
+        se.select_one_to_one_rels_routine(
+            &state,
+            &main_cte_data,
+            rels.single_relationships(),
+            rels.single_relationships_additional_fields(),
+            is_needed_cb,
+        )?;
+        se.select_multi_rels_routine(
+            &state,
+            &main_cte_data,
+            &rels.multi_relationships(),
+            is_needed_cb,
+        )?;
         se.gen_cte_for_sort(&state, &main_cte_data)?;
-        println!(
-            "{:#?}",
-            se.working_tables()
-                .keys()
-                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
-        );
         se.add_working_table(
             &state.main_table(),
             (main_cte_data, Ciboulette2PostgresResponseType::Object),
-        );
-        println!(
-            "{:#?}",
-            se.working_tables()
-                .keys()
-                .collect::<Vec<&Ciboulette2PostgresSafeIdent>>()
         );
         // Aggregate every table using UNION ALL
         se.finish_request(state)?;
@@ -121,7 +106,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         main_cte_data: &Ciboulette2PostgresTable,
-        rels: &Ciboulette2SqlQueryRels<'request>,
+        rels: &[Ciboulette2SqlAdditionalField],
     ) -> Result<(), Ciboulette2SqlError>
     where
         'store: 'request,
@@ -133,7 +118,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &state.main_table(),
             state.main_type().clone(),
             None,
-            rels.single_rels_additional_fields().iter(),
+            rels.iter(),
             !matches!(state.path(), CiboulettePath::TypeIdRelationship(_, _, _)),
         )?;
         match state.path() {
@@ -142,7 +127,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 .gen_matcher_for_related_select(
                     state.table_store(),
                     left_type.clone(),
-                    right_type.clone(),
+                    right_type.related_type().clone(),
                     state,
                     id,
                 )?,

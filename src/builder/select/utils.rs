@@ -23,16 +23,57 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn get_relationships(
         ciboulette_store: &CibouletteStore,
         main_type: Arc<CibouletteResourceType>,
-    ) -> Result<Ciboulette2SqlQueryRels<'request>, Ciboulette2SqlError> {
-        let main_single_relationships = crate::graph_walker::main::get_resource_single_rel(
-            &ciboulette_store,
-            main_type.clone(),
-        )?;
-        let rels: Vec<Ciboulette2PostgresMainResourceRelationships> =
-            crate::graph_walker::relationships::get_resource_multi_rels(
-                &ciboulette_store,
-                main_type.clone(),
-            )?;
-        Ciboulette2SqlQueryRels::new(main_type, main_single_relationships, rels)
+    ) -> Result<Ciboulette2PostgresResourceInformations<'request>, Ciboulette2SqlError> {
+        let mut single_relationships: Vec<Ciboulette2PostgresResourceSingleRelationships> =
+            Vec::new();
+        let mut multi_relationships: Vec<Ciboulette2PostgresMultiRelationships<'request>> =
+            Vec::new();
+
+        for rel_alias in main_type.relationships().keys() {
+            let rel = main_type.get_relationship_details(ciboulette_store, rel_alias)?;
+            match rel.relation_option() {
+                CibouletteRelationshipOption::ManyToOne(opt) => {
+                    single_relationships.push(Ciboulette2PostgresResourceSingleRelationships {
+                        type_: opt.one_table().clone(),
+                        key: opt.many_table_key().clone(),
+                    });
+                }
+                CibouletteRelationshipOption::OneToMany(opt)
+                    if opt.part_of_many_to_many().is_none() =>
+                {
+                    multi_relationships.push(Ciboulette2PostgresMultiRelationships {
+                        type_: rel.related_type().clone(),
+                        rel_opt: Ciboulette2PostgresMultiRelationshipsType::OneToMany(opt.clone()),
+                        values: None,
+                    });
+                }
+                CibouletteRelationshipOption::ManyToMany(opt) => {
+                    multi_relationships.push(Ciboulette2PostgresMultiRelationships {
+                        type_: rel.related_type().clone(),
+                        rel_opt: Ciboulette2PostgresMultiRelationshipsType::ManyToMany(opt.clone()),
+                        values: None,
+                    });
+                }
+                _ => continue,
+            }
+        }
+        let mut single_relationships_additional_fields: Vec<Ciboulette2SqlAdditionalField> =
+            Vec::with_capacity(single_relationships.len());
+        for main_single_rel in single_relationships.iter() {
+            single_relationships_additional_fields.push(Ciboulette2SqlAdditionalField::new(
+                Ciboulette2PostgresTableField::new(
+                    Ciboulette2PostgresSafeIdent::try_from(main_single_rel.key().clone())?,
+                    None,
+                    None,
+                ),
+                Ciboulette2SqlAdditionalFieldType::Relationship,
+                main_single_rel.type_().clone(),
+            ));
+        }
+        Ok(Ciboulette2PostgresResourceInformations {
+            single_relationships,
+            single_relationships_additional_fields,
+            ..Default::default()
+        })
     }
 }

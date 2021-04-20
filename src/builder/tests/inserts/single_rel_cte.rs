@@ -35,6 +35,7 @@ fn simple() {
             store.get_type("favorite_color").unwrap().clone(),
             &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
+            arcstr::literal!("favorite_color"),
             &Ciboulette2PostgresResponseType::Object,
         )
         .unwrap();
@@ -78,6 +79,7 @@ fn sparse() {
             store.get_type("favorite_color").unwrap().clone(),
             &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
+            arcstr::literal!("favorite_color"),
             &Ciboulette2PostgresResponseType::Object,
         )
         .unwrap();
@@ -121,6 +123,7 @@ fn empty_sparse() {
             store.get_type("favorite_color").unwrap().clone(),
             &main_cte_table,
             &Ciboulette2PostgresSafeIdent::try_from("favorite_color").unwrap(),
+            arcstr::literal!("favorite_color"),
             &Ciboulette2PostgresResponseType::Object,
         )
         .unwrap();

@@ -6,11 +6,12 @@ use std::io::Write;
 mod additional_fields;
 mod builder_state;
 mod delete;
+mod extracting_data;
 mod field_name;
 mod insert;
 mod is_needed;
 mod relating_field;
-mod relationships;
+// mod relationships;
 mod select;
 mod update;
 mod utils;
@@ -33,14 +34,15 @@ macro_rules! get_state {
 #[cfg(test)]
 pub mod tests;
 
-use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
-use crate::graph_walker::relationships::{
-    Ciboulette2PostgresMainResourceRelationships, Ciboulette2PostgresMultiRelationships,
-};
+// use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
+// use crate::graph_walker::relationships::{
+//     Ciboulette2PostgresMainResourceRelationships, Ciboulette2PostgresMultiRelationships,
+// };
 use additional_fields::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalFieldType};
 use builder_state::Ciboulette2PostgresBuilderState;
+use extracting_data::*;
 use field_name::Ciboulette2PostgresTableField;
-use relationships::Ciboulette2SqlQueryRels;
+// use relationships::Ciboulette2SqlQueryRels;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 

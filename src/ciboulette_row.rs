@@ -58,16 +58,16 @@ impl<'rows> Ciboulette2PostgresRow<'rows> {
             Vec::with_capacity(hint_size.unwrap_or_default());
 
         for row in rows.into_iter() {
-            let type_ = store.get_type(&row.type_)?;
-            let id = CibouletteIdBuilder::Text(Cow::Borrowed(row.id)).build(type_.id_type())?;
-            let identifier = CibouletteResourceIdentifier::new(id, Cow::Borrowed(row.type_));
+            let id = CibouletteIdBuilder::Text(Cow::Borrowed(row.id));
+            let identifier =
+                CibouletteResourceIdentifierBuilder::new(Some(id), Cow::Borrowed(row.type_));
             let related_identifier = match (row.related_type, row.related_id) {
                 (Some(type_), Some(id)) => {
-                    let related_type = store.get_type(type_)?;
-                    let related_id = CibouletteIdBuilder::Text(Cow::Borrowed(id))
-                        .build(related_type.id_type())?;
-                    let related_identifier =
-                        CibouletteResourceIdentifier::new(related_id, Cow::Borrowed(type_));
+                    let related_id = CibouletteIdBuilder::Text(Cow::Borrowed(id));
+                    let related_identifier = CibouletteResourceIdentifierBuilder::new(
+                        Some(related_id),
+                        Cow::Borrowed(type_),
+                    );
                     Some(related_identifier)
                 }
                 _ => None,

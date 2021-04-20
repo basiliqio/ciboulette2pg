@@ -13,7 +13,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type": "peoples",
+    "type": "author",
     "related_type": "comments",
     "related_id": "[uuid]"
   }

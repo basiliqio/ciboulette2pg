@@ -29,7 +29,7 @@ async fn updating_many_to_many_rels(mut pool: sqlx::PgPool) {
     )
     .await;
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::UpdatingManyRelationships),
+        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
         true
     );
 }
@@ -46,7 +46,7 @@ async fn updating_one_to_many_rels(mut pool: sqlx::PgPool) {
     )
     .await;
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::UpdatingManyRelationships),
+        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
         true
     );
 }

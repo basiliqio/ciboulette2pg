@@ -13,6 +13,8 @@ WITH "cte_peoples_insert" AS (
   SELECT
     "cte_peoples_insert"."id" :: TEXT AS "id",
     "cte_peoples_insert"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
     $4 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $5,
@@ -26,8 +28,6 @@ WITH "cte_peoples_insert" AS (
       $9,
       "cte_peoples_insert"."twitter"
     ) AS "data",
-    NULL :: TEXT AS "related_id",
-    NULL :: TEXT AS "related_type",
     "cte_peoples_insert"."favorite_color" AS "rel_favorite_color"
   FROM
     "cte_peoples_insert"
@@ -36,10 +36,10 @@ WITH "cte_peoples_insert" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     "public"."favorite_color"."id" AS "main_id",
-    $10 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($11, "public"."favorite_color"."color") AS "data",
     "cte_peoples_data"."id" :: TEXT AS "related_id",
-    $12 :: TEXT AS "related_type"
+    $10 :: TEXT AS "related_type",
+    $11 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($12, "public"."favorite_color"."color") AS "data"
   FROM
     "public"."favorite_color"
     INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"

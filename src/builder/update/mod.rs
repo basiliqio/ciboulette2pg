@@ -1,5 +1,4 @@
 use super::*;
-use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
 
 pub mod main;
 pub mod rel;
@@ -52,11 +51,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             CiboulettePath::TypeId(_, _) => {
                 Self::gen_update_main(&ciboulette_store, &ciboulette_table_store, &request)
             }
-            CiboulettePath::TypeIdRelationship(type_, _, _) => Self::gen_update_rel(
+            CiboulettePath::TypeIdRelationship(type_, _, rel_details) => Self::gen_update_rel(
                 &ciboulette_store,
                 &ciboulette_table_store,
                 &request,
                 type_.clone(),
+                rel_details,
             ),
             _ => unreachable!(), // FIXME
         }

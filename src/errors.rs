@@ -16,16 +16,12 @@ pub enum Ciboulette2SqlError {
     EmptyRelValue(String),
     #[error("A null char was found in a indentifier `${0}`")]
     NullCharIdent(String),
-    #[error("Updating relationships cannot be done with main object")]
-    UpdatingRelationships,
-    #[error("Updating one-to-many or many-to-many relationships is forbidden")]
-    UpdatingManyRelationships,
+    #[error("Directly inserting/updating one-to-many or many-to-many relationships is forbidden")]
+    ManyRelationshipDirectWrite,
     #[error("Updating main object cannot be done with relationships")]
     UpdatingMainObject,
     #[error("Multiple ids were provided for a one-to-one relationships")]
     MultiIdsForSingleRelationships,
-    #[error("One-to-many relationship can't be deleted in bulk")]
-    BulkRelationshipDelete,
     #[error("One of the needed relation for ordering couldn't be found : `{0}`")]
     MissingRelationForOrdering(String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]

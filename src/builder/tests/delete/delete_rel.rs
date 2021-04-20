@@ -69,7 +69,7 @@ fn multi_relationships() {
     )
     .unwrap_err();
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::BulkRelationshipDelete),
+        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
         true
     );
 }

@@ -17,6 +17,8 @@ WITH "cte_peoples_update" AS (
   SELECT
     "cte_peoples_update"."id" :: TEXT AS "id",
     "cte_peoples_update"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
     $5 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $6,
@@ -30,8 +32,6 @@ WITH "cte_peoples_update" AS (
       $10,
       "cte_peoples_update"."twitter"
     ) AS "data",
-    NULL :: TEXT AS "related_id",
-    NULL :: TEXT AS "related_type",
     "cte_peoples_update"."favorite_color" AS "rel_favorite_color"
   FROM
     "cte_peoples_update"

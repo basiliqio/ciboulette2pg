@@ -19,7 +19,7 @@ async fn one_to_many(mut pool: sqlx::PgPool) {
     let err =
         test_delete_fails(format!("/peoples/{}/relationships/articles", people_id).as_str()).await;
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::BulkRelationshipDelete),
+        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
         true
     );
 }

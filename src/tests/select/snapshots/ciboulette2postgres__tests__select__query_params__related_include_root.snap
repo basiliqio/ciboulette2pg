@@ -22,7 +22,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type": "peoples",
+    "type": "author",
     "data": {
       "age": 22,
       "first-name": "Francis",
@@ -35,7 +35,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type": "peoples",
+    "type": "author",
     "data": {
       "age": 22,
       "first-name": "Francis",
@@ -48,7 +48,7 @@ expression: value
   },
   {
     "id": "[uuid]",
-    "type": "peoples",
+    "type": "author",
     "data": {
       "age": 34,
       "first-name": "Somebody",

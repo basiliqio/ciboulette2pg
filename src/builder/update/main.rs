@@ -2,7 +2,7 @@ use super::*;
 
 /// Extract the data object from a request, fails if the request doesn't contain a main type
 #[inline]
-fn extract_data<'request>(
+fn extract_data_object_from_update_request<'request>(
     request: &'request CibouletteUpdateRequest<'request>
 ) -> Result<
     &'request CibouletteResource<
@@ -15,7 +15,7 @@ fn extract_data<'request>(
     match request.data() {
         CibouletteUpdateRequestType::MainType(attr) => Ok(attr),
         CibouletteUpdateRequestType::Relationship(_) => {
-            Err(Ciboulette2SqlError::UpdatingRelationships)
+            Err(Ciboulette2SqlError::ManyRelationshipDirectWrite)
         }
     }
 }
@@ -45,7 +45,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         request: &'request CibouletteUpdateRequest<'request>,
         main_update_cte: &Ciboulette2PostgresTable,
         main_data_cte: &Ciboulette2PostgresTable,
-        rels: &Ciboulette2SqlQueryRels<'request>,
+        rels: &[Ciboulette2SqlAdditionalField],
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_data_cte)?;
         self.buf.write_all(b" AS (")?;
@@ -54,7 +54,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &main_update_cte,
             request.resource_type().clone(),
             None,
-            rels.single_rels_additional_fields().iter(),
+            rels.iter(),
             true,
         )?;
         self.buf.write_all(b")")?;
@@ -75,46 +75,40 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let mut se = Self::default();
-        let main_attrs = extract_data(&request)?;
+        let main_data = extract_data_object_from_update_request(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&state.main_table())?;
-        let Ciboulette2PostgresMainResourceInformations {
-            insert_values: main_update_values,
-            single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::extract_fields_and_values(
+        let Ciboulette2PostgresResourceInformations {
+            values,
+            single_relationships,
+            single_relationships_additional_fields,
+            multi_relationships,
+        } = extract_data(
             &ciboulette_store,
-            state.main_type().clone(),
-            main_attrs.attributes(),
-            main_attrs.relationships(),
+            request.path().main_type().clone(),
+            main_data.attributes(),
+            main_data.relationships(),
             true,
         )?;
-        let main_multi_relationships = crate::graph_walker::relationships::extract_fields(
-            &ciboulette_store,
-            state.main_type().clone(),
-            Some(main_attrs.relationships()),
-        )?;
-        let rels = Ciboulette2SqlQueryRels::new(
-            state.main_type().clone(),
-            main_single_relationships,
-            main_multi_relationships,
-        )?;
         se.buf.write_all(b"WITH ")?;
-        se.gen_update_main_update(
+        se.gen_update_main_update(&request, &state.main_table(), &main_cte_update, values)?;
+        se.gen_update_main_update_data(
+            &state,
             &request,
-            &state.main_table(),
             &main_cte_update,
-            main_update_values,
+            &main_cte_data,
+            &single_relationships_additional_fields,
         )?;
-        se.gen_update_main_update_data(&state, &request, &main_cte_update, &main_cte_data, &rels)?;
         se.select_one_to_one_rels_routine(
             &state,
             &main_cte_data,
-            &rels,
+            &single_relationships,
+            &single_relationships_additional_fields,
             Ciboulette2PostgresBuilderState::is_needed_all,
         )?;
         se.select_multi_rels_routine(
             &state,
             &main_cte_data,
-            &rels.multi_rels(),
+            &multi_relationships,
             Ciboulette2PostgresBuilderState::is_needed_all,
         )?;
         se.buf.write_all(b" ")?;

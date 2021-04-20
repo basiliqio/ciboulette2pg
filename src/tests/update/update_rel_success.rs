@@ -90,7 +90,7 @@ async fn set_many_to_one(mut pool: sqlx::PgPool) {
         Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_many_to_one", &["comments"]).await;
     for row in rows.into_iter() {
-        if row.type_() != &"peoples" {
+        if row.type_() != &"author" {
             continue;
         }
         assert_eq!(row.id(), &people_id.to_string().as_str());

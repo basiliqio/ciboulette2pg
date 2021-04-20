@@ -137,7 +137,7 @@ fn forbidden_one_to_many() {
     .unwrap_err();
 
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::UpdatingManyRelationships),
+        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
         true
     );
 }

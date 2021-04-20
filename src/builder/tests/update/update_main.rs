@@ -178,7 +178,7 @@ fn relationship_external() {
     .unwrap_err();
 
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::UpdatingManyRelationships),
+        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
         true
     );
 }

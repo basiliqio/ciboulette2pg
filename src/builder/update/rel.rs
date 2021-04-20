@@ -33,18 +33,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         type_: Arc<CibouletteResourceType>,
         main_cte_update: &Ciboulette2PostgresTable,
         main_cte_data: &Ciboulette2PostgresTable,
-        rels: &Ciboulette2SqlQueryRels<'request>,
+        rels: &[Ciboulette2SqlAdditionalField],
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(
-            &state,
-            &main_cte_update,
-            type_,
-            None,
-            rels.single_rels_additional_fields().iter(),
-            true,
-        )?;
+        self.gen_select_cte_final(&state, &main_cte_update, type_, None, rels.iter(), true)?;
         self.buf.write_all(b")")?;
         Ok(())
     }
@@ -58,6 +51,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
         request: &'request CibouletteUpdateRequest<'request>,
         main_type: Arc<CibouletteResourceType>,
+        rel_details: &CibouletteResourceRelationshipDetails,
     ) -> Result<Self, Ciboulette2SqlError>
     where
         'store: 'request,
@@ -67,28 +61,31 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let rels: &'request CibouletteUpdateRelationship<'request> = extract_rels(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&main_table)?;
-        let Ciboulette2PostgresMainResourceInformations {
-            insert_values: rel_values,
+        let Ciboulette2PostgresResourceInformations {
+            values,
             single_relationships,
-        } = crate::graph_walker::relationships::extract_fields_rel(
+            single_relationships_additional_fields,
+            multi_relationships,
+        } = extract_data_rels(
             &ciboulette_store,
-            request.resource_type().clone(),
-            &rels,
+            request.path().base_type().clone(),
+            rel_details.relation_alias(),
+            rels.value(),
         )?;
-        let rels = Ciboulette2SqlQueryRels::new(main_type.clone(), single_relationships, vec![])?;
         se.buf.write_all(b"WITH ")?;
-        se.gen_update_rel_update(&request, &main_table, &main_cte_update, rel_values)?;
+        se.gen_update_rel_update(&request, &main_table, &main_cte_update, values)?;
         se.gen_update_rel_data(
             &state,
             request.resource_type().clone(),
             &main_cte_update,
             &main_cte_data,
-            &rels,
+            &single_relationships_additional_fields,
         )?;
         se.select_one_to_one_rels_routine(
             &state,
             &main_cte_data,
-            &rels,
+            &single_relationships,
+            &single_relationships_additional_fields,
             Ciboulette2PostgresBuilderState::is_needed_updating_relationships,
         )?;
         se.buf.write_all(b" ")?;

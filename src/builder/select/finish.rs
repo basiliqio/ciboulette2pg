@@ -101,13 +101,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             table,
         )?;
         self.buf.write_all(b", ")?;
-        self.insert_params(
-            Ciboulette2SqlValue::ArcStr(Some(type_.name().clone())),
-            table,
-        )?;
-        self.buf.write_all(b"::TEXT AS \"type\", ")?;
-        self.gen_json_builder(table, type_.clone(), state.query(), include)?;
-        self.buf.write_all(b" AS \"data\", ")?;
         match relating_field {
             Some(relating_field) => {
                 self.insert_ident(relating_field.field(), relating_field.table())?;
@@ -116,13 +109,24 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     Ciboulette2SqlValue::ArcStr(Some(relating_field.related_type().name().clone())),
                     relating_field.table(),
                 )?;
-                self.buf.write_all(b"::TEXT AS \"related_type\"")?;
+                self.buf.write_all(b"::TEXT AS \"related_type\", ")?;
+                self.insert_params(
+                    Ciboulette2SqlValue::ArcStr(Some(relating_field.alias().clone())),
+                    table,
+                )?;
             }
             None => {
                 self.buf
-                    .write_all(b"NULL::TEXT AS \"related_id\", NULL::TEXT AS \"related_type\"")?;
+                    .write_all(b"NULL::TEXT AS \"related_id\", NULL::TEXT AS \"related_type\", ")?;
+                self.insert_params(
+                    Ciboulette2SqlValue::ArcStr(Some(type_.name().clone())),
+                    table,
+                )?;
             }
         }
+        self.buf.write_all(b"::TEXT AS \"type\", ")?;
+        self.gen_json_builder(table, type_.clone(), state.query(), include)?;
+        self.buf.write_all(b" AS \"data\"")?;
         self.handle_additionnal_params(&table, additional_fields)?;
         self.gen_sorting_keys(&table, type_, &state.query())?;
         self.buf.write_all(b" FROM ")?;

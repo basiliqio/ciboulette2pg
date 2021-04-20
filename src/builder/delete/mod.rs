@@ -43,7 +43,7 @@ impl<'store, 'request> Ciboulette2PostgresBuilder<'request> {
                             opt.one_table().name().to_string(),
                         ));
                     }
-                    _ => return Err(Ciboulette2SqlError::BulkRelationshipDelete), // Fails if it's a multi relationship
+                    _ => return Err(Ciboulette2SqlError::ManyRelationshipDirectWrite), // Fails if it's a multi relationship
                 }
             }
             None => se.gen_delete_normal(&table_store, request), // If we're not deleting a relationships but an object

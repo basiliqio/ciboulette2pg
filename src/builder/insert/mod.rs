@@ -17,36 +17,39 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let (main_cte_insert, main_cte_data) = gen_insert_cte_tables(&state)?;
 
-        let Ciboulette2PostgresMainResourceInformations {
-            insert_values: main_inserts_values,
-            single_relationships: main_single_relationships,
-        } = crate::graph_walker::main::extract_fields_and_values(
+        let Ciboulette2PostgresResourceInformations {
+            values,
+            single_relationships,
+            single_relationships_additional_fields,
+            multi_relationships,
+        } = extract_data(
             &ciboulette_store,
             request.path().main_type().clone(),
             request.data().attributes(),
             request.data().relationships(),
-            false,
-        )?;
-        let multi_rels = crate::graph_walker::relationships::extract_fields(
-            &ciboulette_store,
-            request.path().main_type().clone(),
-            Some(request.data().relationships()),
-        )?;
-        let rels = Ciboulette2SqlQueryRels::new(
-            state.main_type().clone(),
-            main_single_relationships,
-            multi_rels,
+            true,
         )?;
         se.buf.write_all(b"WITH ")?;
-        se.write_main_table_inserts(&main_cte_insert, &state, main_inserts_values)?;
-        se.write_main_table_select(&main_cte_data, &state, main_cte_insert, &rels)?;
+        se.write_main_table_inserts(&main_cte_insert, &state, values)?;
+        se.write_main_table_select(
+            &main_cte_data,
+            &state,
+            main_cte_insert,
+            &single_relationships_additional_fields,
+        )?;
         se.select_one_to_one_rels_routine(
             &state,
             &main_cte_data,
-            &rels,
+            &single_relationships,
+            &single_relationships_additional_fields,
             Ciboulette2PostgresBuilderState::is_needed_all,
         )?;
-        se.inserts_handle_many_to_many_rels(&state, &main_cte_data, rels.multi_rels())?;
+        se.select_multi_rels_routine(
+            &state,
+            &main_cte_data,
+            &multi_relationships,
+            Ciboulette2PostgresBuilderState::is_needed_all,
+        )?;
         se.buf.write_all(b" ")?;
         se.add_working_table(
             &state.main_table(),
@@ -63,7 +66,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         main_cte_data: &Ciboulette2PostgresTable,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         main_cte_insert: Ciboulette2PostgresTable,
-        rels: &Ciboulette2SqlQueryRels<'request>,
+        rels: &[Ciboulette2SqlAdditionalField],
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(main_cte_data)?;
         self.buf.write_all(b" AS (")?;
@@ -72,7 +75,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &main_cte_insert,
             state.main_type().clone(),
             None,
-            rels.single_rels_additional_fields().iter(),
+            rels.iter(),
             true,
         )?;
         self.buf.write_all(b")")?;
