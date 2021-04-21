@@ -30,7 +30,7 @@ where
                 } else if y.related_type().as_ref() == other {
                     Some(Ciboulette2PostgresResponseType::Object)
                 } else {
-                    self.check_if_rel_is_needed(other, x, y)
+                    self.check_if_rel_is_needed(other, y)
                 }
             }
             CiboulettePath::TypeIdRelationship(x, _, y) => {
@@ -39,7 +39,7 @@ where
                 } else if y.related_type().as_ref() == other {
                     Some(Ciboulette2PostgresResponseType::Id)
                 } else {
-                    self.check_if_rel_is_needed(other, x, y)
+                    self.check_if_rel_is_needed(other, y)
                 }
             }
         }

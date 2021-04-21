@@ -1,6 +1,5 @@
 use super::*;
 pub mod main;
-pub mod rel;
 
 impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate a SQL query to handle a `POST` request

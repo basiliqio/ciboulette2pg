@@ -1,8 +1,6 @@
 use super::*;
 use crate::Ciboulette2SqlError;
-use ciboulette::{
-    CibouletteId, CibouletteResourceIdentifier, CibouletteResponseElement, CibouletteStore,
-};
+use ciboulette::{CibouletteId, CibouletteResponseElement, CibouletteStore};
 use getset::Getters;
 use serde::Serialize;
 use sqlx::FromRow;

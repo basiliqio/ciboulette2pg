@@ -58,7 +58,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         &mut self,
         ciboulette_table_store: &Ciboulette2PostgresTableStore,
         left_type: Arc<CibouletteResourceType>,
-        right_type: Arc<CibouletteResourceType>,
+        rel_details: &CibouletteResourceRelationshipDetails,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,
     ) -> Result<(), Ciboulette2SqlError>
@@ -66,8 +66,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         'store: 'request,
     {
         let left_table = ciboulette_table_store.get(left_type.name().as_str())?;
-        let right_table = ciboulette_table_store.get(right_type.name().as_str())?;
-        Self::gen_inner_join(&mut self.buf, state, &left_table, &right_table)?;
+        Self::gen_inner_join(&mut self.buf, state, &left_table, &rel_details, None)?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
             &Ciboulette2PostgresTableField::new(left_table.id().get_ident().clone(), None, None),
@@ -122,12 +121,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             !matches!(state.path(), CiboulettePath::TypeIdRelationship(_, _, _)),
         )?;
         match state.path() {
-            CiboulettePath::TypeIdRelationship(left_type, id, right_type)
-            | CiboulettePath::TypeIdRelated(left_type, id, right_type) => self
+            CiboulettePath::TypeIdRelationship(left_type, id, rel_details)
+            | CiboulettePath::TypeIdRelated(left_type, id, rel_details) => self
                 .gen_matcher_for_related_select(
                     state.table_store(),
                     left_type.clone(),
-                    right_type.related_type().clone(),
+                    rel_details,
                     state,
                     id,
                 )?,

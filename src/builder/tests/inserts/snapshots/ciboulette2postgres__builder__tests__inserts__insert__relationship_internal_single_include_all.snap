@@ -51,7 +51,7 @@ WITH "cte_peoples_insert" AS (
     "public"."people-article"."people_id" AS "rel_people_id"
   FROM
     "public"."people-article"
-    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" :: TEXT = "cte_peoples_data"."id" :: TEXT
+    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" = "cte_peoples_data"."main_id"
 ),
 "cte_rel_articles_data" AS (
   SELECT
@@ -68,7 +68,7 @@ WITH "cte_peoples_insert" AS (
     ) AS "data"
   FROM
     "public"."articles"
-    INNER JOIN "cte_rel_people-article_rel_data" ON "cte_rel_people-article_rel_data"."rel_article_id" :: TEXT = "public"."articles"."id" :: TEXT
+    INNER JOIN "cte_rel_people-article_rel_data" ON "cte_rel_people-article_rel_data"."rel_article_id" = "public"."articles"."id"
 ),
 "cte_rel_comments_data" AS (
   SELECT

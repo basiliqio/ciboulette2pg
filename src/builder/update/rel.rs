@@ -65,7 +65,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             values,
             single_relationships,
             single_relationships_additional_fields,
-            multi_relationships,
+            multi_relationships: _,
         } = extract_data_rels(
             &ciboulette_store,
             request.path().base_type().clone(),

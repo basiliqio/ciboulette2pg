@@ -21,7 +21,6 @@ safe_ident!(CIBOULETTE_INSERT_SUFFIX, "insert");
 safe_ident!(CIBOULETTE_REL_DATA_SUFFIX, "rel_data");
 safe_ident!(CIBOULETTE_UPDATE_SUFFIX, "update");
 safe_ident!(CIBOULETTE_DATA_SUFFIX, "data");
-safe_ident!(CIBOULETTE_ID_SUFFIX, "id");
 safe_ident!(CIBOULETTE_SORT_PREFIX, "sort");
 safe_ident!(CIBOULETTE_MAIN_IDENTIFIER, "main_id");
 safe_ident!(CIBOULETTE_EMPTY_IDENT, "");

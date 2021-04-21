@@ -6,21 +6,21 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf: &mut Ciboulette2PostgresBuf,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         left_table: &Ciboulette2PostgresTable,
-        right_table: &Ciboulette2PostgresTable,
+        rel_details: &CibouletteResourceRelationshipDetails,
+        right_table_override: Option<&Ciboulette2PostgresTable>,
     ) -> Result<(), Ciboulette2SqlError> {
         let left_type = left_table.ciboulette_type();
-        let right_type = right_table.ciboulette_type();
-        let right_type_alias = left_type.get_alias(right_type.name().as_str())?;
-        let (_, opt) = state
-            .store()
-            .get_rel(left_type.name().as_str(), right_type_alias)?;
-        match opt {
+        let right_table = match right_table_override {
+            Some(x) => x,
+            None => state.table_store().get(rel_details.related_type().name())?,
+        };
+        match rel_details.relation_option() {
             CibouletteRelationshipOption::ManyToMany(opt) => {
                 Self::gen_inner_join_many_to_many_rel(
                     &mut *buf,
                     state,
                     opt,
-                    right_type.clone(),
+                    rel_details.related_type().clone(),
                     right_table,
                     left_table,
                     left_type.clone(),
@@ -90,7 +90,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(b" = ")?;
         Self::insert_ident_inner(
             &mut *buf,
-            &Ciboulette2PostgresTableField::new(right_table.id().get_ident().clone(), None, None),
+            &match right_table.is_cte() {
+                true => Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
+                false => Ciboulette2PostgresTableField::new(
+                    right_table.id().get_ident().clone(),
+                    None,
+                    None,
+                ),
+            },
             right_table,
             None,
         )?;
@@ -110,7 +117,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(b" ON ")?;
         Self::insert_ident_inner(
             buf,
-            &Ciboulette2PostgresTableField::new(left_table.id().get_ident().clone(), None, None),
+            &match left_table.is_cte() {
+                true => Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
+                false => Ciboulette2PostgresTableField::new(
+                    left_table.id().get_ident().clone(),
+                    None,
+                    None,
+                ),
+            },
             left_table,
             None,
         )?;
@@ -141,7 +155,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(b" ON ")?;
         Self::insert_ident_inner(
             buf,
-            &Ciboulette2PostgresTableField::new(left_table.id().get_ident().clone(), None, None),
+            &match left_table.is_cte() {
+                true => Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
+                false => Ciboulette2PostgresTableField::new(
+                    left_table.id().get_ident().clone(),
+                    None,
+                    None,
+                ),
+            },
             left_table,
             None,
         )?;
@@ -183,7 +204,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         buf.write_all(b" = ")?;
         Self::insert_ident_inner(
             buf,
-            &Ciboulette2PostgresTableField::new(right_table.id().get_ident().clone(), None, None),
+            &match right_table.is_cte() {
+                true => Ciboulette2PostgresTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
+                false => Ciboulette2PostgresTableField::new(
+                    right_table.id().get_ident().clone(),
+                    None,
+                    None,
+                ),
+            },
             right_table,
             None,
         )?;

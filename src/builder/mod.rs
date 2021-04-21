@@ -11,7 +11,6 @@ mod field_name;
 mod insert;
 mod is_needed;
 mod relating_field;
-// mod relationships;
 mod select;
 mod update;
 mod utils;
@@ -34,10 +33,6 @@ macro_rules! get_state {
 #[cfg(test)]
 pub mod tests;
 
-// use crate::graph_walker::main::Ciboulette2PostgresMainResourceInformations;
-// use crate::graph_walker::relationships::{
-//     Ciboulette2PostgresMainResourceRelationships, Ciboulette2PostgresMultiRelationships,
-// };
 use additional_fields::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalFieldType};
 use builder_state::Ciboulette2PostgresBuilderState;
 use extracting_data::*;

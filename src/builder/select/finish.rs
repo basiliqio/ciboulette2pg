@@ -111,7 +111,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 )?;
                 self.buf.write_all(b"::TEXT AS \"related_type\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::ArcStr(Some(relating_field.alias().clone())),
+                    Ciboulette2SqlValue::ArcStr(Some(relating_field.alias().clone())), // If it's a relating field, the 'related_type' field contains the relationships alias, to identify it later
                     table,
                 )?;
             }

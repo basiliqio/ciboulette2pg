@@ -29,7 +29,6 @@ where
     pub(crate) fn check_if_rel_is_needed(
         &self,
         other: &CibouletteResourceType,
-        x: &CibouletteResourceType,
         y: &CibouletteResourceRelationshipDetails,
     ) -> Option<Ciboulette2PostgresResponseType> {
         match y.relation_option() {

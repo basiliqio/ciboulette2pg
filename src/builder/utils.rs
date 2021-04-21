@@ -1,30 +1,6 @@
 use super::*;
 
 impl<'request> Ciboulette2PostgresBuilder<'request> {
-    /// Create a list of relationships' id, to use as value for later inserting
-    pub(crate) fn gen_rel_values(
-        &mut self,
-        ids: Vec<value::Ciboulette2SqlValue<'request>>,
-        table: &Ciboulette2PostgresTable,
-        id_param: &Ciboulette2PostgresId,
-    ) -> Result<(), Ciboulette2SqlError> {
-        // It's a logic error to have an empty id vector here
-        if ids.is_empty() {
-            return Err(Ciboulette2SqlError::EmptyRelValue(
-                id_param.get_ident().to_string(),
-            ));
-        }
-        self.write_list(ids, &table, false, |ref mut se, curr, t| {
-            se.buf.write_all(b"(")?;
-            se.insert_params(curr, t)?;
-            se.buf.write_all(b"::")?;
-            id_param.get_type().to_writer(&mut se.buf)?;
-            se.buf.write_all(b")")?;
-            Ok(())
-        })?;
-        Ok(())
-    }
-
     /// Finish building the query, setting the last ';' and then converting the
     /// final query to UTF-8
     #[inline]
@@ -280,9 +256,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         right_table: &Ciboulette2PostgresTable,
         right: &Ciboulette2PostgresTableField,
     ) -> Result<(), Ciboulette2SqlError> {
-        Self::insert_ident_inner(&mut self.buf, left, &left_table, Some("TEXT"))?;
+        Self::insert_ident_inner(&mut self.buf, left, &left_table, None)?;
         self.buf.write_all(b" = ")?;
-        Self::insert_ident_inner(&mut self.buf, &right, &right_table, Some("TEXT"))?;
+        Self::insert_ident_inner(&mut self.buf, &right, &right_table, None)?;
         //FIXME Make a better id type management system
         Ok(())
     }

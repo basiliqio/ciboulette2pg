@@ -11,7 +11,7 @@ mod misc;
 mod select;
 mod update;
 
-pub fn gen_table_store<'store>(store: &'store CibouletteStore) -> Ciboulette2PostgresTableStore {
+pub fn gen_table_store(store: &CibouletteStore) -> Ciboulette2PostgresTableStore {
     vec![
         Ciboulette2PostgresTable::new(
             Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
