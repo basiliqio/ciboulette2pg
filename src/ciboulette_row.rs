@@ -1,6 +1,8 @@
 use super::*;
 use crate::Ciboulette2SqlError;
-use ciboulette::{CibouletteId, CibouletteResponseElement, CibouletteStore};
+use ciboulette::{
+    CibouletteId, CibouletteResourceType, CibouletteResponseElement, CibouletteStore,
+};
 use getset::Getters;
 use serde::Serialize;
 use sqlx::FromRow;
@@ -44,6 +46,7 @@ impl<'rows> Ciboulette2PostgresRow<'rows> {
     pub fn build_response_elements<I>(
         rows: I,
         store: &CibouletteStore,
+        main_type: &Arc<CibouletteResourceType>,
         hint_size: Option<usize>,
     ) -> Result<
         Vec<CibouletteResponseElement<'rows, &'rows serde_json::value::RawValue>>,
@@ -72,6 +75,7 @@ impl<'rows> Ciboulette2PostgresRow<'rows> {
             };
             res.push(CibouletteResponseElement::new(
                 &store,
+                main_type,
                 identifier,
                 row.data,
                 related_identifier,

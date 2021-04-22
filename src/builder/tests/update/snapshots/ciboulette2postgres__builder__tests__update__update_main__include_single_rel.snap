@@ -3,7 +3,7 @@ source: src/builder/tests/update/update_main.rs
 expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
 
 ---
-WITH "cte_peoples_update" AS (
+WITH "cte_peoples_update_0" AS (
   UPDATE
     "public"."peoples"
   SET
@@ -12,58 +12,58 @@ WITH "cte_peoples_update" AS (
   WHERE
     "public"."peoples"."id" = $3 RETURNING *
 ),
-"cte_peoples_data" AS (
+"cte_peoples_data_1" AS (
   SELECT
-    "cte_peoples_update"."id" :: TEXT AS "id",
-    "cte_peoples_update"."id" AS "main_id",
+    "cte_peoples_update_0"."id" :: TEXT AS "id",
+    "cte_peoples_update_0"."id" AS "main_id",
     NULL :: TEXT AS "related_id",
     NULL :: TEXT AS "related_type",
     $4 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
       $5,
-      "cte_peoples_update"."age",
+      "cte_peoples_update_0"."age",
       $6,
-      "cte_peoples_update"."first-name",
+      "cte_peoples_update_0"."first-name",
       $7,
-      "cte_peoples_update"."gender",
+      "cte_peoples_update_0"."gender",
       $8,
-      "cte_peoples_update"."last-name",
+      "cte_peoples_update_0"."last-name",
       $9,
-      "cte_peoples_update"."twitter"
+      "cte_peoples_update_0"."twitter"
     ) AS "data",
-    "cte_peoples_update"."favorite_color" AS "rel_favorite_color"
+    "cte_peoples_update_0"."favorite_color" AS "rel_favorite_color"
   FROM
-    "cte_peoples_update"
+    "cte_peoples_update_0"
 ),
-"cte_rel_favorite_color_data" AS (
+"cte_rel_favorite_color_data_2" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     "public"."favorite_color"."id" AS "main_id",
-    "cte_peoples_data"."id" :: TEXT AS "related_id",
+    "cte_peoples_data_1"."id" :: TEXT AS "related_id",
     $10 :: TEXT AS "related_type",
     $11 :: TEXT AS "type",
     JSON_BUILD_OBJECT($12, "public"."favorite_color"."color") AS "data"
   FROM
     "public"."favorite_color"
-    INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
+    INNER JOIN "cte_peoples_data_1" ON "cte_peoples_data_1"."rel_favorite_color" = "public"."favorite_color"."id"
 ) (
   SELECT
-    "cte_rel_favorite_color_data"."id",
-    "cte_rel_favorite_color_data"."type",
-    "cte_rel_favorite_color_data"."data",
-    "cte_rel_favorite_color_data"."related_type",
-    "cte_rel_favorite_color_data"."related_id"
+    "cte_peoples_data_1"."id",
+    "cte_peoples_data_1"."type",
+    "cte_peoples_data_1"."data",
+    "cte_peoples_data_1"."related_type",
+    "cte_peoples_data_1"."related_id"
   FROM
-    "cte_rel_favorite_color_data"
+    "cte_peoples_data_1"
 )
 UNION
 ALL (
   SELECT
-    "cte_peoples_data"."id",
-    "cte_peoples_data"."type",
-    "cte_peoples_data"."data",
-    "cte_peoples_data"."related_type",
-    "cte_peoples_data"."related_id"
+    "cte_rel_favorite_color_data_2"."id",
+    "cte_rel_favorite_color_data_2"."type",
+    "cte_rel_favorite_color_data_2"."data",
+    "cte_rel_favorite_color_data_2"."related_type",
+    "cte_rel_favorite_color_data_2"."related_id"
   FROM
-    "cte_peoples_data"
+    "cte_rel_favorite_color_data_2"
 );

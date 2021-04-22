@@ -3,7 +3,7 @@ source: src/builder/tests/select/select_related.rs
 expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
 
 ---
-WITH "cte_favorite_color_data" AS (
+WITH "cte_favorite_color_data_0" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     "public"."favorite_color"."id" AS "main_id",
@@ -16,28 +16,13 @@ WITH "cte_favorite_color_data" AS (
     INNER JOIN "public"."peoples" ON "public"."peoples"."favorite_color" = "public"."favorite_color"."id"
   WHERE
     "public"."peoples"."id" = $3
-),
-"cte_rel_peoples_data" AS (
-  SELECT
-    "public"."peoples"."id" :: TEXT AS "id",
-    "public"."peoples"."id" AS "main_id",
-    "public"."peoples"."favorite_color" :: TEXT AS "related_id",
-    $4 :: TEXT AS "related_type",
-    $5 :: TEXT AS "type",
-    NULL :: json AS "data",
-    "public"."peoples"."favorite_color" AS "rel_favorite_color"
-  FROM
-    "public"."peoples"
-    INNER JOIN "cte_favorite_color_data" ON "cte_favorite_color_data"."main_id" = "public"."peoples"."favorite_color"
-  WHERE
-    "public"."peoples"."favorite_color" = "cte_favorite_color_data"."main_id"
 )(
   SELECT
-    "cte_favorite_color_data"."id",
-    "cte_favorite_color_data"."type",
-    "cte_favorite_color_data"."data",
-    "cte_favorite_color_data"."related_type",
-    "cte_favorite_color_data"."related_id"
+    "cte_favorite_color_data_0"."id",
+    "cte_favorite_color_data_0"."type",
+    "cte_favorite_color_data_0"."data",
+    "cte_favorite_color_data_0"."related_type",
+    "cte_favorite_color_data_0"."related_id"
   FROM
-    "cte_favorite_color_data"
+    "cte_favorite_color_data_0"
 );

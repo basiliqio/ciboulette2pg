@@ -25,27 +25,6 @@ pub(crate) enum Ciboulette2PostgresMultiRelationshipsType {
     ManyToMany(Arc<CibouletteRelationshipManyToManyOption>),
 }
 
-impl Ciboulette2PostgresMultiRelationshipsType {
-    pub fn dest_resource(&self) -> &CibouletteResourceType {
-        match self {
-            Ciboulette2PostgresMultiRelationshipsType::OneToMany(x) => x.one_table(),
-            Ciboulette2PostgresMultiRelationshipsType::ManyToMany(x) => x.bucket_resource(),
-        }
-    }
-
-    pub fn dest_key(
-        &self,
-        main_type: &CibouletteResourceType,
-    ) -> Result<ArcStr, CibouletteError> {
-        match self {
-            Ciboulette2PostgresMultiRelationshipsType::OneToMany(x) => {
-                Ok(x.many_table_key().clone())
-            }
-            Ciboulette2PostgresMultiRelationshipsType::ManyToMany(x) => x.keys_for_type(main_type),
-        }
-    }
-}
-
 /// Informations about the main resource type, extracted from the request
 #[derive(Clone, Debug, Default, Getters, MutGetters)]
 #[getset(get = "pub", get_mut = "pub")]

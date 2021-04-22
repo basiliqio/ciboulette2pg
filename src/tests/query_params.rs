@@ -35,11 +35,6 @@ macro_rules! ciboulette_query_test_routine {
 macro_rules! ciboulette_query_test_multi {
     ($transform_function:ident) => {
         ciboulette_query_test_routine!(sorting, $transform_function, "/peoples?&sort=first-name");
-        ciboulette_query_test_routine!(
-            sorting_full_path,
-            $transform_function,
-            "/peoples?sort=peoples.first-name"
-        );
         ciboulette_query_test_routine!(sorting_desc, $transform_function, "/peoples?sort=-age");
         ciboulette_query_test_routine!(
             sorting_multiple_fields,
@@ -60,7 +55,7 @@ macro_rules! ciboulette_query_test_related {
         ciboulette_query_test_routine!(
             related_sorting_by_child_full_path,
             $transform_function,
-            "/peoples/{}/articles?sort=articles.body",
+            "/peoples/{}/articles?sort=body",
             "peoples"
         );
         ciboulette_query_test_routine!(
@@ -78,19 +73,19 @@ macro_rules! ciboulette_query_test_related {
         ciboulette_query_test_routine!(
             related_sort_and_sparse,
             $transform_function,
-            "/peoples/{}/articles?fields[articles]=title&sort=articles.body",
+            "/peoples/{}/articles?fields[articles]=title&sort=body",
             "peoples"
         );
         ciboulette_query_test_routine!(
             related_include_root,
             $transform_function,
-            "/peoples/{}/articles?include=peoples",
+            "/peoples/{}/articles?include=author",
             "peoples"
         );
         ciboulette_query_test_routine!(
             related_include_and_sparse,
             $transform_function,
-            "/peoples/{}/articles?include=peoples&fields[peoples]=first-name",
+            "/peoples/{}/articles?include=author&fields[peoples]=first-name",
             "peoples"
         );
     };
@@ -102,7 +97,7 @@ macro_rules! ciboulette_query_test_relationship_many_to_many {
         ciboulette_query_test_routine!(
             relationships_many_to_many_sorting_by_child_full_path,
             $transform_function,
-            "/peoples/{}/relationships/articles?sort=articles.body",
+            "/peoples/{}/relationships/articles?sort=body",
             "peoples"
         );
         ciboulette_query_test_routine!(
@@ -120,19 +115,19 @@ macro_rules! ciboulette_query_test_relationship_many_to_many {
         ciboulette_query_test_routine!(
             relationships_many_to_many_sort_and_sparse,
             $transform_function,
-            "/peoples/{}/relationships/articles?fields[articles]=title&sort=articles.body",
+            "/peoples/{}/relationships/articles?fields[articles]=title&sort=body",
             "peoples"
         );
         ciboulette_query_test_routine!(
             relationships_many_to_many_include_root,
             $transform_function,
-            "/peoples/{}/relationships/articles?include=peoples",
+            "/peoples/{}/relationships/articles?include=author",
             "peoples"
         );
         ciboulette_query_test_routine!(
             relationships_many_to_many_include_and_sparse,
             $transform_function,
-            "/peoples/{}/relationships/articles?include=peoples&fields[peoples]=first-name",
+            "/peoples/{}/relationships/articles?include=author&fields[peoples]=first-name",
             "peoples"
         );
     };
@@ -144,7 +139,7 @@ macro_rules! ciboulette_query_test_relationship_many_to_one {
         ciboulette_query_test_routine!(
             relationships_many_to_one_sorting_by_child_full_path,
             $transform_function,
-            "/comments/{}/relationships/author?sort=peoples.first-name",
+            "/comments/{}/relationships/author?sort=first-name",
             "comments"
         );
         ciboulette_query_test_routine!(
@@ -162,7 +157,7 @@ macro_rules! ciboulette_query_test_relationship_many_to_one {
         ciboulette_query_test_routine!(
             relationships_many_to_one_sort_and_sparse,
             $transform_function,
-            "/comments/{}/relationships/author?fields[peoples]=first-name&sort=peoples.last-name",
+            "/comments/{}/relationships/author?fields[peoples]=first-name&sort=last-name",
             "comments"
         );
         ciboulette_query_test_routine!(
@@ -217,6 +212,12 @@ macro_rules! ciboulette_query_test_single {
 			include_multiple_resources_with_sparsing,
 			$transform_function,
 			"/peoples/{}?include=peoples.articles,people-article&fields[peoples]=last-name&fields[articles]=title&fields[people-article]=article_id,people_id",
+			"peoples"
+		);
+		ciboulette_query_test_routine!(
+			include_nested,
+			$transform_function,
+			"/peoples/{}?include=articles.comments",
 			"peoples"
 		);
     };

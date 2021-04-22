@@ -14,7 +14,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let mut se = Self::default();
         check_insert_request(&request)?;
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
-        let (main_cte_insert, main_cte_data) = gen_insert_cte_tables(&state)?;
+        let (main_cte_insert, main_cte_data) = se.gen_insert_cte_tables(&state)?;
 
         let Ciboulette2PostgresResourceInformations {
             values,
@@ -36,26 +36,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             main_cte_insert,
             &single_relationships_additional_fields,
         )?;
-        se.select_one_to_one_rels_routine(
-            &state,
-            &main_cte_data,
-            &single_relationships,
-            &single_relationships_additional_fields,
-            Ciboulette2PostgresBuilderState::is_needed_all,
-        )?;
-        se.select_multi_rels_routine(
-            &state,
-            &main_cte_data,
-            &multi_relationships,
-            Ciboulette2PostgresBuilderState::is_needed_all,
-        )?;
+        se.select_rels(&state, &main_cte_data, state.inclusion_map())?;
         se.buf.write_all(b" ")?;
-        se.add_working_table(
-            &state.main_table(),
-            (main_cte_data, Ciboulette2PostgresResponseType::Object),
-        );
         // Aggregate every table using UNION ALL
-        se.finish_request(state)?;
+        se.finish_request(state, main_cte_data, false)?;
         Ok(se)
     }
 
@@ -67,14 +51,15 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         main_cte_insert: Ciboulette2PostgresTable,
         rels: &[Ciboulette2SqlAdditionalField],
     ) -> Result<(), Ciboulette2SqlError> {
+        let sort_keys_mains = Self::gen_sort_key_for_main(state, main_cte_data)?;
         self.write_table_info(main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(
+        self.gen_select_cte(
             state,
             &main_cte_insert,
             state.main_type().clone(),
             None,
-            rels.iter(),
+            rels.iter().chain(sort_keys_mains.iter()),
             true,
         )?;
         self.buf.write_all(b")")?;
@@ -94,19 +79,24 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.buf.write_all(b"),")?;
         Ok(())
     }
-}
 
-/// Gen the insert and data table for the query
-fn gen_insert_cte_tables(
-    state: &Ciboulette2PostgresBuilderState
-) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
-    let main_cte_insert = state
-        .main_table()
-        .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_INSERT_SUFFIX)?;
-    let main_cte_data = state
-        .main_table()
-        .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
-    Ok((main_cte_insert, main_cte_data))
+    /// Gen the insert and data table for the query
+    fn gen_insert_cte_tables(
+        &mut self,
+        state: &Ciboulette2PostgresBuilderState,
+    ) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
+        let main_cte_insert = state.main_table().to_cte(
+            &mut *self,
+            CIBOULETTE_EMPTY_IDENT,
+            CIBOULETTE_INSERT_SUFFIX,
+        )?;
+        let main_cte_data = state.main_table().to_cte(
+            &mut *self,
+            CIBOULETTE_EMPTY_IDENT,
+            CIBOULETTE_DATA_SUFFIX,
+        )?;
+        Ok((main_cte_insert, main_cte_data))
+    }
 }
 
 /// Check that the insert request is correct

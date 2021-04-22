@@ -13,9 +13,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let mut se = Self::default();
         let state: Ciboulette2PostgresBuilderState<'store, 'request> =
             get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
-        let main_cte_data = state
-            .main_table()
-            .to_cte(CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
+        let main_cte_data =
+            state
+                .main_table()
+                .to_cte(&mut se, CIBOULETTE_EMPTY_IDENT, CIBOULETTE_DATA_SUFFIX)?;
         let rels = extract_data_no_body(&ciboulette_store, state.main_type().clone())?;
 
         se.buf.write_all(b"WITH \n")?;
@@ -24,32 +25,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &main_cte_data,
             rels.single_relationships_additional_fields(),
         )?;
-        let is_needed_cb = match request.path() {
-            CiboulettePath::TypeIdRelationship(_, _, _) => {
-                Ciboulette2PostgresBuilderState::is_needed_all_for_relationships
-            }
-            _ => Ciboulette2PostgresBuilderState::is_needed_all,
-        };
-        se.select_one_to_one_rels_routine(
-            &state,
-            &main_cte_data,
-            rels.single_relationships(),
-            rels.single_relationships_additional_fields(),
-            is_needed_cb,
-        )?;
-        se.select_multi_rels_routine(
-            &state,
-            &main_cte_data,
-            &rels.multi_relationships(),
-            is_needed_cb,
-        )?;
-        se.gen_cte_for_sort(&state, &main_cte_data)?;
-        se.add_working_table(
-            &state.main_table(),
-            (main_cte_data, Ciboulette2PostgresResponseType::Object),
-        );
         // Aggregate every table using UNION ALL
-        se.finish_request(state)?;
+        se.finish_request(state, main_cte_data, false)?;
         Ok(se)
     }
 
@@ -110,30 +87,49 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     where
         'store: 'request,
     {
+        let sort_keys_mains = Self::gen_sort_key_for_main(state, main_cte_data)?;
         self.write_table_info(main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(
+        self.gen_select_cte(
             state,
             &state.main_table(),
             state.main_type().clone(),
             None,
-            rels.iter(),
+            rels.iter().chain(sort_keys_mains.iter()),
             !matches!(state.path(), CiboulettePath::TypeIdRelationship(_, _, _)),
         )?;
         match state.path() {
-            CiboulettePath::TypeIdRelationship(left_type, id, rel_details)
-            | CiboulettePath::TypeIdRelated(left_type, id, rel_details) => self
-                .gen_matcher_for_related_select(
+            CiboulettePath::TypeIdRelationship(left_type, id, rel_details) => {
+                self.gen_matcher_for_related_select(
                     state.table_store(),
                     left_type.clone(),
                     rel_details,
                     state,
                     id,
-                )?,
-            CiboulettePath::TypeId(_, id) => self.gen_matcher_for_normal_select(state, id)?,
-            _ => (),
+                )?;
+                self.buf.write_all(b")")?;
+            }
+            CiboulettePath::TypeIdRelated(left_type, id, rel_details) => {
+                self.gen_matcher_for_related_select(
+                    state.table_store(),
+                    left_type.clone(),
+                    rel_details,
+                    state,
+                    id,
+                )?;
+                self.buf.write_all(b")")?;
+                self.select_rels(&state, &main_cte_data, state.inclusion_map())?;
+            }
+            CiboulettePath::TypeId(_, id) => {
+                self.gen_matcher_for_normal_select(state, id)?;
+                self.buf.write_all(b") ")?;
+                self.select_rels(&state, &main_cte_data, state.inclusion_map())?;
+            }
+            _ => {
+                self.buf.write_all(b")")?;
+                self.select_rels(&state, &main_cte_data, state.inclusion_map())?;
+            }
         }
-        self.buf.write_all(b")")?;
         Ok(())
     }
 }

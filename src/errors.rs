@@ -23,7 +23,7 @@ pub enum Ciboulette2SqlError {
     #[error("Multiple ids were provided for a one-to-one relationships")]
     MultiIdsForSingleRelationships,
     #[error("One of the needed relation for ordering couldn't be found : `{0}`")]
-    MissingRelationForOrdering(String),
+    MissingRelationForSorting(String),
     #[error("A non-ascii char was found in a indentifier `${0}`")]
     NonAsciiCharInIdent(String),
     #[error("Client provided `id`s are forbidden for inserts")]

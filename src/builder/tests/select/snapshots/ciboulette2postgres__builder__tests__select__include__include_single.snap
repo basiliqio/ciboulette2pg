@@ -1,5 +1,5 @@
 ---
-source: src/builder/tests/select/select_main.rs
+source: src/builder/tests/select/include.rs
 expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
 
 ---
@@ -27,6 +27,18 @@ WITH "cte_peoples_data_0" AS (
     "public"."peoples"
   WHERE
     "public"."peoples"."id" = $7
+),
+"cte_rel_favorite_color_data_1" AS (
+  SELECT
+    "public"."favorite_color"."id" :: TEXT AS "id",
+    "public"."favorite_color"."id" AS "main_id",
+    "cte_peoples_data_0"."id" :: TEXT AS "related_id",
+    $8 :: TEXT AS "related_type",
+    $9 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($10, "public"."favorite_color"."color") AS "data"
+  FROM
+    "public"."favorite_color"
+    INNER JOIN "cte_peoples_data_0" ON "cte_peoples_data_0"."rel_favorite_color" = "public"."favorite_color"."id"
 ) (
   SELECT
     "cte_peoples_data_0"."id",
@@ -36,4 +48,15 @@ WITH "cte_peoples_data_0" AS (
     "cte_peoples_data_0"."related_id"
   FROM
     "cte_peoples_data_0"
+)
+UNION
+ALL (
+  SELECT
+    "cte_rel_favorite_color_data_1"."id",
+    "cte_rel_favorite_color_data_1"."type",
+    "cte_rel_favorite_color_data_1"."data",
+    "cte_rel_favorite_color_data_1"."related_type",
+    "cte_rel_favorite_color_data_1"."related_id"
+  FROM
+    "cte_rel_favorite_color_data_1"
 );

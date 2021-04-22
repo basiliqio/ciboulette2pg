@@ -46,12 +46,11 @@ impl Ciboulette2SqlAdditionalField {
             ciboulette_type,
         }
     }
-}
 
-impl TryFrom<&CibouletteSortingElement> for Ciboulette2SqlAdditionalField {
-    type Error = Ciboulette2SqlError;
-
-    fn try_from(el: &CibouletteSortingElement) -> Result<Self, Self::Error> {
+    pub fn from_sorting_field(
+        el: &CibouletteSortingElement,
+        main_type: Arc<CibouletteResourceType>,
+    ) -> Result<Self, Ciboulette2SqlError> {
         let table_field = Ciboulette2PostgresTableField::new(
             Ciboulette2PostgresSafeIdent::try_from(el.field().clone())?,
             None,
@@ -60,7 +59,7 @@ impl TryFrom<&CibouletteSortingElement> for Ciboulette2SqlAdditionalField {
         Ok(Ciboulette2SqlAdditionalField::new(
             table_field,
             Ciboulette2SqlAdditionalFieldType::Sorting,
-            el.type_().clone(),
+            main_type,
         ))
     }
 }

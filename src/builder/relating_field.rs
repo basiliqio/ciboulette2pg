@@ -2,24 +2,24 @@ use super::*;
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2PostgresRelatingField {
+pub(crate) struct Ciboulette2PostgresRelatingField<'a> {
     pub(crate) field: Ciboulette2PostgresTableField,
     pub(crate) table: Ciboulette2PostgresTable,
-    pub(crate) alias: ArcStr,
+    pub(crate) rel_chain: &'a [CibouletteResourceRelationshipDetails],
     pub(crate) related_type: Arc<CibouletteResourceType>,
 }
 
-impl Ciboulette2PostgresRelatingField {
+impl<'a> Ciboulette2PostgresRelatingField<'a> {
     pub fn new(
         field: Ciboulette2PostgresTableField,
         table: Ciboulette2PostgresTable,
-        alias: ArcStr,
+        rel_chain: &'a [CibouletteResourceRelationshipDetails],
         related_type: Arc<CibouletteResourceType>,
     ) -> Self {
         Ciboulette2PostgresRelatingField {
             field,
             table,
-            alias,
+            rel_chain,
             related_type,
         }
     }

@@ -1,7 +1,0 @@
----
-source: src/builder/tests/inserts/gen_values.rs
-expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
-
----
-($1 :: UUID),
-($2 :: UUID);

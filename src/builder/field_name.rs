@@ -21,21 +21,6 @@ impl Ciboulette2PostgresTableField {
     ) -> Self {
         Ciboulette2PostgresTableField { name, alias, cast }
     }
-    pub fn from_additional_field(id: Ciboulette2SqlAdditionalField) -> Self {
-        Ciboulette2PostgresTableField {
-            name: id.ident.name,
-            alias: Some(id.name),
-            cast: None,
-        }
-    }
-
-    pub fn from_additional_field_with_cast(id: Ciboulette2SqlAdditionalField) -> Self {
-        Ciboulette2PostgresTableField {
-            name: id.name,
-            alias: None,
-            cast: None,
-        }
-    }
 }
 
 impl From<&Ciboulette2PostgresId> for Ciboulette2PostgresTableField {

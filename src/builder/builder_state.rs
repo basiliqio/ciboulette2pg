@@ -14,6 +14,14 @@ pub(crate) struct Ciboulette2PostgresBuilderState<'store, 'request> {
     #[getset(get_copy = "pub")]
     query: &'request CibouletteQueryParameters<'request>,
     #[getset(get = "pub")]
+    inclusion_map: BTreeMap<
+        Vec<CibouletteResourceRelationshipDetails>,
+        (
+            Ciboulette2PostgresResponseType,
+            Vec<CibouletteSortingElement>,
+        ),
+    >,
+    #[getset(get = "pub")]
     main_type: Arc<CibouletteResourceType>,
     #[getset(get = "pub")]
     main_table: Arc<Ciboulette2PostgresTable>,
@@ -25,29 +33,41 @@ impl<'store, 'request> Ciboulette2PostgresBuilderState<'store, 'request>
 where
     'store: 'request,
 {
-    /// Check if a relationship is needed in the response.
-    pub(crate) fn check_if_rel_is_needed(
-        &self,
-        other: &CibouletteResourceType,
-        y: &CibouletteResourceRelationshipDetails,
-    ) -> Option<Ciboulette2PostgresResponseType> {
-        match y.relation_option() {
-            CibouletteRelationshipOption::ManyToMany(opt) => {
-                if opt.bucket_resource().as_ref() == other {
-                    Some(Ciboulette2PostgresResponseType::Object)
-                } else {
-                    None
-                }
-            }
-            CibouletteRelationshipOption::ManyToOne(opt)
-            | CibouletteRelationshipOption::OneToMany(opt) => {
-                if opt.one_table().as_ref() == other || opt.many_table().as_ref() == other {
-                    Some(Ciboulette2PostgresResponseType::Object)
-                } else {
-                    None
+    fn build_inclusion_map(
+        query: &'request CibouletteQueryParameters<'request>
+    ) -> BTreeMap<
+        Vec<CibouletteResourceRelationshipDetails>,
+        (
+            Ciboulette2PostgresResponseType,
+            Vec<CibouletteSortingElement>,
+        ),
+    > {
+        let mut res: BTreeMap<
+            Vec<CibouletteResourceRelationshipDetails>,
+            (
+                Ciboulette2PostgresResponseType,
+                Vec<CibouletteSortingElement>,
+            ),
+        > = BTreeMap::new();
+
+        for include_param in query.include() {
+            res.insert(
+                include_param.clone(),
+                (Ciboulette2PostgresResponseType::Object, Vec::default()),
+            );
+        }
+        for sort in query.sorting() {
+            if let Some(mut x) = res.insert(
+                sort.rel_chain().clone(),
+                (Ciboulette2PostgresResponseType::None, vec![sort.clone()]),
+            ) {
+                if let Some((y, z)) = res.get_mut(sort.rel_chain()) {
+                    *y = x.0;
+                    z.append(&mut x.1);
                 }
             }
         }
+        res
     }
 
     /// Create a new state
@@ -62,6 +82,7 @@ where
         let main_table = table_store.get(main_type.name().as_str())?.clone();
 
         Ok(Ciboulette2PostgresBuilderState {
+            inclusion_map: Self::build_inclusion_map(query),
             store,
             table_store,
             path,

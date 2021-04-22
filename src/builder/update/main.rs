@@ -47,14 +47,15 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         main_data_cte: &Ciboulette2PostgresTable,
         rels: &[Ciboulette2SqlAdditionalField],
     ) -> Result<(), Ciboulette2SqlError> {
+        let sort_keys_mains = Self::gen_sort_key_for_main(state, main_data_cte)?;
         self.write_table_info(&main_data_cte)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(
+        self.gen_select_cte(
             &state,
             &main_update_cte,
             request.resource_type().clone(),
             None,
-            rels.iter(),
+            rels.iter().chain(sort_keys_mains.iter()),
             true,
         )?;
         self.buf.write_all(b")")?;
@@ -76,7 +77,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let mut se = Self::default();
         let main_data = extract_data_object_from_update_request(&request)?;
-        let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&state.main_table())?;
+        let (main_cte_update, main_cte_data) =
+            Self::gen_update_cte_tables(&mut se, &state.main_table())?;
         let Ciboulette2PostgresResourceInformations {
             values,
             single_relationships,
@@ -98,27 +100,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &main_cte_data,
             &single_relationships_additional_fields,
         )?;
-        se.select_one_to_one_rels_routine(
-            &state,
-            &main_cte_data,
-            &single_relationships,
-            &single_relationships_additional_fields,
-            Ciboulette2PostgresBuilderState::is_needed_all,
-        )?;
-        se.select_multi_rels_routine(
-            &state,
-            &main_cte_data,
-            &multi_relationships,
-            Ciboulette2PostgresBuilderState::is_needed_all,
-        )?;
+        se.select_rels(&state, &main_cte_data, state.inclusion_map())?;
         se.buf.write_all(b" ")?;
-        se.gen_cte_for_sort(&state, &main_cte_data)?;
-        se.add_working_table(
-            &state.main_table(),
-            (main_cte_data, Ciboulette2PostgresResponseType::Object),
-        );
         // Aggregate every table using UNION ALL
-        se.finish_request(state)?;
+        se.finish_request(state, main_cte_data, false)?;
         Ok(se)
     }
 }

@@ -6,24 +6,6 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type": "articles",
-    "data": {
-      "title": "How to dead"
-    },
-    "related_type": "peoples",
-    "related_id": "[uuid]"
-  },
-  {
-    "id": "[uuid]",
-    "type": "articles",
-    "data": {
-      "title": "Oh my g**"
-    },
-    "related_type": "peoples",
-    "related_id": "[uuid]"
-  },
-  {
-    "id": "[uuid]",
     "type": "peoples",
     "data": {
       "age": 22,
@@ -32,5 +14,23 @@ expression: value
       "last-name": "Yor el",
       "twitter": null
     }
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": {
+      "title": "How to dead"
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": {
+      "title": "Oh my g**"
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
   }
 ]

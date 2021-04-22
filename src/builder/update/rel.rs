@@ -37,7 +37,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     ) -> Result<(), Ciboulette2SqlError> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        self.gen_select_cte_final(&state, &main_cte_update, type_, None, rels.iter(), true)?;
+        self.gen_select_cte(&state, &main_cte_update, type_, None, rels.iter(), true)?;
         self.buf.write_all(b")")?;
         Ok(())
     }
@@ -60,12 +60,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let mut se = Self::default();
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let rels: &'request CibouletteUpdateRelationship<'request> = extract_rels(&request)?;
-        let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&main_table)?;
+        let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&mut se, &main_table)?;
         let Ciboulette2PostgresResourceInformations {
             values,
             single_relationships,
             single_relationships_additional_fields,
-            multi_relationships: _,
+            multi_relationships,
         } = extract_data_rels(
             &ciboulette_store,
             request.path().base_type().clone(),
@@ -81,21 +81,43 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             &main_cte_data,
             &single_relationships_additional_fields,
         )?;
-        se.select_one_to_one_rels_routine(
-            &state,
-            &main_cte_data,
-            &single_relationships,
-            &single_relationships_additional_fields,
-            Ciboulette2PostgresBuilderState::is_needed_updating_relationships,
-        )?;
-        se.buf.write_all(b" ")?;
-        se.gen_cte_for_sort(&state, &main_cte_data)?;
-        se.add_working_table(
-            &main_table,
-            (main_cte_data, Ciboulette2PostgresResponseType::Object),
+        let mut inclusion_map: BTreeMap<
+            Vec<CibouletteResourceRelationshipDetails>,
+            (
+                Ciboulette2PostgresResponseType,
+                Vec<CibouletteSortingElement>,
+            ),
+        > = BTreeMap::default();
+        inclusion_map.insert(
+            vec![rel_details.clone()],
+            (
+                Ciboulette2PostgresResponseType::Id,
+                state
+                    .inclusion_map()
+                    .get(&vec![])
+                    .map(|(_, x)| x)
+                    .cloned()
+                    .unwrap_or_default(),
+            ),
         );
+        se.select_rels(&state, &main_cte_data, &inclusion_map)?;
         // Aggregate every table using UNION ALL
-        se.finish_request(state)?;
+        let rel_table = se
+            .add_working_table(
+                vec![rel_details.clone()],
+                main_cte_data.clone(),
+                Ciboulette2PostgresResponseType::Id,
+            )
+            .map(|(x, _)| x)
+            .ok_or(Ciboulette2SqlError::UnknownError)?;
+        match state.query().sorting().is_empty() {
+            true => {
+                se.write_table_final_select(&rel_table)?;
+                se.buf.write_all(b")")?;
+            }
+            false => se.gen_cte_main_final_sorting(&state, &rel_table)?,
+        }
+        se.finish_request(state, main_cte_data, true)?;
         Ok(se)
     }
 }

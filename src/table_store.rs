@@ -116,6 +116,7 @@ impl Ciboulette2PostgresTable {
     /// Create a new CTE from the current table
     pub fn to_cte(
         &self,
+        builder: &mut Ciboulette2PostgresBuilder,
         prefix: Ciboulette2PostgresSafeIdent,
         suffix: Ciboulette2PostgresSafeIdent,
     ) -> Result<Self, Ciboulette2SqlError> {
@@ -127,7 +128,10 @@ impl Ciboulette2PostgresTable {
                 .name()
                 .clone()
                 .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(prefix))
-                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Suffix(suffix)),
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Suffix(suffix))
+                .add_modifier(Ciboulette2PostgresSafeIdentModifier::Index(Some(
+                    builder.get_new_cte_index(),
+                ))),
             is_cte: true,
         })
     }

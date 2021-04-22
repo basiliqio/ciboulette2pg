@@ -9,7 +9,6 @@ mod delete;
 mod extracting_data;
 mod field_name;
 mod insert;
-mod is_needed;
 mod relating_field;
 mod select;
 mod update;
@@ -80,9 +79,10 @@ pub struct Ciboulette2PostgresBuilder<'request> {
     params: Ciboulette2SqlArguments<'request>,
     #[getset(get_mut = "pub")]
     working_tables: BTreeMap<
-        Ciboulette2PostgresSafeIdent,
+        Vec<CibouletteResourceRelationshipDetails>,
         (Ciboulette2PostgresTable, Ciboulette2PostgresResponseType),
     >,
+    cte_index: usize,
 }
 
 impl<'request> Default for Ciboulette2PostgresBuilder<'request> {
@@ -93,6 +93,7 @@ impl<'request> Default for Ciboulette2PostgresBuilder<'request> {
             ))),
             params: Ciboulette2SqlArguments::with_capacity(128),
             working_tables: BTreeMap::default(),
+            cte_index: 0,
         }
     }
 }
@@ -100,9 +101,17 @@ impl<'request> Default for Ciboulette2PostgresBuilder<'request> {
 impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn add_working_table(
         &mut self,
-        main_table: &Ciboulette2PostgresTable,
-        val: (Ciboulette2PostgresTable, Ciboulette2PostgresResponseType),
-    ) {
-        self.working_tables.insert(main_table.name().clone(), val);
+        rel_chain: Vec<CibouletteResourceRelationshipDetails>,
+        table: Ciboulette2PostgresTable,
+        response_type: Ciboulette2PostgresResponseType,
+    ) -> Option<(Ciboulette2PostgresTable, Ciboulette2PostgresResponseType)> {
+        self.working_tables
+            .insert(rel_chain, (table, response_type))
+    }
+
+    pub(crate) fn get_new_cte_index(&mut self) -> usize {
+        let res = self.cte_index;
+        self.cte_index += 1;
+        res
     }
 }

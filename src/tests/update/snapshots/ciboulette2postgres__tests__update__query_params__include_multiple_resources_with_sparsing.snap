@@ -6,11 +6,18 @@ expression: value
 [
   {
     "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "last-name": "Yor el"
+    }
+  },
+  {
+    "id": "[uuid]",
     "type": "articles",
     "data": {
       "title": "How to dead"
     },
-    "related_type": "peoples",
+    "related_type": "articles",
     "related_id": "[uuid]"
   },
   {
@@ -19,14 +26,27 @@ expression: value
     "data": {
       "title": "Oh my g**"
     },
-    "related_type": "peoples",
+    "related_type": "articles",
     "related_id": "[uuid]"
   },
   {
     "id": "[uuid]",
-    "type": "peoples",
+    "type": "people-article",
     "data": {
-      "last-name": "Yor el"
-    }
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    },
+    "related_type": "people-article",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "people-article",
+    "data": {
+      "article_id": "[uuid]",
+      "people_id": "[uuid]"
+    },
+    "related_type": "people-article",
+    "related_id": "[uuid]"
   }
 ]

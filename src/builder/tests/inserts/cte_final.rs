@@ -22,7 +22,7 @@ fn simple() {
     )
     .unwrap();
     builder
-        .gen_select_cte_final(
+        .gen_select_cte(
             &state,
             &dest_table,
             store.get_type("peoples").unwrap().clone(),
@@ -59,7 +59,7 @@ fn sparse() {
     .unwrap();
 
     builder
-        .gen_select_cte_final(
+        .gen_select_cte(
             &state,
             &dest_table,
             store.get_type("peoples").unwrap().clone(),
@@ -95,7 +95,7 @@ fn empty_sparse() {
     )
     .unwrap();
     builder
-        .gen_select_cte_final(
+        .gen_select_cte(
             &state,
             &dest_table,
             store.get_type("peoples").unwrap().clone(),
@@ -131,7 +131,7 @@ fn non_included() {
     )
     .unwrap();
     builder
-        .gen_select_cte_final(
+        .gen_select_cte(
             &state,
             &dest_table,
             store.get_type("peoples").unwrap().clone(),

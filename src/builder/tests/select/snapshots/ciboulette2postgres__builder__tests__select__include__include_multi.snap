@@ -1,9 +1,9 @@
 ---
-source: src/builder/tests/select/select_main.rs
+source: src/builder/tests/select/include.rs
 expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
 
 ---
-WITH "cte_peoples_data" AS (
+WITH "cte_peoples_data_0" AS (
   SELECT
     "public"."peoples"."id" :: TEXT AS "id",
     "public"."peoples"."id" AS "main_id",
@@ -28,20 +28,11 @@ WITH "cte_peoples_data" AS (
   WHERE
     "public"."peoples"."id" = $7
 ),
-"cte_rel_people-article_rel_data" AS (
-  SELECT
-    "public"."people-article"."id" :: TEXT AS "id",
-    "public"."people-article"."article_id" AS "rel_article_id",
-    "public"."people-article"."people_id" AS "rel_people_id"
-  FROM
-    "public"."people-article"
-    INNER JOIN "cte_peoples_data" ON "public"."people-article"."people_id" = "cte_peoples_data"."main_id"
-),
-"cte_rel_articles_data" AS (
+"cte_rel_articles_data_1" AS (
   SELECT
     "public"."articles"."id" :: TEXT AS "id",
     "public"."articles"."id" AS "main_id",
-    "cte_rel_people-article_rel_data"."rel_people_id" :: TEXT AS "related_id",
+    "cte_peoples_data_0"."id" :: TEXT AS "related_id",
     $8 :: TEXT AS "related_type",
     $9 :: TEXT AS "type",
     JSON_BUILD_OBJECT(
@@ -52,25 +43,26 @@ WITH "cte_peoples_data" AS (
     ) AS "data"
   FROM
     "public"."articles"
-    INNER JOIN "cte_rel_people-article_rel_data" ON "cte_rel_people-article_rel_data"."rel_article_id" = "public"."articles"."id"
-)(
+    INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
+    INNER JOIN "cte_peoples_data_0" ON "cte_peoples_data_0"."main_id" = "public"."people-article"."people_id"
+) (
   SELECT
-    "cte_rel_articles_data"."id",
-    "cte_rel_articles_data"."type",
-    "cte_rel_articles_data"."data",
-    "cte_rel_articles_data"."related_type",
-    "cte_rel_articles_data"."related_id"
+    "cte_peoples_data_0"."id",
+    "cte_peoples_data_0"."type",
+    "cte_peoples_data_0"."data",
+    "cte_peoples_data_0"."related_type",
+    "cte_peoples_data_0"."related_id"
   FROM
-    "cte_rel_articles_data"
+    "cte_peoples_data_0"
 )
 UNION
 ALL (
   SELECT
-    "cte_peoples_data"."id",
-    "cte_peoples_data"."type",
-    "cte_peoples_data"."data",
-    "cte_peoples_data"."related_type",
-    "cte_peoples_data"."related_id"
+    "cte_rel_articles_data_1"."id",
+    "cte_rel_articles_data_1"."type",
+    "cte_rel_articles_data_1"."data",
+    "cte_rel_articles_data_1"."related_type",
+    "cte_rel_articles_data_1"."related_id"
   FROM
-    "cte_peoples_data"
+    "cte_rel_articles_data_1"
 );

@@ -30,7 +30,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 Self::gen_inner_join_one_to_many_rel_table(&mut *buf, &state, left_table, opt)?;
             }
             CibouletteRelationshipOption::ManyToOne(opt) => {
-                Self::gen_inner_join_many_to_one_rel_table(&mut *buf, &state, right_table, opt)?;
+                Self::gen_inner_join_many_to_one_rel_table(
+                    &mut *buf,
+                    left_table,
+                    right_table,
+                    opt,
+                )?;
             }
         }
         Ok(())
@@ -181,24 +186,29 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     }
 
     /// Gen an inner join between the right table and the bucket, in case of a many-to-one relationship
-    fn gen_inner_join_many_to_one_rel_table<'store>(
+    fn gen_inner_join_many_to_one_rel_table(
         buf: &mut Ciboulette2PostgresBuf,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        left_table: &Ciboulette2PostgresTable,
         right_table: &Ciboulette2PostgresTable,
         opt: &CibouletteRelationshipOneToManyOption,
     ) -> Result<(), Ciboulette2SqlError> {
-        let many_table = state.table_store().get(opt.many_table().name().as_str())?;
         buf.write_all(b" INNER JOIN ")?;
-        Self::write_table_info_inner(buf, many_table)?;
+        Self::write_table_info_inner(buf, left_table)?;
         buf.write_all(b" ON ")?;
         Self::insert_ident_inner(
             buf,
             &Ciboulette2PostgresTableField::new(
-                Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?,
+                match left_table.is_cte() {
+                    true => Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?
+                        .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
+                            CIBOULETTE_REL_PREFIX,
+                        )),
+                    false => Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?,
+                },
                 None,
                 None,
             ),
-            many_table,
+            left_table,
             None,
         )?;
         buf.write_all(b" = ")?;

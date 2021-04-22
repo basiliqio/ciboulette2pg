@@ -3,7 +3,7 @@ source: src/builder/tests/misc/sort.rs
 expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
 
 ---
-WITH "cte_peoples_data" AS (
+WITH "cte_peoples_data_0" AS (
   SELECT
     "public"."peoples"."id" :: TEXT AS "id",
     "public"."peoples"."id" AS "main_id",
@@ -26,29 +26,37 @@ WITH "cte_peoples_data" AS (
   FROM
     "public"."peoples"
 ),
-"cte_rel_favorite_color_data" AS (
+"cte_rel_favorite_color_data_1" AS (
   SELECT
     "public"."favorite_color"."id" :: TEXT AS "id",
     "public"."favorite_color"."id" AS "main_id",
-    "cte_peoples_data"."id" :: TEXT AS "related_id",
+    "cte_peoples_data_0"."id" :: TEXT AS "related_id",
     $7 :: TEXT AS "related_type",
     $8 :: TEXT AS "type",
     NULL :: json AS "data",
     "public"."favorite_color"."color" AS "sort_color"
   FROM
     "public"."favorite_color"
-    INNER JOIN "cte_peoples_data" ON "public"."favorite_color"."id" = "cte_peoples_data"."rel_favorite_color"
-)(
+    INNER JOIN "cte_peoples_data_0" ON "cte_peoples_data_0"."rel_favorite_color" = "public"."favorite_color"."id"
+),
+"cte_final_main_data" AS (
   SELECT
-    "cte_peoples_data"."id",
-    "cte_peoples_data"."type",
-    "cte_peoples_data"."data",
-    "cte_peoples_data"."related_type",
-    "cte_peoples_data"."related_id"
+    DISTINCT ON ("cte_peoples_data_0"."main_id") "cte_peoples_data_0".*,
+    "cte_rel_favorite_color_data_1"."sort_color" AS "sort_favorite_color_color"
   FROM
-    "cte_peoples_data"
-    LEFT JOIN "public"."peoples" ON "public"."peoples"."id" = "cte_peoples_data"."main_id"
-    LEFT JOIN "cte_rel_favorite_color_data" ON "cte_rel_favorite_color_data"."main_id" = "public"."peoples"."favorite_color"
+    "cte_peoples_data_0"
+    LEFT JOIN "cte_rel_favorite_color_data_1" ON "cte_rel_favorite_color_data_1"."main_id" = "cte_peoples_data_0"."rel_favorite_color"
   ORDER BY
-    "cte_rel_favorite_color_data"."sort_color" ASC
+    "cte_peoples_data_0"."main_id"
+) (
+  SELECT
+    "cte_final_main_data"."id",
+    "cte_final_main_data"."type",
+    "cte_final_main_data"."data",
+    "cte_final_main_data"."related_type",
+    "cte_final_main_data"."related_id"
+  FROM
+    "cte_final_main_data"
+  ORDER BY
+    "cte_final_main_data"."sort_favorite_color_color" ASC
 );

@@ -111,78 +111,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Ok(())
     }
 
-    /// Handle joigning the related tables + ordering the result set depending
-    /// on the sorting requirement set by the request
-    #[inline]
-    pub(crate) fn handle_sorting_routine<'store>(
-        mut buf: &mut Ciboulette2PostgresBuf,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_table: &Ciboulette2PostgresTable,
-        table: &Ciboulette2PostgresTable,
-        included_tables_map: &BTreeMap<
-            Ciboulette2PostgresSafeIdent,
-            (Ciboulette2PostgresTable, Ciboulette2PostgresResponseType),
-        >,
-    ) -> Result<(), Ciboulette2SqlError> {
-        if main_cte_table != table {
-            return Ok(());
-        }
-        let mut included_tables: Vec<&Ciboulette2PostgresTable> =
-            Vec::with_capacity(state.query().sorting_map().len());
-
-        for el in state.query().sorting() {
-            if el.type_() == state.main_type() {
-                included_tables.push(main_cte_table);
-                continue;
-            }
-            let type_alias = state.main_type().get_alias(el.type_().name().as_str())?;
-            let (_, opt) = state
-                .store()
-                .get_rel(state.main_type().name().as_str(), type_alias.as_str())?;
-            let (included_table, _) = included_tables_map
-                .get(state.table_store().get(el.type_().name().as_str())?.name())
-                .ok_or_else(|| {
-                    Ciboulette2SqlError::MissingRelationForOrdering(table.name().to_string())
-                })?;
-            Self::gen_sort_joins(
-                buf,
-                &included_table,
-                &state.main_table(),
-                &main_cte_table,
-                &opt,
-            )?;
-            included_tables.push(included_table);
-        }
-
-        let mut iter = state
-            .query()
-            .sorting()
-            .iter()
-            .zip(included_tables)
-            .peekable();
-        if iter.peek().is_some() {
-            buf.write_all(b" ORDER BY ")?;
-        }
-        while let Some((el, table)) = iter.next() {
-            Self::insert_ident_inner(
-                &mut buf,
-                &Ciboulette2PostgresTableField::from_additional_field_with_cast(
-                    Ciboulette2SqlAdditionalField::try_from(el)?,
-                ),
-                table,
-                None,
-            )?;
-            match el.direction() {
-                CibouletteSortingDirection::Asc => buf.write_all(b" ASC")?,
-                CibouletteSortingDirection::Desc => buf.write_all(b" DESC")?,
-            }
-            if iter.peek().is_some() {
-                buf.write_all(b", ")?;
-            }
-        }
-        Ok(())
-    }
-
     /// Write the table information to the query
     ///
     /// In the form of `"schema"."table"`
@@ -245,21 +173,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         if wrap_in_parenthesis {
             self.buf.write_all(b")")?;
         }
-        Ok(())
-    }
-
-    /// Compare 2 fields, casting them to `TEXT` to be sure of type compatibility
-    pub(crate) fn compare_fields(
-        &mut self,
-        left_table: &Ciboulette2PostgresTable,
-        left: &Ciboulette2PostgresTableField,
-        right_table: &Ciboulette2PostgresTable,
-        right: &Ciboulette2PostgresTableField,
-    ) -> Result<(), Ciboulette2SqlError> {
-        Self::insert_ident_inner(&mut self.buf, left, &left_table, None)?;
-        self.buf.write_all(b" = ")?;
-        Self::insert_ident_inner(&mut self.buf, &right, &right_table, None)?;
-        //FIXME Make a better id type management system
         Ok(())
     }
 }

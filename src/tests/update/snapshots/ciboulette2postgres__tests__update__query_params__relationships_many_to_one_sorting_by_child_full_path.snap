@@ -6,15 +6,15 @@ expression: value
 [
   {
     "id": "[uuid]",
+    "type": "author",
+    "related_type": "peoples",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
     "type": "comments",
     "data": {
       "body": "Wasnt convinced..."
     }
-  },
-  {
-    "id": "[uuid]",
-    "type": "author",
-    "related_type": "comments",
-    "related_id": "[uuid]"
   }
 ]

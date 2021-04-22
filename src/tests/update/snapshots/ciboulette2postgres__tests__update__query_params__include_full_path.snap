@@ -6,12 +6,23 @@ expression: value
 [
   {
     "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Sicnarf",
+      "gender": "M",
+      "last-name": "Yor el",
+      "twitter": null
+    }
+  },
+  {
+    "id": "[uuid]",
     "type": "articles",
     "data": {
       "body": "Yes",
       "title": "How to dead"
     },
-    "related_type": "peoples",
+    "related_type": "articles",
     "related_id": "[uuid]"
   },
   {
@@ -21,18 +32,7 @@ expression: value
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
     },
-    "related_type": "peoples",
+    "related_type": "articles",
     "related_id": "[uuid]"
-  },
-  {
-    "id": "[uuid]",
-    "type": "peoples",
-    "data": {
-      "age": 22,
-      "first-name": "Sicnarf",
-      "gender": "M",
-      "last-name": "Yor el",
-      "twitter": null
-    }
   }
 ]
