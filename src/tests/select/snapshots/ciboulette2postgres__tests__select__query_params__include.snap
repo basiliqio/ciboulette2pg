@@ -22,7 +22,7 @@ expression: value
       "body": "Yes",
       "title": "How to dead"
     },
-    "related_type": "articles",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   },
   {
@@ -32,7 +32,7 @@ expression: value
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
     },
-    "related_type": "articles",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   }
 ]

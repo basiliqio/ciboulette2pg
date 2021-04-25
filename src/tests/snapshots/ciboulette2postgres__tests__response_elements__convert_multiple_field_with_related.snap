@@ -28,7 +28,7 @@ expression: value
   },
   {
     "identifier": {
-      "type": "peoples",
+      "type": "articles",
       "id": "[uuid]"
     },
     "data": {
@@ -45,7 +45,7 @@ expression: value
   },
   {
     "identifier": {
-      "type": "peoples",
+      "type": "articles",
       "id": "[uuid]"
     },
     "data": {
@@ -62,7 +62,7 @@ expression: value
   },
   {
     "identifier": {
-      "type": "peoples",
+      "type": "articles",
       "id": "[uuid]"
     },
     "data": {

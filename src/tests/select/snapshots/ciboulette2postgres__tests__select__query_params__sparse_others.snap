@@ -21,7 +21,7 @@ expression: value
     "data": {
       "title": "How to dead"
     },
-    "related_type": "articles",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   },
   {
@@ -30,7 +30,7 @@ expression: value
     "data": {
       "title": "Oh my g**"
     },
-    "related_type": "articles",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   }
 ]

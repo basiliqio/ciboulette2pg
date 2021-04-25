@@ -22,7 +22,7 @@ expression: value
       "body": "Yes",
       "title": "How to dead"
     },
-    "related_type": "articles",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   },
   {
@@ -32,7 +32,7 @@ expression: value
       "body": "Yeah I know ! Right ?!",
       "title": "Oh my g**"
     },
-    "related_type": "articles",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   },
   {
@@ -41,7 +41,7 @@ expression: value
     "data": {
       "body": "Wasnt convinced..."
     },
-    "related_type": "comments",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   },
   {
@@ -50,7 +50,7 @@ expression: value
     "data": {
       "body": "Vous savez, moi je ne crois pas qu\"il y ait de bonne ou de mauvaise situation. Moi, si je devais résumer ma vie aujourd\"hui avec vous, je dirais que c\"est d\"abord des rencontres. Des gens qui m\"ont tendu la main, peut-être à un moment où je ne pouvais pas, où j\"étais seul chez moi."
     },
-    "related_type": "comments",
+    "related_type": "peoples",
     "related_id": "[uuid]"
   }
 ]
