@@ -55,7 +55,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     }
 
     /// Insert `WHERE` close into the query for selecting main object or relationships
-    fn gen_matcher_for_normal_select<'store>(
+    pub(crate) fn gen_matcher_for_normal_select<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,

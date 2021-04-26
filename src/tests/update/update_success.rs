@@ -35,6 +35,28 @@ macro_rules! baseline_for_people {
 }
 
 #[basiliq_test(run_migrations)]
+async fn empty(mut pool: sqlx::PgPool) {
+    let data = init_values::init_values(&mut pool).await;
+    baseline_for_people!(pool);
+    let people_id = data.get("peoples").unwrap().first().unwrap();
+    let raw_rows = test_update(
+        &mut pool,
+        format!("/peoples/{}", people_id).as_str(),
+        json!({
+            "data": json!({
+                "type": "peoples",
+                "id": people_id
+            })
+        })
+        .to_string()
+        .as_str(),
+    )
+    .await;
+    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    snapshot_table(&mut pool, "update_empty", &["peoples"]).await;
+}
+
+#[basiliq_test(run_migrations)]
 async fn main_fields(mut pool: sqlx::PgPool) {
     let data = init_values::init_values(&mut pool).await;
     baseline_for_people!(pool);

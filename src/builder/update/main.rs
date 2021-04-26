@@ -92,7 +92,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             true,
         )?;
         se.buf.write_all(b"WITH ")?;
-        se.gen_update_main_update(&request, &state.main_table(), &main_cte_update, values)?;
+        match values.is_empty() {
+            true => se.gen_update_select_if_empty_value(&state, &main_cte_update, request)?,
+            false => {
+                se.gen_update_main_update(&request, &state.main_table(), &main_cte_update, values)?
+            }
+        };
         se.gen_update_main_update_data(
             &state,
             &request,
@@ -105,5 +110,22 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         // Aggregate every table using UNION ALL
         se.finish_request(state, main_cte_data, false)?;
         Ok(se)
+    }
+
+    fn gen_update_select_if_empty_value<'store>(
+        &mut self,
+        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        main_cte_update: &Ciboulette2PostgresTable,
+        request: &'request CibouletteUpdateRequest<'request>,
+    ) -> Result<(), Ciboulette2SqlError>
+    where
+        'store: 'request,
+    {
+        self.write_table_info(main_cte_update)?;
+        self.buf.write_all(b" AS (SELECT * FROM ")?;
+        self.write_table_info(state.main_table())?;
+        self.gen_matcher_for_normal_select(state, request.resource_id())?;
+        self.buf.write_all(b"), ")?;
+        Ok(())
     }
 }
