@@ -9,9 +9,5 @@ expression: value
     "type": "author",
     "related_type": "comments",
     "related_id": "[uuid]"
-  },
-  {
-    "id": "[uuid]",
-    "type": "comments"
   }
 ]

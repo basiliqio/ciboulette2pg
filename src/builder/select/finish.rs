@@ -243,7 +243,15 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.write_table_info(table)?;
         for rel_chain in state.inclusion_map().keys() {
             let mut current_table = table.clone();
+            println!("Current table {}", current_table.name());
             for (idx, rel) in rel_chain.iter().enumerate() {
+                println!(
+                    "MY REL CHAIN IS {:#?}",
+                    rel_chain[0..=idx]
+                        .iter()
+                        .map(|x| x.related_type().name())
+                        .collect::<Vec<&ArcStr>>()
+                );
                 let current_rel_chain = &rel_chain[0..=idx];
                 let left_table = self
                     .working_tables()
@@ -251,6 +259,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     .cloned()
                     .map(|(x, _)| x)
                     .ok_or(Ciboulette2SqlError::UnknownError)?;
+                println!("LEFT TABLE {}", left_table.name());
                 Self::gen_left_join(&mut self.buf, &left_table, rel, &current_table)?;
                 current_table = left_table;
             }

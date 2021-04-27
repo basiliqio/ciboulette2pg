@@ -15,6 +15,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     ) -> Result<(), Ciboulette2SqlError> {
         for (included_list, (response_type, sort_fields_el)) in inclusion_map {
             let mut current_table = main_cte_data.clone();
+            let mut current_type = main_cte_data.ciboulette_type().clone();
             for (include_el_index, include_el) in included_list.iter().enumerate() {
                 let next_table = state
                     .table_store()
@@ -37,7 +38,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     },
                     current_table.clone(),
                     &current_rel_chain,
-                    current_table.ciboulette_type().clone(),
+                    current_type,
                 );
                 let mut sort_additional_fields = Vec::with_capacity(sort_fields_el.len()); // FIXME Do better
                 for sorting_element in sort_fields_el {
@@ -70,6 +71,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     *response_type,
                 );
                 current_table = next_table_cte;
+                current_type = current_table.ciboulette_type().clone();
             }
         }
         Ok(())

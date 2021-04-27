@@ -15,9 +15,5 @@ expression: value
     "type": "articles",
     "related_type": "peoples",
     "related_id": "[uuid]"
-  },
-  {
-    "id": "[uuid]",
-    "type": "peoples"
   }
 ]

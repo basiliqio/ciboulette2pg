@@ -20,13 +20,13 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let rels = extract_data_no_body(&ciboulette_store, state.main_type().clone())?;
 
         se.buf.write_all(b"WITH \n")?;
-        let main_cte_data = se.gen_main_select(
+        let skip_main = se.gen_main_select(
             &state,
-            main_cte_data,
+            &main_cte_data,
             rels.single_relationships_additional_fields(),
         )?;
         // Aggregate every table using UNION ALL
-        se.finish_request(state, main_cte_data, false)?;
+        se.finish_request(state, main_cte_data, skip_main)?;
         Ok(se)
     }
 
@@ -101,24 +101,25 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     fn gen_main_select<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: Ciboulette2PostgresTable,
+        main_cte_data: &Ciboulette2PostgresTable,
         rels: &[Ciboulette2SqlAdditionalField],
-    ) -> Result<Ciboulette2PostgresTable, Ciboulette2SqlError>
+    ) -> Result<bool, Ciboulette2SqlError>
     where
         'store: 'request,
     {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
-        match state.path() {
+        let skip_main = match state.path() {
             CiboulettePath::TypeIdRelationship(left_type, id, rel_details) => {
-                return self.gen_main_select_type_relationships(
+                self.gen_main_select_type_relationships(
                     state,
-                    main_cte_data,
+                    &main_cte_data,
                     left_type,
                     rel_details,
                     rels,
                     id,
-                );
+                )?;
+                true
             }
             CiboulettePath::TypeIdRelated(left_type, id, rel_details) => {
                 self.gen_main_select_type_related(
@@ -129,26 +130,29 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     id,
                     &main_cte_data,
                 )?;
+                false
             }
             CiboulettePath::TypeId(_, id) => {
                 self.gen_main_select_type_id(state, rels, id, &main_cte_data)?;
+                false
             }
             CiboulettePath::Type(_) => {
                 self.gen_main_select_type(state, rels, &main_cte_data)?;
+                false
             }
-        }
-        Ok(main_cte_data)
+        };
+        Ok(skip_main)
     }
 
     fn gen_main_select_type_relationships<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: Ciboulette2PostgresTable,
+        main_cte_data: &Ciboulette2PostgresTable,
         left_type: &Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
         rels: &[Ciboulette2SqlAdditionalField],
         id: &'store CibouletteId,
-    ) -> Result<Ciboulette2PostgresTable, Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2SqlError>
     where
         'store: 'request,
     {
@@ -196,13 +200,31 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         )?;
         self.gen_matcher_for_normal_select_inner(state, id, &*main_type_table)?;
         self.buf.write_all(b") ")?;
-        self.select_rels(&state, &main_cte_data, &state.inclusion_map())?;
-        let rel_table = self.add_working_table(
-            vec![rel_details.clone()],
-            main_type_cte.clone(),
-            Ciboulette2PostgresResponseType::Id,
-        );
-        Ok(main_cte_data)
+        let inclusion_map: BTreeMap<
+            Vec<CibouletteResourceRelationshipDetails>,
+            (
+                Ciboulette2PostgresResponseType,
+                Vec<CibouletteSortingElement>,
+            ),
+        > = state
+            .inclusion_map()
+            .iter()
+            .map(|(k, (_, e))| {
+                (
+                    k.clone(),
+                    (Ciboulette2PostgresResponseType::None, e.clone()),
+                )
+            })
+            .collect();
+        self.select_rels(&state, &main_cte_data, &inclusion_map)?;
+        match state.query().sorting().is_empty() {
+            true => {
+                self.write_table_final_select(&main_cte_data)?;
+                self.buf.write_all(b")")?;
+            }
+            false => self.gen_cte_main_final_sorting(&state, &main_cte_data)?,
+        }
+        Ok(())
     }
 
     fn gen_main_select_type_related<'store>(
