@@ -7,7 +7,7 @@ expression: value
   {
     "id": "[uuid]",
     "type": "author",
-    "related_type": "peoples",
+    "related_type": "comments",
     "related_id": "[uuid]"
   },
   {

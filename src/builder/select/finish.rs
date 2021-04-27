@@ -142,15 +142,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             Some(relating_field) => {
                 self.insert_ident(relating_field.field(), relating_field.table())?;
                 self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
-                let related_type_name = match relating_field.rel_chain().len() > 2 {
-                    true => relating_field.rel_chain()[relating_field.rel_chain().len() - 2]
-                        .related_type()
-                        .name()
-                        .clone(),
-                    false => state.main_type().name().clone(),
-                };
                 self.insert_params(
-                    Ciboulette2SqlValue::ArcStr(Some(related_type_name)),
+                    Ciboulette2SqlValue::ArcStr(Some(
+                        relating_field.table().ciboulette_type().name().clone(),
+                    )),
                     relating_field.table(),
                 )?;
                 self.buf.write_all(b"::TEXT AS \"related_type\", ")?;

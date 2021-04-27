@@ -46,12 +46,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                         next_table.ciboulette_type().clone(),
                     )?);
                 }
+                let rels =
+                    extract_data_no_body(&state.store(), next_table_cte.ciboulette_type().clone())?;
                 self.gen_select_cte(
 					state,
 					&next_table,
 					working_table.ciboulette_type().clone(),
 					Some(relating_field),
-					sort_additional_fields.iter(),
+					rels.single_relationships_additional_fields().iter().chain(sort_additional_fields.iter()),
 					!matches!(include_el.relation_option(), CibouletteRelationshipOption::ManyToOne(x) if x.part_of_many_to_many().is_some()) && matches!(response_type, Ciboulette2PostgresResponseType::Object),
 				)?;
                 Self::gen_inner_join(

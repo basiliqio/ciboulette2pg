@@ -53,7 +53,9 @@ WITH "cte_peoples_data_0" AS (
     "cte_rel_articles_data_1"."id" :: TEXT AS "related_id",
     $12 :: TEXT AS "related_type",
     $13 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($14, "public"."comments"."body") AS "data"
+    JSON_BUILD_OBJECT($14, "public"."comments"."body") AS "data",
+    "public"."comments"."article" AS "rel_article",
+    "public"."comments"."author" AS "rel_author"
   FROM
     "public"."comments"
     INNER JOIN "cte_rel_articles_data_1" ON "cte_rel_articles_data_1"."main_id" = "public"."comments"."article"

@@ -57,7 +57,9 @@ WITH "cte_peoples_insert_0" AS (
     "cte_peoples_data_1"."id" :: TEXT AS "related_id",
     $14 :: TEXT AS "related_type",
     $15 :: TEXT AS "type",
-    JSON_BUILD_OBJECT($16, "public"."comments"."body") AS "data"
+    JSON_BUILD_OBJECT($16, "public"."comments"."body") AS "data",
+    "public"."comments"."article" AS "rel_article",
+    "public"."comments"."author" AS "rel_author"
   FROM
     "public"."comments"
     INNER JOIN "cte_peoples_data_1" ON "cte_peoples_data_1"."main_id" = "public"."comments"."author"
@@ -86,7 +88,9 @@ WITH "cte_peoples_insert_0" AS (
       "public"."people-article"."article_id",
       $23,
       "public"."people-article"."people_id"
-    ) AS "data"
+    ) AS "data",
+    "public"."people-article"."article_id" AS "rel_article_id",
+    "public"."people-article"."people_id" AS "rel_people_id"
   FROM
     "public"."people-article"
     INNER JOIN "cte_peoples_data_1" ON "cte_peoples_data_1"."main_id" = "public"."people-article"."people_id"
