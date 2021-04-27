@@ -6,6 +6,12 @@ expression: value
 [
   {
     "id": "[uuid]",
-    "type": "favorite_color"
+    "type": "favorite_color",
+    "related_type": "peoples",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "peoples"
   }
 ]
