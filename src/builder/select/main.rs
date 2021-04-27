@@ -155,25 +155,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let main_type_table = state.table_store().get(left_type.name().as_str())?.clone();
         let main_type_cte =
             main_type_table.to_cte(&mut *self, CIBOULETTE_REL_PREFIX, CIBOULETTE_DATA_SUFFIX)?;
-        let mut inclusion_map: BTreeMap<
-            Vec<CibouletteResourceRelationshipDetails>,
-            (
-                Ciboulette2PostgresResponseType,
-                Vec<CibouletteSortingElement>,
-            ),
-        > = BTreeMap::default();
-        inclusion_map.insert(
-            vec![rel_details.clone()],
-            (
-                Ciboulette2PostgresResponseType::Id,
-                state
-                    .inclusion_map()
-                    .get(&vec![])
-                    .map(|(_, x)| x)
-                    .cloned()
-                    .unwrap_or_default(),
-            ),
-        );
         let sort_keys_mains = Self::gen_sort_key_for_main(state, &main_type_table)?;
         let rels_main_type = extract_data_no_body(state.store(), state.path().base_type().clone())?;
         self.gen_select_cte(
@@ -215,6 +196,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         )?;
         self.gen_matcher_for_normal_select_inner(state, id, &*main_type_table)?;
         self.buf.write_all(b") ")?;
+        self.select_rels(&state, &main_cte_data, &state.inclusion_map())?;
         let rel_table = self.add_working_table(
             vec![rel_details.clone()],
             main_type_cte.clone(),

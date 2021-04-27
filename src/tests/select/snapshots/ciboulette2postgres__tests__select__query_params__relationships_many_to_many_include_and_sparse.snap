@@ -19,5 +19,32 @@ expression: value
   {
     "id": "[uuid]",
     "type": "peoples"
+  },
+  {
+    "id": "[uuid]",
+    "type": "author",
+    "data": {
+      "first-name": "Francis"
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "author",
+    "data": {
+      "first-name": "Francis"
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "author",
+    "data": {
+      "first-name": "Somebody"
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
   }
 ]

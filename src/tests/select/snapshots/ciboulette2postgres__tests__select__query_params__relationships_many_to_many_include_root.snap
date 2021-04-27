@@ -19,5 +19,44 @@ expression: value
   {
     "id": "[uuid]",
     "type": "peoples"
+  },
+  {
+    "id": "[uuid]",
+    "type": "author",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "author",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "author",
+    "data": {
+      "age": 34,
+      "first-name": "Somebody",
+      "gender": "F",
+      "last-name": "Wuhu",
+      "twitter": "@randomhandle"
+    },
+    "related_type": "articles",
+    "related_id": "[uuid]"
   }
 ]
