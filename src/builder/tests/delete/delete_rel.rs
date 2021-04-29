@@ -9,7 +9,7 @@ fn simple_single_rel() {
             .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Delete;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_delete(
@@ -33,7 +33,7 @@ fn simple_single_rel_non_optional() {
     .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Delete;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
     let err = Ciboulette2PostgresBuilder::gen_delete(
@@ -59,7 +59,7 @@ fn multi_relationships() {
     .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Delete;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
     let err = Ciboulette2PostgresBuilder::gen_delete(

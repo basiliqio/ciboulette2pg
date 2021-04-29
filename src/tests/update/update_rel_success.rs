@@ -11,7 +11,7 @@ async fn test_update<'store>(
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
     let body: Option<&str> = Some(body);
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &body);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_update(

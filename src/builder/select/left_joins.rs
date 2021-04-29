@@ -50,11 +50,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             buf,
             &Ciboulette2PostgresTableField::new(
                 match right_table.is_cte() {
-                    true => Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?
+                    true => Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key())?
                         .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
                             CIBOULETTE_REL_PREFIX,
                         )),
-                    false => Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?,
+                    false => Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key())?,
                 },
                 None,
                 None,

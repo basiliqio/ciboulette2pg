@@ -154,7 +154,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         left_table: &Ciboulette2PostgresTable,
         opt: &CibouletteRelationshipOneToManyOption,
     ) -> Result<(), Ciboulette2SqlError> {
-        let many_table = state.table_store().get(opt.many_table().name().as_str())?;
+        let many_table = state
+            .table_store()
+            .get(opt.many_resource().name().as_str())?;
         buf.write_all(b" INNER JOIN ")?;
         Self::write_table_info_inner(buf, left_table)?;
         buf.write_all(b" ON ")?;
@@ -175,7 +177,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &Ciboulette2PostgresTableField::new(
-                Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?,
+                Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key())?,
                 None,
                 None,
             ),
@@ -199,11 +201,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             buf,
             &Ciboulette2PostgresTableField::new(
                 match left_table.is_cte() {
-                    true => Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?
+                    true => Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key())?
                         .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
                             CIBOULETTE_REL_PREFIX,
                         )),
-                    false => Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key())?,
+                    false => Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key())?,
                 },
                 None,
                 None,

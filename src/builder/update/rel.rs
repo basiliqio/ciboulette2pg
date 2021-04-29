@@ -3,7 +3,7 @@ use super::*;
 //// Extract the relationships object from a request, fails if the request contains a main type
 fn extract_rels<'request>(
     request: &'request CibouletteUpdateRequest<'request>
-) -> Result<&'request CibouletteUpdateRelationship<'request>, Ciboulette2SqlError> {
+) -> Result<&'request CibouletteUpdateRelationshipBody<'request>, Ciboulette2SqlError> {
     match request.data() {
         CibouletteUpdateRequestType::MainType(_) => Err(Ciboulette2SqlError::UpdatingMainObject),
         CibouletteUpdateRequestType::Relationship(rels) => Ok(rels),
@@ -59,7 +59,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let main_table = ciboulette_table_store.get(&main_type.name().as_str())?;
         let mut se = Self::default();
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
-        let rels: &'request CibouletteUpdateRelationship<'request> = extract_rels(&request)?;
+        let rels: &'request CibouletteUpdateRelationshipBody<'request> = extract_rels(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&mut se, &main_table)?;
         let Ciboulette2PostgresResourceInformations {
             values,

@@ -38,18 +38,18 @@ pub(crate) fn fill_relationships_without_data(
             acc.single_relationships_additional_fields_mut().push(
                 Ciboulette2SqlAdditionalField::new(
                     Ciboulette2PostgresTableField::new(
-                        Ciboulette2PostgresSafeIdent::try_from(opt.many_table_key().clone())?,
+                        Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key().clone())?,
                         None,
                         None,
                     ),
                     Ciboulette2SqlAdditionalFieldType::Relationship,
-                    opt.one_table().clone(),
+                    opt.one_resource().clone(),
                 ),
             );
             acc.single_relationships_mut()
                 .push(Ciboulette2PostgresResourceSingleRelationships {
-                    type_: opt.one_table().clone(),
-                    key: opt.many_table_key().clone(),
+                    type_: opt.one_resource().clone(),
+                    key: opt.many_resource_key().clone(),
                     rel_details,
                 });
         }

@@ -30,7 +30,7 @@ async fn test_update<'store>(
     let body_opt = Some(body.as_str());
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &body_opt);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body_opt);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_update(
@@ -74,7 +74,7 @@ async fn test_update_many_to_one<'store>(
     let body_opt = Some(body.as_str());
     const INTENTION: CibouletteIntention = CibouletteIntention::Update;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &body_opt);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body_opt);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_update(

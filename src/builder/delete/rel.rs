@@ -7,14 +7,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         query: &'request CibouletteDeleteRequest<'request>,
         rel_opt: &CibouletteRelationshipOneToManyOption,
     ) -> Result<(), Ciboulette2SqlError> {
-        let many_table = table_store.get(rel_opt.many_table().name().as_str())?;
+        let many_table = table_store.get(rel_opt.many_resource().name().as_str())?;
 
         self.buf.write_all(b"UPDATE ")?;
         self.write_table_info(many_table)?;
         self.buf.write_all(b" SET ")?;
         self.insert_ident_name(
             &Ciboulette2PostgresTableField::new(
-                Ciboulette2PostgresSafeIdent::try_from(rel_opt.many_table_key())?,
+                Ciboulette2PostgresSafeIdent::try_from(rel_opt.many_resource_key())?,
                 None,
                 None,
             ),

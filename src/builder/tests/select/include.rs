@@ -10,7 +10,7 @@ fn include_multi() {
     .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(
@@ -34,7 +34,7 @@ fn include_nested() {
     .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(
@@ -61,7 +61,7 @@ fn include_single() {
     .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(
@@ -84,7 +84,7 @@ fn include_deep_nested() {
     .unwrap();
     const INTENTION: CibouletteIntention = CibouletteIntention::Read;
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &None);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
     let builder = Ciboulette2PostgresBuilder::gen_select(

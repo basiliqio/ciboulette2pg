@@ -30,7 +30,7 @@ where
 	"#,
     );
 
-    let req_builder = CibouletteInboundRequestBuilder::new(INTENTION, &parsed_url, &BODY);
+    let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&store).unwrap();
     CibouletteCreateRequest::try_from(request).unwrap()
 }

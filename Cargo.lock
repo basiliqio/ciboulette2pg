@@ -82,7 +82,7 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 [[package]]
 name = "basiliq_db_test_proc_macro"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#903b69c944879b3d4a2cce305583ae10f3d0df03"
+source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#3ce72bfa386c4b4cd360d55125a951fff47bdb81"
 dependencies = [
  "basiliq_db_test_utils",
  "proc-macro2",
@@ -93,7 +93,7 @@ dependencies = [
 [[package]]
 name = "basiliq_db_test_utils"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/basiliq_db_test_utils.git#903b69c944879b3d4a2cce305583ae10f3d0df03"
+source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#3ce72bfa386c4b4cd360d55125a951fff47bdb81"
 dependencies = [
  "anyhow",
  "lazy_static",
@@ -237,11 +237,12 @@ dependencies = [
 
 [[package]]
 name = "ciboulette"
-version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#03cc2e67d2bc92ed01da3790eac4e01af84ea7fa"
+version = "0.1.1"
+source = "git+https://github.com/basiliqio/ciboulette.git?branch=main#10b23f7953fd1e14c2f4f769523c7f43c83fa5d2"
 dependencies = [
  "arcstr",
  "getset",
+ "indexmap",
  "itertools",
  "lazy_static",
  "messy_json",
@@ -289,7 +290,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/ciboulette.git#03cc2e67d2bc92ed01da3790eac4e01af84ea7fa"
+source = "git+https://github.com/basiliqio/ciboulette.git?branch=main#10b23f7953fd1e14c2f4f769523c7f43c83fa5d2"
 dependencies = [
  "arcstr",
  "ciboulette",
@@ -666,6 +667,7 @@ checksum = "824845a0bf897a9042383849b02c1bc219c2383772efcd5c6f9766fa4b81aef3"
 dependencies = [
  "autocfg",
  "hashbrown",
+ "serde",
 ]
 
 [[package]]
@@ -807,8 +809,9 @@ checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
 
 [[package]]
 name = "messy_json"
-version = "0.1.0"
-source = "git+https://gitlab.com/basiliq/messy_json.git#5932e7b5d475ef2de7ff570e2da8320391ad010e"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "689e1b3c1c03897ab9cbf5757395de430ca940efb383e9209501f5e64938e97e"
 dependencies = [
  "arcstr",
  "itertools",
@@ -1176,9 +1179,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.6"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8270314b5ccceb518e7e578952f0b72b88222d02e8f77f5ecf7abbb673539041"
+checksum = "85dd92e586f7355c633911e11f77f3d12f04b1b1bd76a198bd34ae3af8341ef2"
 dependencies = [
  "bitflags",
 ]
@@ -1606,9 +1609,9 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "syn"
-version = "1.0.70"
+version = "1.0.71"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9505f307c872bab8eb46f77ae357c8eba1fdacead58ee5a850116b1d7f82883"
+checksum = "ad184cc9470f9117b2ac6817bfe297307418819ba40552f9b3846f05c33d5373"
 dependencies = [
  "proc-macro2",
  "quote",
