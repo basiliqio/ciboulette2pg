@@ -81,6 +81,16 @@ impl<'request> From<&CibouletteId<'request>> for Ciboulette2SqlValue<'request> {
     }
 }
 
+impl<'request> From<CibouletteIdType> for Ciboulette2SqlValue<'request> {
+    fn from(val: CibouletteIdType) -> Ciboulette2SqlValue<'request> {
+        match val {
+            CibouletteIdType::Number => Ciboulette2SqlValue::Numeric(None),
+            CibouletteIdType::Text => Ciboulette2SqlValue::Text(None),
+            CibouletteIdType::Uuid => Ciboulette2SqlValue::Uuid(None),
+        }
+    }
+}
+
 impl<'request> From<&'request str> for Ciboulette2SqlValue<'request> {
     fn from(val: &'request str) -> Ciboulette2SqlValue<'request> {
         Ciboulette2SqlValue::Text(Some(Cow::Borrowed(val)))

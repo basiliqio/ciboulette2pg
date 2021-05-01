@@ -18,9 +18,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 
         let Ciboulette2PostgresResourceInformations {
             values,
-            single_relationships,
+            single_relationships: _, // TODO
             single_relationships_additional_fields,
-            multi_relationships,
+            multi_relationships: _, // TODO
         } = extract_data(
             &ciboulette_store,
             request.path().main_type().clone(),
@@ -29,13 +29,16 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             true,
         )?;
         se.buf.write_all(b"WITH ")?;
+        // Insert the data in the database
         se.write_main_table_inserts(&main_cte_insert, &state, values)?;
+        // Return the just inserted data
         se.write_main_table_select(
             &main_cte_data,
             &state,
             main_cte_insert,
             &single_relationships_additional_fields,
         )?;
+        // Select the relationships
         se.select_rels(&state, &main_cte_data, state.inclusion_map())?;
         se.buf.write_all(b" ")?;
         // Aggregate every table using UNION ALL

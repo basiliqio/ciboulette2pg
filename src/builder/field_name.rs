@@ -8,8 +8,11 @@ use std::convert::TryFrom;
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2PostgresTableField {
+    /// The name of the field
     pub(crate) name: Ciboulette2PostgresSafeIdent,
+    /// The new alias of the field, if any
     pub(crate) alias: Option<Ciboulette2PostgresSafeIdent>,
+    /// the cast this field should go under
     pub(crate) cast: Option<Ciboulette2PostgresSafeIdent>,
 }
 

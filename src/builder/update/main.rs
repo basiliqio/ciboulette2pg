@@ -81,9 +81,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             Self::gen_update_cte_tables(&mut se, &state.main_table())?;
         let Ciboulette2PostgresResourceInformations {
             values,
-            single_relationships,
+            single_relationships: _, // TODO
             single_relationships_additional_fields,
-            multi_relationships,
+            multi_relationships: _, // TODO
         } = extract_data(
             &ciboulette_store,
             request.path().main_type().clone(),
@@ -112,6 +112,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Ok(se)
     }
 
+    /// Select the value that should've been updated, when updating a record
+    /// with no provided values to update
     fn gen_update_select_if_empty_value<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,

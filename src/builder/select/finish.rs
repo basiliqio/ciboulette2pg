@@ -3,6 +3,9 @@ use itertools::Itertools;
 use super::*;
 
 impl<'request> Ciboulette2PostgresBuilder<'request> {
+    /// Finish an SQL query, selecting every working table in the state.
+    ///
+    /// If the `skip_main` parameter is used, the main table table is not handled
     pub(crate) fn finish_request<'store>(
         &mut self,
         state: Ciboulette2PostgresBuilderState<'store, 'request>,
@@ -23,26 +26,33 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 
         for (table, is_needed) in std::mem::take(&mut self.working_tables).values() {
             if matches!(is_needed, Ciboulette2PostgresResponseType::None) {
+                // if the table is not needed, skip it
                 continue;
             } else {
+                // Begin with an "UNION ALL" as the main table should've been handled before in any case
                 self.buf.write_all(b" UNION ALL ")?;
             }
-            // SELECT * FROM
+            // Select the working table
             self.write_table_final_select(table)?;
             self.buf.write_all(b")")?;
         }
         Ok(())
     }
 
+    /// Handle the main table sorting, create a new cte just for sorting
     pub(crate) fn gen_cte_main_final_sorting<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         main_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError> {
+        // Select the final main data, removing duplicates
         let (final_data_table, sorting_field_map) =
             self.gen_select_cte_final(&state, main_table)?;
+        // From now on, we're not writing CTE anymore
+        // Writing the final select, that'll be part of the database response
         self.write_table_final_select(&final_data_table)?;
         self.buf.write_all(b" ORDER BY ")?;
+        // For every sorting field, in the order specified by the request, sort the request
         for (idx, sorting_el) in state.query().sorting().iter().enumerate() {
             let field_name = sorting_field_map
                 .get(sorting_el)
@@ -64,6 +74,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Ok(())
     }
 
+    /// Select a table that will be part of the database response
+    ///
+    /// The select is wrapped in parenthesis, the parent function has the responsability to add the matching closing
+    /// parenthesis
     pub(crate) fn write_table_final_select(
         &mut self,
         table: &Ciboulette2PostgresTable,
@@ -107,6 +121,15 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Self::write_table_info_inner(&mut self.buf, &table)?;
         Ok(())
     }
+
+    /// Generate a select CTE.
+    ///
+    /// It exposes common keys such as :
+    /// - id
+    /// - type
+    /// - data
+    /// - related_type
+    /// - related_id
     pub(crate) fn gen_select_cte<'store, 'b, I>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
@@ -178,6 +201,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Ok(())
     }
 
+    /// Create a final CTE for the main data
+    ///
+    /// Aggregating in a single place the final main data, removing duplicates row
+    /// and joining the sort keys that can be used later to sort the main data
     pub(crate) fn gen_select_cte_final<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
@@ -243,15 +270,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.write_table_info(table)?;
         for rel_chain in state.inclusion_map().keys() {
             let mut current_table = table.clone();
-            println!("Current table {}", current_table.name());
             for (idx, rel) in rel_chain.iter().enumerate() {
-                println!(
-                    "MY REL CHAIN IS {:#?}",
-                    rel_chain[0..=idx]
-                        .iter()
-                        .map(|x| x.related_type().name())
-                        .collect::<Vec<&ArcStr>>()
-                );
                 let current_rel_chain = &rel_chain[0..=idx];
                 let left_table = self
                     .working_tables()
@@ -259,7 +278,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     .cloned()
                     .map(|(x, _)| x)
                     .ok_or(Ciboulette2SqlError::UnknownError)?;
-                println!("LEFT TABLE {}", left_table.name());
                 Self::gen_left_join(&mut self.buf, &left_table, rel, &current_table)?;
                 current_table = left_table;
             }

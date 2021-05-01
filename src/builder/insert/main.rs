@@ -13,7 +13,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.buf.write_all(b" ")?;
         match params.len() {
             0 => {
-                self.buf.write_all(b"DEFAULT VALUES")?;
+                self.buf.write_all(b"DEFAULT VALUES")?; // Inserts default values if none are provided
             }
             _ => {
                 self.gen_normal_insert_values(params, table)?;

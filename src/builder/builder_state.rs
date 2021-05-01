@@ -5,14 +5,19 @@ use getset::CopyGetters;
 /// State that'll be shared by the query builder during the whole process,
 /// allowing to pass fewer arguments per functions
 pub(crate) struct Ciboulette2PostgresBuilderState<'store, 'request> {
+    /// The resource store
     #[getset(get_copy = "pub")]
     store: &'store CibouletteStore,
+    /// The table store, converting resource to underlying Postgres table
     #[getset(get_copy = "pub")]
     table_store: &'store Ciboulette2PostgresTableStore,
+    /// The path of the query
     #[getset(get_copy = "pub")]
     path: &'request CiboulettePath<'request>,
+    /// The query of the request
     #[getset(get_copy = "pub")]
     query: &'request CibouletteQueryParameters<'request>,
+    /// An map of the resource to be included and how to sort the main data
     #[getset(get = "pub")]
     inclusion_map: BTreeMap<
         Vec<CibouletteResourceRelationshipDetails>,
@@ -21,10 +26,13 @@ pub(crate) struct Ciboulette2PostgresBuilderState<'store, 'request> {
             Vec<CibouletteSortingElement>,
         ),
     >,
+    /// The main resource type
     #[getset(get = "pub")]
     main_type: Arc<CibouletteResourceType>,
+    /// The main resource table
     #[getset(get = "pub")]
     main_table: Arc<Ciboulette2PostgresTable>,
+    /// The main resource expected response type
     #[getset(get_copy = "pub")]
     expected_response_type: Ciboulette2PostgresResponseType,
 }
@@ -33,6 +41,8 @@ impl<'store, 'request> Ciboulette2PostgresBuilderState<'store, 'request>
 where
     'store: 'request,
 {
+    /// Build the inclusion map, merging the include list and the sorting list
+    /// to create a single map
     fn build_inclusion_map(
         query: &'request CibouletteQueryParameters<'request>
     ) -> BTreeMap<

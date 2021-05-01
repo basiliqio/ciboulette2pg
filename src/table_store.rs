@@ -4,14 +4,14 @@ use super::*;
 #[derive(Getters, Clone, Debug, Default)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresTableStore {
-    map: BTreeMap<String, Arc<Ciboulette2PostgresTable>>,
+    map: BTreeMap<ArcStr, Arc<Ciboulette2PostgresTable>>,
 }
 
 impl Ciboulette2PostgresTableStore {
     /// Add a new table
     pub fn add_table(
         &mut self,
-        key: String,
+        key: ArcStr,
         val: Arc<Ciboulette2PostgresTable>,
     ) {
         self.map.insert(key, val);
@@ -28,10 +28,10 @@ impl Ciboulette2PostgresTableStore {
     }
 }
 
-impl std::iter::FromIterator<(String, Arc<Ciboulette2PostgresTable>)>
+impl std::iter::FromIterator<(ArcStr, Arc<Ciboulette2PostgresTable>)>
     for Ciboulette2PostgresTableStore
 {
-    fn from_iter<I: IntoIterator<Item = (String, Arc<Ciboulette2PostgresTable>)>>(
+    fn from_iter<I: IntoIterator<Item = (ArcStr, Arc<Ciboulette2PostgresTable>)>>(
         iter: I
     ) -> Ciboulette2PostgresTableStore {
         Ciboulette2PostgresTableStore {

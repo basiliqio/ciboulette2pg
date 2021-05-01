@@ -6,6 +6,8 @@ mod many_to_one;
 use many_to_many::*;
 use many_to_one::*;
 
+/// Extract the many-to-one data from the request
+/// Fails if the relation is not many-to-one
 pub(crate) fn extract_data_rels<'store, 'request>(
     store: &'store CibouletteStore,
     main_type: Arc<CibouletteResourceType>,
@@ -28,7 +30,8 @@ where
     }
 }
 
-/// Get the relationships data for the main type
+/// Get the relationships data for the main type, don't extract data from that
+/// relationships
 pub(crate) fn fill_relationships_without_data(
     acc: &mut Ciboulette2PostgresResourceInformations,
     rel_details: CibouletteResourceRelationshipDetails,
@@ -80,6 +83,7 @@ pub(crate) fn fill_relationships_without_data(
     Ok(())
 }
 
+/// Extract relationships data from the request for all relationships types
 pub(crate) fn extract_data_from_relationship_details<'request>(
     acc: &mut Ciboulette2PostgresResourceInformations<'request>,
     main_type: &Arc<CibouletteResourceType>,

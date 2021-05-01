@@ -1,6 +1,9 @@
 use super::*;
 
 impl<'request> Ciboulette2PostgresBuilder<'request> {
+    /// Delete a many-to-one relationships
+    ///
+    /// Updating the "many" table, to replace the foreign id by a `NULL`
     pub(super) fn gen_delete_rel_one_to_many(
         &mut self,
         table_store: &Ciboulette2PostgresTableStore,

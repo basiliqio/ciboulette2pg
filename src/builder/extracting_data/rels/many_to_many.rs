@@ -1,5 +1,6 @@
 use super::*;
 
+/// Extract many-to-many/one-to-many relationships id from requests
 pub(super) fn extract_data_from_relationship_details_many<'request>(
     acc: &mut Ciboulette2PostgresResourceInformations<'request>,
     relationship_data: &'request CibouletteRelationshipObject,
@@ -40,8 +41,10 @@ pub(super) fn extract_data_from_relationship_details_many<'request>(
                 Ciboulette2PostgresMultiRelationships {
                     type_: rel_details.related_type().clone(),
                     rel_opt,
+                    values: Some(vec![Ciboulette2SqlValue::from(
+                        *rel_details.related_type().id_type(),
+                    )]),
                     rel_details,
-                    values: Some(vec![Ciboulette2SqlValue::Text(None)]), // FIXME Not always TEXT
                 },
             );
         }

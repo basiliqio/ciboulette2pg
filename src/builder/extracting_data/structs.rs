@@ -9,6 +9,7 @@ pub(crate) struct Ciboulette2PostgresResourceSingleRelationships {
     pub rel_details: CibouletteResourceRelationshipDetails,
 }
 
+/// Informations about an Many-to-Many/One-to-Many relationships, extracted from the request
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2PostgresMultiRelationships<'request> {
@@ -18,7 +19,7 @@ pub(crate) struct Ciboulette2PostgresMultiRelationships<'request> {
     pub values: Option<Vec<Ciboulette2SqlValue<'request>>>,
 }
 
-/// Extract informations concerning the main resource's one-to-many relationships
+/// Extract informations concerning the main resource's relationships (Many-to-Many/One-to-Many)
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum Ciboulette2PostgresMultiRelationshipsType {
     OneToMany(Arc<CibouletteRelationshipOneToManyOption>),

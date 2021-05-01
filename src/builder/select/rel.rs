@@ -1,6 +1,9 @@
 use super::*;
 
 impl<'request> Ciboulette2PostgresBuilder<'request> {
+    /// Select the relationships of the main data, including every included relationships.
+    ///
+    /// It can include nested include, including every intermediate tables
     pub(crate) fn select_rels<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
@@ -40,7 +43,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     &current_rel_chain,
                     current_type,
                 );
-                let mut sort_additional_fields = Vec::with_capacity(sort_fields_el.len()); // FIXME Do better
+                let mut sort_additional_fields = Vec::with_capacity(sort_fields_el.len());
                 for sorting_element in sort_fields_el {
                     sort_additional_fields.push(Ciboulette2SqlAdditionalField::from_sorting_field(
                         sorting_element,

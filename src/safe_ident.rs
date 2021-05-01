@@ -33,8 +33,11 @@ safe_ident!(CIBOULETTE_RELATED_TYPE_IDENT, "related_type");
 /// An modifier for [Ciboulette2PostgresSafeIdent](Ciboulette2PostgresSafeIdent)
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub(crate) enum Ciboulette2PostgresSafeIdentModifier {
+    /// A prefix identifier
     Prefix(Ciboulette2PostgresSafeIdent),
+    /// A suffix identifier
     Suffix(Ciboulette2PostgresSafeIdent),
+    /// An index to add to the ident
     Index(Option<usize>),
 }
 

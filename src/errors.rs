@@ -1,6 +1,5 @@
 use thiserror::Error;
-pub type Ciboulette2SqlBufError =
-    buf_redux::IntoInnerError<buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>>;
+
 /// An error throwable by this library
 #[derive(Error, Debug)]
 pub enum Ciboulette2SqlError {
@@ -39,7 +38,9 @@ pub enum Ciboulette2SqlError {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
-    BufReaderInto(#[from] Ciboulette2SqlBufError),
+    BufReaderInto(
+        #[from] buf_redux::IntoInnerError<buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>>,
+    ),
     #[error(transparent)]
     Utf8(#[from] std::string::FromUtf8Error),
     #[error("An unknown error occurred")]

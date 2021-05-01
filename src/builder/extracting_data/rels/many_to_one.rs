@@ -64,6 +64,7 @@ pub(super) fn extract_many_to_one_relationships_from_ressource_identifiers<'requ
     }
 }
 
+/// Extract many-to-one relationships id from requests
 pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
     acc: &mut Ciboulette2PostgresResourceInformations<'request>,
     main_type: &Arc<CibouletteResourceType>,

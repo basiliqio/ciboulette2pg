@@ -63,9 +63,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&mut se, &main_table)?;
         let Ciboulette2PostgresResourceInformations {
             values,
-            single_relationships,
+            single_relationships: _, //TODO
             single_relationships_additional_fields,
-            multi_relationships,
+            multi_relationships: _, //TODO
         } = extract_data_rels(
             &ciboulette_store,
             request.path().base_type().clone(),
@@ -88,6 +88,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 Vec<CibouletteSortingElement>,
             ),
         > = BTreeMap::default();
+        // Little hack, making the root inclusion map appear as the inclusing map of the
+        // related type.
         inclusion_map.insert(
             vec![rel_details.clone()],
             (
@@ -101,7 +103,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             ),
         );
         se.select_rels(&state, &main_cte_data, &inclusion_map)?;
-        // Aggregate every table using UNION ALL
+        // Only selecting the relating table
         let rel_table = se
             .add_working_table(
                 vec![rel_details.clone()],

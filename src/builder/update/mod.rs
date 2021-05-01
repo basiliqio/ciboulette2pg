@@ -42,6 +42,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Ok((main_cte_update, main_cte_data))
     }
 
+    /// Handle a `PATCH` request, updating resource or Many-to-One relationships
+    ///
+    /// Fails if the relationships is Many-to-Many or One-to-Many
     pub fn gen_update<'store>(
         ciboulette_store: &'store CibouletteStore,
         ciboulette_table_store: &'store Ciboulette2PostgresTableStore,

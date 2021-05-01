@@ -7,6 +7,8 @@ pub(crate) use main::*;
 pub(crate) use rels::*;
 pub(crate) use structs::*;
 
+/// Extract all the necessary data for build SQL queries from the attributes and
+/// relationships
 pub(crate) fn extract_data<'store, 'request>(
     store: &'store CibouletteStore,
     main_type: Arc<CibouletteResourceType>,
@@ -18,7 +20,7 @@ where
     'store: 'request,
 {
     let mut res = Ciboulette2PostgresResourceInformations::default();
-    fill_attributes(&mut res.values, &attributes)?;
+    attributes_to_sql_params(&mut res.values, &attributes)?;
 
     for rel_alias in main_type.relationships().keys() {
         let rel_details = main_type.get_relationship_details(store, rel_alias)?;
@@ -36,6 +38,7 @@ where
     Ok(res)
 }
 
+///
 pub(crate) fn extract_data_no_body<'store, 'request>(
     store: &'store CibouletteStore,
     main_type: Arc<CibouletteResourceType>,

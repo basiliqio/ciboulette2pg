@@ -1,7 +1,20 @@
+#![macro_use]
 use super::*;
 use getset::{Getters, MutGetters};
 use numtoa::NumToA;
 use std::io::Write;
+
+macro_rules! get_state {
+    ($ciboulette_store:expr, $ciboulette_table_store:expr, $req:expr) => {
+        Ciboulette2PostgresBuilderState::new(
+            $ciboulette_store,
+            $ciboulette_table_store,
+            $req.path(),
+            $req.query(),
+            Ciboulette2PostgresResponseType::from(*$req.expected_response_type()),
+        )
+    };
+}
 
 mod additional_fields;
 mod builder_state;
@@ -16,19 +29,6 @@ mod utils;
 
 use relating_field::Ciboulette2PostgresRelatingField;
 
-#[macro_export]
-macro_rules! get_state {
-    ($ciboulette_store:expr, $ciboulette_table_store:expr, $req:expr) => {
-        Ciboulette2PostgresBuilderState::new(
-            $ciboulette_store,
-            $ciboulette_table_store,
-            $req.path(),
-            $req.query(),
-            Ciboulette2PostgresResponseType::from(*$req.expected_response_type()),
-        )
-    };
-}
-
 #[cfg(test)]
 pub mod tests;
 
@@ -36,10 +36,10 @@ use additional_fields::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalF
 use builder_state::Ciboulette2PostgresBuilderState;
 use extracting_data::*;
 use field_name::Ciboulette2PostgresTableField;
-// use relationships::Ciboulette2SqlQueryRels;
 
 type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 
+/// A list of parameters to send along side the query to database
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
 pub struct Ciboulette2SqlArguments<'request> {
@@ -72,6 +72,7 @@ impl<'request> std::ops::DerefMut for Ciboulette2SqlArguments<'request> {
     }
 }
 
+/// Ciboulette to Postgres Query builder
 #[derive(Debug, Getters, MutGetters)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresBuilder<'request> {

@@ -1,6 +1,8 @@
 use super::*;
 
 impl<'request> Ciboulette2PostgresBuilder<'request> {
+    /// Add the sorting key to the CTE table so that future table
+    /// can reference them
     pub(crate) fn gen_sort_key_for_rel<'a>(
         state: &Ciboulette2PostgresBuilderState,
         main_cte_data: &Ciboulette2PostgresTable,
@@ -22,6 +24,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         };
         Ok(additional_field_iter)
     }
+
+    /// Wrapper for `gen_sort_key_for_rel` for the main table, which has an empty
+    /// rel_chain
     pub(crate) fn gen_sort_key_for_main(
         state: &Ciboulette2PostgresBuilderState,
         main_cte_data: &Ciboulette2PostgresTable,

@@ -24,12 +24,17 @@ impl Ciboulette2SqlAdditionalFieldType {
     }
 }
 
+/// An additional field to be included in the selecting CTE
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
 pub(crate) struct Ciboulette2SqlAdditionalField {
+    /// The type of the additional field
     pub(crate) type_: Ciboulette2SqlAdditionalFieldType,
+    /// The ident to use for the additional field
     pub(crate) ident: Ciboulette2PostgresTableField,
+    /// It's name, later linking
     pub(crate) name: Ciboulette2PostgresSafeIdent,
+    /// The resource type it relates to
     pub(crate) ciboulette_type: Arc<CibouletteResourceType>,
 }
 

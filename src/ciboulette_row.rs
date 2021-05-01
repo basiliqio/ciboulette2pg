@@ -14,14 +14,20 @@ use std::{borrow::Cow, usize};
 #[derive(Clone, Debug, Getters, sqlx::FromRow, Serialize)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PostgresRow<'rows> {
+    /// The id of the resource, casted to TEXT
     id: &'rows str,
+    /// The type of the resource beeing returned, casted to TEXT
+    /// In case of a relationships, this is the relationships chain
     #[sqlx(rename = "type")]
     #[serde(rename = "type")]
     type_: &'rows str,
+    /// The json formatted data, if any
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<&'rows serde_json::value::RawValue>, // TODO doesn't make it an option
+    data: Option<&'rows serde_json::value::RawValue>,
+    /// The type id it relates to
     #[serde(skip_serializing_if = "Option::is_none")]
     related_type: Option<&'rows str>,
+    /// The id of the resource it relates
     #[serde(skip_serializing_if = "Option::is_none")]
     related_id: Option<&'rows str>,
 }
@@ -43,6 +49,7 @@ impl<'rows> Ciboulette2PostgresRow<'rows> {
         Ok(res)
     }
 
+    /// Build the responses elements for the main type from an iterator
     pub fn build_response_elements<I>(
         rows: I,
         store: &CibouletteStore,

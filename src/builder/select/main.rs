@@ -57,7 +57,6 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Insert `WHERE` close into the query for selecting main object or relationships
     pub(crate) fn gen_matcher_for_normal_select_inner<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,
         main_table: &Ciboulette2PostgresTable,
     ) -> Result<(), Ciboulette2SqlError>
@@ -144,6 +143,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Ok(skip_main)
     }
 
+    /// Generate the select for the main data relationships to the related data
     fn gen_main_select_type_relationships<'store>(
         &mut self,
         state: &Ciboulette2PostgresBuilderState<'store, 'request>,
@@ -198,8 +198,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 .iter(),
             false,
         )?;
-        self.gen_matcher_for_normal_select_inner(state, id, &*main_type_table)?;
+        self.gen_matcher_for_normal_select_inner(id, &*main_type_table)?;
         self.buf.write_all(b") ")?;
+        // Kind of hack, but replace the including, marking every working table as unneeded
+        // TODO find a better way
         let inclusion_map: BTreeMap<
             Vec<CibouletteResourceRelationshipDetails>,
             (

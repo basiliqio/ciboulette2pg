@@ -45,7 +45,7 @@ pub fn gen_table_store(store: &CibouletteStore) -> Ciboulette2PostgresTableStore
         ),
     ]
     .into_iter()
-    .map(|x| (x.name().to_string(), Arc::new(x)))
+    .map(|x| (ArcStr::from(x.name().to_string()), Arc::new(x)))
     .collect()
 }
 

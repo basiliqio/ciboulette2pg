@@ -10,13 +10,13 @@ mod embedded_migrations {
 
 lazy_static! {
     static ref BASILIQ_DATABASE_URL: String =
-        std::env::var("BASILIQ_DATABASE_URL").expect("the database url to be set");
+        std::env::var("DATABASE_URL").expect("the database url to be set");
     static ref BASILIQ_DEFAULT_DATABASE: String = format!("basiliq_test_{}", Uuid::new_v4());
     static ref BASILIQ_DEFAULT_DATABASE_INIT: Mutex<bool> = Mutex::new(false);
 }
 
 pub async fn run_migrations(db_name: &str) {
-    let mut config = refinery::config::Config::from_env_var("BASILIQ_DATABASE_URL")
+    let mut config = refinery::config::Config::from_env_var("DATABASE_URL")
         .expect("to parse the basiliq database url")
         .set_db_name(db_name);
     embedded_migrations::migrations::runner()
