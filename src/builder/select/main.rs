@@ -1,17 +1,17 @@
 use super::*;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Generate a SQL query to handle a `SELECT` request
     pub fn gen_select<'store>(
         ciboulette_store: &'store CibouletteStore,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        ciboulette_table_store: &'store Ciboulette2PgTableStore,
         request: &'request CibouletteReadRequest<'request>,
-    ) -> Result<Self, Ciboulette2SqlError>
+    ) -> Result<Self, Ciboulette2PgError>
     where
         'store: 'request,
     {
         let mut se = Self::default();
-        let state: Ciboulette2PostgresBuilderState<'store, 'request> =
+        let state: Ciboulette2PgBuilderState<'store, 'request> =
             get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let main_cte_data =
             state
@@ -33,12 +33,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Insert `INNER JOIN`s and `WHERE` close into the query for selecting related object
     fn gen_matcher_for_related_select<'store>(
         &mut self,
-        ciboulette_table_store: &Ciboulette2PostgresTableStore,
+        ciboulette_table_store: &Ciboulette2PgTableStore,
         left_type: Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -46,11 +46,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         Self::gen_inner_join(&mut self.buf, state, &left_table, &rel_details, None)?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(left_table.id().get_ident().clone(), None, None),
+            &Ciboulette2PgTableField::new(left_table.id().get_ident().clone(), None, None),
             &left_table,
         )?;
         self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2SqlValue::from(id), &left_table)?;
+        self.insert_params(Ciboulette2PgValue::from(id), &left_table)?;
         Ok(())
     }
 
@@ -58,51 +58,47 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn gen_matcher_for_normal_select_inner<'store>(
         &mut self,
         id: &CibouletteId<'request>,
-        main_table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError>
+        main_table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(main_table.id().get_ident().clone(), None, None),
+            &Ciboulette2PgTableField::new(main_table.id().get_ident().clone(), None, None),
             &main_table,
         )?;
         self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2SqlValue::from(id), &main_table)?;
+        self.insert_params(Ciboulette2PgValue::from(id), &main_table)?;
         Ok(())
     }
 
     /// Insert `WHERE` close into the query for selecting main object or relationships
     pub(crate) fn gen_matcher_for_normal_select<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
         id: &CibouletteId<'request>,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(
-                state.main_table().id().get_ident().clone(),
-                None,
-                None,
-            ),
+            &Ciboulette2PgTableField::new(state.main_table().id().get_ident().clone(), None, None),
             &state.main_table(),
         )?;
         self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2SqlValue::from(id), &state.main_table())?;
+        self.insert_params(Ciboulette2PgValue::from(id), &state.main_table())?;
         Ok(())
     }
 
     /// Generate the main `SELECT` of the query
     fn gen_main_select<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: &Ciboulette2PostgresTable,
-        rels: &[Ciboulette2SqlAdditionalField],
-    ) -> Result<bool, Ciboulette2SqlError>
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_cte_data: &Ciboulette2PgTable,
+        rels: &[Ciboulette2PgAdditionalField],
+    ) -> Result<bool, Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -146,13 +142,13 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate the select for the main data relationships to the related data
     fn gen_main_select_type_relationships<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: &Ciboulette2PostgresTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_cte_data: &Ciboulette2PgTable,
         left_type: &Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
-        rels: &[Ciboulette2SqlAdditionalField],
+        rels: &[Ciboulette2PgAdditionalField],
         id: &'store CibouletteId,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -165,9 +161,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             state,
             &state.main_table(),
             state.main_type().clone(),
-            Some(Ciboulette2PostgresRelatingField::new(
-                Ciboulette2PostgresTableField {
-                    name: Ciboulette2PostgresSafeIdent::from(main_type_table.id().get_ident()),
+            Some(Ciboulette2PgRelatingField::new(
+                Ciboulette2PgTableField {
+                    name: Ciboulette2PgSafeIdent::from(main_type_table.id().get_ident()),
                     alias: None,
                     cast: None,
                 },
@@ -204,19 +200,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         // TODO find a better way
         let inclusion_map: BTreeMap<
             Vec<CibouletteResourceRelationshipDetails>,
-            (
-                Ciboulette2PostgresResponseType,
-                Vec<CibouletteSortingElement>,
-            ),
+            (Ciboulette2PgResponseType, Vec<CibouletteSortingElement>),
         > = state
             .inclusion_map()
             .iter()
-            .map(|(k, (_, e))| {
-                (
-                    k.clone(),
-                    (Ciboulette2PostgresResponseType::None, e.clone()),
-                )
-            })
+            .map(|(k, (_, e))| (k.clone(), (Ciboulette2PgResponseType::None, e.clone())))
             .collect();
         self.select_rels(&state, &main_cte_data, &inclusion_map)?;
         match state.query().sorting().is_empty() {
@@ -231,13 +219,13 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 
     fn gen_main_select_type_related<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        rels: &[Ciboulette2SqlAdditionalField],
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        rels: &[Ciboulette2PgAdditionalField],
         left_type: &Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
         id: &'store CibouletteId,
-        main_cte_data: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError>
+        main_cte_data: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -264,10 +252,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 
     fn gen_main_select_type<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        rels: &[Ciboulette2SqlAdditionalField],
-        main_cte_data: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError>
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        rels: &[Ciboulette2PgAdditionalField],
+        main_cte_data: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -287,11 +275,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 
     fn gen_main_select_type_id<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        rels: &[Ciboulette2SqlAdditionalField],
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        rels: &[Ciboulette2PgAdditionalField],
         id: &'store CibouletteId,
-        main_cte_data: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError>
+        main_cte_data: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {

@@ -19,9 +19,9 @@ dependencies = [
 
 [[package]]
 name = "aho-corasick"
-version = "0.7.15"
+version = "0.7.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7404febffaa47dac81aa44dba71523c9d069b1bdc50a77db41195149e17f68e5"
+checksum = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f"
 dependencies = [
  "memchr",
 ]
@@ -82,7 +82,7 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 [[package]]
 name = "basiliq_db_test_proc_macro"
 version = "0.1.0"
-source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#3ce72bfa386c4b4cd360d55125a951fff47bdb81"
+source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#2b14069b52c9bb602ab24d2cfdcbf8a8110c7a83"
 dependencies = [
  "basiliq_db_test_utils",
  "proc-macro2",
@@ -93,7 +93,7 @@ dependencies = [
 [[package]]
 name = "basiliq_db_test_utils"
 version = "0.1.0"
-source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#3ce72bfa386c4b4cd360d55125a951fff47bdb81"
+source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#2b14069b52c9bb602ab24d2cfdcbf8a8110c7a83"
 dependencies = [
  "anyhow",
  "lazy_static",
@@ -238,7 +238,7 @@ dependencies = [
 [[package]]
 name = "ciboulette"
 version = "0.1.1"
-source = "git+https://github.com/basiliqio/ciboulette.git?branch=main#10b23f7953fd1e14c2f4f769523c7f43c83fa5d2"
+source = "git+https://github.com/basiliqio/ciboulette.git?branch=main#7b22042e29d1289045bf2bf4e0d33eaf7e5e29c2"
 dependencies = [
  "arcstr",
  "getset",
@@ -257,7 +257,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ciboulette2postgres"
+name = "ciboulette2pg"
 version = "0.1.0"
 dependencies = [
  "arcstr",
@@ -290,7 +290,7 @@ dependencies = [
 [[package]]
 name = "ciboulette_test_helper"
 version = "0.1.0"
-source = "git+https://github.com/basiliqio/ciboulette.git?branch=main#10b23f7953fd1e14c2f4f769523c7f43c83fa5d2"
+source = "git+https://github.com/basiliqio/ciboulette.git?branch=main#7b22042e29d1289045bf2bf4e0d33eaf7e5e29c2"
 dependencies = [
  "arcstr",
  "ciboulette",
@@ -347,9 +347,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7e9d99fa91428effe99c5c6d4634cdeba32b8cf784fc428a2a687f61a952c49"
+checksum = "4feb231f0d4d6af81aed15928e58ecf5816aa62a2393e2c82f46973e92a9a278"
 dependencies = [
  "autocfg",
  "cfg-if",
@@ -753,9 +753,9 @@ checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
 
 [[package]]
 name = "lock_api"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a3c91c24eae6777794bb1997ad98bbb87daf92890acab859f7eaa4320333176"
+checksum = "0382880606dff6d15c9476c416d18690b72742aa7b605bb6dd6ec9030fbf07eb"
 dependencies = [
  "scopeguard",
 ]
@@ -803,9 +803,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.3.4"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
+checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
 
 [[package]]
 name = "messy_json"
@@ -1243,9 +1243,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.4.6"
+version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a26af418b574bd56588335b3a3659a65725d4e636eb1016c2f9e3b38c7cc759"
+checksum = "1efb2352a0f4d4b128f734b5c44c79ff80117351138733f12f982fe3e2b13343"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1254,9 +1254,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.23"
+version = "0.6.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24d5f089152e60f62d28b835fbff2cd2e8dc0baf1ac13343bef92ab7eed84548"
+checksum = "00efb87459ba4f6fb2169d20f68565555688e1250ee6825cdf6254f8b48fafb2"
 
 [[package]]
 name = "ring"
@@ -1816,9 +1816,9 @@ checksum = "bb0d2e7be6ae3a5fa87eed5fb451aff96f2573d2694942e40543ae0bbe19c796"
 
 [[package]]
 name = "unicode-xid"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7fe0bb3479651439c9112f72b6c505038574c9fbb575ed1bf3b797fa39dd564"
+checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
 
 [[package]]
 name = "unicode_categories"

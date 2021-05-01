@@ -10,14 +10,11 @@ fn many_to_many() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap_err();
+    let err =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap_err();
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::SortingByMultiRel(_, _)),
+        matches!(err, Ciboulette2PgError::SortingByMultiRel(_, _)),
         true
     );
 }
@@ -32,14 +29,11 @@ fn one_to_many() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap_err();
+    let err =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap_err();
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::SortingByMultiRel(_, _)),
+        matches!(err, Ciboulette2PgError::SortingByMultiRel(_, _)),
         true
     );
 }
@@ -54,12 +48,9 @@ fn single() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
 
     let res = builder.build().unwrap();
     test_sql!(res);

@@ -3,22 +3,22 @@ use std::convert::TryFrom;
 
 /// Type of additional field
 #[derive(Clone, Debug)]
-pub enum Ciboulette2SqlAdditionalFieldType {
+pub enum Ciboulette2PgAdditionalFieldType {
     /// A field required to link a relationship
     Relationship,
     /// A field required for sorting
     Sorting,
 }
 
-impl Ciboulette2SqlAdditionalFieldType {
+impl Ciboulette2PgAdditionalFieldType {
     /// Print the prefix of the additional type to str
-    pub(crate) fn to_safe_modifier(&self) -> Ciboulette2PostgresSafeIdentModifier {
+    pub(crate) fn to_safe_modifier(&self) -> Ciboulette2PgSafeIdentModifier {
         match self {
-            Ciboulette2SqlAdditionalFieldType::Relationship => {
-                Ciboulette2PostgresSafeIdentModifier::Prefix(CIBOULETTE_REL_PREFIX)
+            Ciboulette2PgAdditionalFieldType::Relationship => {
+                Ciboulette2PgSafeIdentModifier::Prefix(CIBOULETTE_REL_PREFIX)
             }
-            Ciboulette2SqlAdditionalFieldType::Sorting => {
-                Ciboulette2PostgresSafeIdentModifier::Prefix(CIBOULETTE_SORT_PREFIX)
+            Ciboulette2PgAdditionalFieldType::Sorting => {
+                Ciboulette2PgSafeIdentModifier::Prefix(CIBOULETTE_SORT_PREFIX)
             }
         }
     }
@@ -27,24 +27,24 @@ impl Ciboulette2SqlAdditionalFieldType {
 /// An additional field to be included in the selecting CTE
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
-pub(crate) struct Ciboulette2SqlAdditionalField {
+pub(crate) struct Ciboulette2PgAdditionalField {
     /// The type of the additional field
-    pub(crate) type_: Ciboulette2SqlAdditionalFieldType,
+    pub(crate) type_: Ciboulette2PgAdditionalFieldType,
     /// The ident to use for the additional field
-    pub(crate) ident: Ciboulette2PostgresTableField,
+    pub(crate) ident: Ciboulette2PgTableField,
     /// It's name, later linking
-    pub(crate) name: Ciboulette2PostgresSafeIdent,
+    pub(crate) name: Ciboulette2PgSafeIdent,
     /// The resource type it relates to
     pub(crate) ciboulette_type: Arc<CibouletteResourceType>,
 }
 
-impl Ciboulette2SqlAdditionalField {
+impl Ciboulette2PgAdditionalField {
     pub fn new(
-        ident: Ciboulette2PostgresTableField,
-        type_: Ciboulette2SqlAdditionalFieldType,
+        ident: Ciboulette2PgTableField,
+        type_: Ciboulette2PgAdditionalFieldType,
         ciboulette_type: Arc<CibouletteResourceType>,
     ) -> Self {
-        Ciboulette2SqlAdditionalField {
+        Ciboulette2PgAdditionalField {
             name: ident.name().clone().add_modifier(type_.to_safe_modifier()),
             ident,
             type_,
@@ -55,15 +55,15 @@ impl Ciboulette2SqlAdditionalField {
     pub fn from_sorting_field(
         el: &CibouletteSortingElement,
         main_type: Arc<CibouletteResourceType>,
-    ) -> Result<Self, Ciboulette2SqlError> {
-        let table_field = Ciboulette2PostgresTableField::new(
-            Ciboulette2PostgresSafeIdent::try_from(el.field().clone())?,
+    ) -> Result<Self, Ciboulette2PgError> {
+        let table_field = Ciboulette2PgTableField::new(
+            Ciboulette2PgSafeIdent::try_from(el.field().clone())?,
             None,
             None,
         );
-        Ok(Ciboulette2SqlAdditionalField::new(
+        Ok(Ciboulette2PgAdditionalField::new(
             table_field,
-            Ciboulette2SqlAdditionalFieldType::Sorting,
+            Ciboulette2PgAdditionalFieldType::Sorting,
             main_type,
         ))
     }

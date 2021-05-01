@@ -1,13 +1,13 @@
 use super::*;
 pub mod main;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Generate a SQL query to handle a `POST` request
     pub fn gen_insert<'store>(
         ciboulette_store: &'store CibouletteStore,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        ciboulette_table_store: &'store Ciboulette2PgTableStore,
         request: &'request CibouletteCreateRequest<'request>,
-    ) -> Result<Self, Ciboulette2SqlError>
+    ) -> Result<Self, Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -16,7 +16,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let (main_cte_insert, main_cte_data) = se.gen_insert_cte_tables(&state)?;
 
-        let Ciboulette2PostgresResourceInformations {
+        let Ciboulette2PgResourceInformations {
             values,
             single_relationships: _, // TODO
             single_relationships_additional_fields,
@@ -49,11 +49,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Write the main table `SELECT` after having inserted it
     fn write_main_table_select<'store>(
         &mut self,
-        main_cte_data: &Ciboulette2PostgresTable,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_insert: Ciboulette2PostgresTable,
-        rels: &[Ciboulette2SqlAdditionalField],
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_cte_data: &Ciboulette2PgTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_cte_insert: Ciboulette2PgTable,
+        rels: &[Ciboulette2PgAdditionalField],
+    ) -> Result<(), Ciboulette2PgError> {
         let sort_keys_mains = Self::gen_sort_key_for_main(state, main_cte_data)?;
         self.write_table_info(main_cte_data)?;
         self.buf.write_all(b" AS (")?;
@@ -72,10 +72,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Write the main table `INSERT`
     fn write_main_table_inserts<'store>(
         &mut self,
-        main_cte_insert: &Ciboulette2PostgresTable,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_inserts_values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_cte_insert: &Ciboulette2PgTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_inserts_values: Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
+    ) -> Result<(), Ciboulette2PgError> {
         self.write_table_info(main_cte_insert)?;
         self.buf.write_all(b" AS (")?;
         self.gen_insert_normal(state.main_table().as_ref(), main_inserts_values, true)?;
@@ -86,8 +86,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Gen the insert and data table for the query
     fn gen_insert_cte_tables(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState,
-    ) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
+        state: &Ciboulette2PgBuilderState,
+    ) -> Result<(Ciboulette2PgTable, Ciboulette2PgTable), Ciboulette2PgError> {
         let main_cte_insert = state.main_table().to_cte(
             &mut *self,
             CIBOULETTE_EMPTY_IDENT,
@@ -103,11 +103,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 }
 
 /// Check that the insert request is correct
-fn check_insert_request(request: &CibouletteCreateRequest) -> Result<(), Ciboulette2SqlError> {
+fn check_insert_request(request: &CibouletteCreateRequest) -> Result<(), Ciboulette2PgError> {
     if request.data().identifier().id().is_some() {
-        Err(Ciboulette2SqlError::ProvidedIdOnInserts)
+        Err(Ciboulette2PgError::ProvidedIdOnInserts)
     } else if request.data().attributes().is_none() {
-        Err(Ciboulette2SqlError::MissingAttributes)
+        Err(Ciboulette2PgError::MissingAttributes)
     } else {
         Ok(())
     }

@@ -13,12 +13,9 @@ fn include_multi() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);
@@ -37,12 +34,9 @@ fn include_nested() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
     // for el in res.1.iter().enumerate()
     // {
@@ -64,12 +58,9 @@ fn include_single() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
 }
@@ -87,12 +78,9 @@ fn include_deep_nested() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteReadRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_select(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_select(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
     test_sql!(res);
 }

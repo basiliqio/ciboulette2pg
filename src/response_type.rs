@@ -2,7 +2,7 @@ use ciboulette::CibouletteResponseRequiredType;
 
 /// The response type of a resource
 #[derive(Clone, Debug, Copy)]
-pub enum Ciboulette2PostgresResponseType {
+pub enum Ciboulette2PgResponseType {
     /// Return the whole object, with its included attributes
     Object,
     /// Return only the identifier of the object
@@ -11,12 +11,12 @@ pub enum Ciboulette2PostgresResponseType {
     None,
 }
 
-impl From<CibouletteResponseRequiredType> for Ciboulette2PostgresResponseType {
-    fn from(other: CibouletteResponseRequiredType) -> Ciboulette2PostgresResponseType {
+impl From<CibouletteResponseRequiredType> for Ciboulette2PgResponseType {
+    fn from(other: CibouletteResponseRequiredType) -> Ciboulette2PgResponseType {
         match other {
-            CibouletteResponseRequiredType::Object(_) => Ciboulette2PostgresResponseType::Object,
-            CibouletteResponseRequiredType::Id(_) => Ciboulette2PostgresResponseType::Id,
-            CibouletteResponseRequiredType::None => Ciboulette2PostgresResponseType::None,
+            CibouletteResponseRequiredType::Object(_) => Ciboulette2PgResponseType::Object,
+            CibouletteResponseRequiredType::Id(_) => Ciboulette2PgResponseType::Id,
+            CibouletteResponseRequiredType::None => Ciboulette2PgResponseType::None,
         }
     }
 }

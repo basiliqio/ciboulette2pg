@@ -14,12 +14,9 @@ async fn test_update<'store>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
@@ -54,8 +51,7 @@ async fn set_one_to_one(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    let rows =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let rows = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_one_to_one", &["peoples"]).await;
     for row in rows.into_iter() {
         if row.type_() != &"favorite_color" {
@@ -86,8 +82,7 @@ async fn set_many_to_one(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    let rows =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let rows = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_many_to_one", &["comments"]).await;
     for row in rows.into_iter() {
         if row.type_() != &"author" {
@@ -112,6 +107,6 @@ async fn unset_one_to_one(mut pool: sqlx::PgPool) {
             .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_unset_one_to_one", &["peoples"]).await;
 }

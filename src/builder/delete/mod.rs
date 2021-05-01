@@ -2,20 +2,20 @@ use super::*;
 pub mod main;
 pub mod rel;
 
-impl<'store, 'request> Ciboulette2PostgresBuilder<'request> {
+impl<'store, 'request> Ciboulette2PgBuilder<'request> {
     /// Generate a SQL query to handle a `DELETE` request
     ///
     /// Fails if trying to delete an one-to-many relationships.
     /// Fails if trying to delete a non optional many-to-one relationships.
     pub fn gen_delete(
         store: &'store CibouletteStore,
-        table_store: &'store Ciboulette2PostgresTableStore,
+        table_store: &'store Ciboulette2PgTableStore,
         request: &'request CibouletteDeleteRequest<'request>,
-    ) -> Result<Self, Ciboulette2SqlError>
+    ) -> Result<Self, Ciboulette2PgError>
     where
         'store: 'request,
     {
-        let mut se = Ciboulette2PostgresBuilder::default();
+        let mut se = Ciboulette2PgBuilder::default();
         match request.related_type() {
             Some(related_type) => {
                 se.handle_delete_rel(request, related_type, store, table_store)?
@@ -31,8 +31,8 @@ impl<'store, 'request> Ciboulette2PostgresBuilder<'request> {
         request: &'request CibouletteDeleteRequest,
         related_type: &Arc<CibouletteResourceType>,
         store: &CibouletteStore,
-        table_store: &Ciboulette2PostgresTableStore,
-    ) -> Result<Result<(), Ciboulette2SqlError>, Ciboulette2SqlError> {
+        table_store: &Ciboulette2PgTableStore,
+    ) -> Result<Result<(), Ciboulette2PgError>, Ciboulette2PgError> {
         let alias = request
             .resource_type()
             .get_alias(related_type.name().as_str())?;
@@ -52,12 +52,12 @@ impl<'store, 'request> Ciboulette2PostgresBuilder<'request> {
                 if opt.many_resource().as_ref() == request.resource_type().as_ref()
                     && opt.one_resource().as_ref() == related_type.as_ref() =>
             {
-                return Err(Ciboulette2SqlError::MissingRelationship(
+                return Err(Ciboulette2PgError::MissingRelationship(
                     request.resource_type().name().to_string(),
                     opt.one_resource().name().to_string(),
                 ));
             }
-            _ => return Err(Ciboulette2SqlError::ManyRelationshipDirectWrite), // Fails if it's a multi relationship
+            _ => return Err(Ciboulette2PgError::ManyRelationshipDirectWrite), // Fails if it's a multi relationship
         })
     }
 }

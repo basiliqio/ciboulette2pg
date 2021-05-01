@@ -1,5 +1,5 @@
 // use ciboulette::*;
-// use ciboulette2sql::*;
+// use Ciboulette2Pg::*;
 // use ciboulette_test_helper::*;
 // use std::convert::TryInto;
 // use url::Url;
@@ -48,12 +48,12 @@
 //     //         .unwrap();
 //     println!(
 //         "Main : {:#?}",
-//         ciboulette2sql::creation::main::gen_query_main(&store, &req).unwrap()
+//         Ciboulette2Pg::creation::main::gen_query_main(&store, &req).unwrap()
 //     );
 
 //     println!(
 //         "Rel : {:#?}",
-//         ciboulette2sql::creation::relationships::gen_query_relationships(
+//         Ciboulette2Pg::creation::relationships::gen_query_relationships(
 //             &store, &req, "MAIN_ID"
 //         )
 //         .unwrap()

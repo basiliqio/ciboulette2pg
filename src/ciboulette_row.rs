@@ -1,5 +1,5 @@
 use super::*;
-use crate::Ciboulette2SqlError;
+use crate::Ciboulette2PgError;
 use ciboulette::{
     CibouletteId, CibouletteResourceType, CibouletteResponseElement, CibouletteStore,
 };
@@ -13,7 +13,7 @@ use std::{borrow::Cow, usize};
 /// Made of the object id, type and its data
 #[derive(Clone, Debug, Getters, sqlx::FromRow, Serialize)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresRow<'rows> {
+pub struct Ciboulette2PgRow<'rows> {
     /// The id of the resource, casted to TEXT
     id: &'rows str,
     /// The type of the resource beeing returned, casted to TEXT
@@ -32,11 +32,11 @@ pub struct Ciboulette2PostgresRow<'rows> {
     related_id: Option<&'rows str>,
 }
 
-impl<'rows> Ciboulette2PostgresRow<'rows> {
-    /// Extract an [Ciboulette2PostgresRow](Ciboulette2PostgresRow) for a slice of [PgRow](sqlx::postgres::PgRow)
+impl<'rows> Ciboulette2PgRow<'rows> {
+    /// Extract an [Ciboulette2PgRow](Ciboulette2PgRow) for a slice of [PgRow](sqlx::postgres::PgRow)
     pub fn from_raw(
         values: &'rows [sqlx::postgres::PgRow]
-    ) -> Result<Vec<Ciboulette2PostgresRow>, Ciboulette2SqlError>
+    ) -> Result<Vec<Ciboulette2PgRow>, Ciboulette2PgError>
     where
         CibouletteId<'rows>: sqlx::Decode<'rows, sqlx::Postgres>,
         CibouletteId<'rows>: sqlx::Type<sqlx::Postgres>,
@@ -57,10 +57,10 @@ impl<'rows> Ciboulette2PostgresRow<'rows> {
         hint_size: Option<usize>,
     ) -> Result<
         Vec<CibouletteResponseElement<'rows, &'rows serde_json::value::RawValue>>,
-        Ciboulette2SqlError,
+        Ciboulette2PgError,
     >
     where
-        I: IntoIterator<Item = Ciboulette2PostgresRow<'rows>>,
+        I: IntoIterator<Item = Ciboulette2PgRow<'rows>>,
     {
         let mut res: Vec<CibouletteResponseElement<'rows, &'rows serde_json::value::RawValue>> =
             Vec::with_capacity(hint_size.unwrap_or_default());

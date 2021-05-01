@@ -2,7 +2,7 @@ use thiserror::Error;
 
 /// An error throwable by this library
 #[derive(Error, Debug)]
-pub enum Ciboulette2SqlError {
+pub enum Ciboulette2PgError {
     #[error("Cannot represent `{0}`")]
     BigDecimal(u128),
     #[error("Missing relationship `{1}` for type `{0}`")]

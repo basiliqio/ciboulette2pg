@@ -22,12 +22,9 @@ fn empty() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);
@@ -60,12 +57,9 @@ fn simple() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);
@@ -109,12 +103,9 @@ fn relationship_internal() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);
@@ -154,12 +145,9 @@ fn relationship_internal_force_null() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);
@@ -203,15 +191,12 @@ fn relationship_external() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let err: Ciboulette2SqlError = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap_err();
+    let err: Ciboulette2PgError =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap_err();
 
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
+        matches!(err, Ciboulette2PgError::ManyRelationshipDirectWrite),
         true
     );
 }
@@ -242,12 +227,9 @@ fn not_all_required_fields() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
 
     let res = builder.build().unwrap();
 
@@ -281,12 +263,9 @@ fn forced_null_fields() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
 
     let res = builder.build().unwrap();
 
@@ -322,12 +301,9 @@ fn include_single_rel() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
 
     let res = builder.build().unwrap();
 
@@ -363,12 +339,9 @@ fn include_multi_rel() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &BODY);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
 
     let res = builder.build().unwrap();
 

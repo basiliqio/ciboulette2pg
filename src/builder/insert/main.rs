@@ -1,13 +1,13 @@
 use super::*;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Generate a insert query for `POST` requests
     pub(crate) fn gen_insert_normal(
         &mut self,
-        table: &Ciboulette2PostgresTable,
-        params: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
+        table: &Ciboulette2PgTable,
+        params: Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
         returning: bool,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         self.buf.write_all(b"INSERT INTO ")?;
         self.write_table_info(table)?;
         self.buf.write_all(b" ")?;
@@ -28,14 +28,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate columns name before the "VALUES" and insert the parameters after that
     fn gen_normal_insert_values(
         &mut self,
-        params: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
-        table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
-        let mut param_ident: Vec<Ciboulette2PostgresTableField> = Vec::with_capacity(params.len());
-        let mut param_value: Vec<Ciboulette2SqlValue<'request>> = Vec::with_capacity(params.len());
+        params: Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
+        let mut param_ident: Vec<Ciboulette2PgTableField> = Vec::with_capacity(params.len());
+        let mut param_value: Vec<Ciboulette2PgValue<'request>> = Vec::with_capacity(params.len());
         for (n, v) in params.into_iter() {
-            param_ident.push(Ciboulette2PostgresTableField::new(
-                Ciboulette2PostgresSafeIdent::try_from(n)?,
+            param_ident.push(Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdent::try_from(n)?,
                 None,
                 None,
             ));

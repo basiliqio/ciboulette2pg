@@ -12,12 +12,9 @@ fn simple_single_rel() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_delete(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_delete(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let res = builder.build().unwrap();
 
     test_sql!(res);
@@ -36,15 +33,12 @@ fn simple_single_rel_non_optional() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_delete(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap_err();
+    let err =
+        Ciboulette2PgBuilder::gen_delete(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap_err();
     println!("{:#?}", err);
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::MissingRelationship(x, y) if x == "comments" && y == "peoples"),
+        matches!(err, Ciboulette2PgError::MissingRelationship(x, y) if x == "comments" && y == "peoples"),
         true
     );
 }
@@ -62,14 +56,11 @@ fn multi_relationships() {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
-    let err = Ciboulette2PostgresBuilder::gen_delete(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap_err();
+    let err =
+        Ciboulette2PgBuilder::gen_delete(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap_err();
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
+        matches!(err, Ciboulette2PgError::ManyRelationshipDirectWrite),
         true
     );
 }

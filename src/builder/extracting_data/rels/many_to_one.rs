@@ -5,88 +5,86 @@ pub(super) fn extract_many_to_one_relationships_from_ressource_identifiers<'requ
     attributes: &'request CibouletteOptionalData<CibouletteResourceIdentifierSelector<'request>>,
     rel_opt: Arc<CibouletteRelationshipOneToManyOption>,
     rel_details: CibouletteResourceRelationshipDetails,
-) -> Result<Ciboulette2PostgresResourceInformations<'request>, Ciboulette2SqlError> {
+) -> Result<Ciboulette2PgResourceInformations<'request>, Ciboulette2PgError> {
     match attributes {
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
-            Ok(Ciboulette2PostgresResourceInformations {
+            Ok(Ciboulette2PgResourceInformations {
                 values: vec![(
                     rel_opt.many_resource_key().clone(),
-                    Ciboulette2SqlValue::from(rel_id.id()),
+                    Ciboulette2PgValue::from(rel_id.id()),
                 )],
-                single_relationships: vec![Ciboulette2PostgresResourceSingleRelationships {
+                single_relationships: vec![Ciboulette2PgResourceSingleRelationships {
                     type_: rel_opt.one_resource().clone(),
                     key: rel_opt.many_resource_key().clone(),
                     rel_details,
                 }],
-                single_relationships_additional_fields: vec![Ciboulette2SqlAdditionalField::new(
-                    Ciboulette2PostgresTableField::new(
-                        Ciboulette2PostgresSafeIdent::try_from(
-                            rel_opt.many_resource_key().clone(),
-                        )?,
+                single_relationships_additional_fields: vec![Ciboulette2PgAdditionalField::new(
+                    Ciboulette2PgTableField::new(
+                        Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key().clone())?,
                         None,
                         None,
                     ),
-                    Ciboulette2SqlAdditionalFieldType::Relationship,
+                    Ciboulette2PgAdditionalFieldType::Relationship,
                     rel_opt.one_resource().clone(),
                 )],
                 multi_relationships: BTreeMap::default(),
             })
         }
         CibouletteOptionalData::Object(_) => {
-            Err(Ciboulette2SqlError::MultiIdsForSingleRelationships)
+            Err(Ciboulette2PgError::MultiIdsForSingleRelationships)
         }
-        CibouletteOptionalData::Null(x) if *x => Ok(Ciboulette2PostgresResourceInformations {
+        CibouletteOptionalData::Null(x) if *x => Ok(Ciboulette2PgResourceInformations {
             values: vec![(
                 rel_opt.many_resource_key().clone(),
                 match rel_opt.one_resource().id_type() {
-                    CibouletteIdType::Text => Ciboulette2SqlValue::Text(None),
-                    CibouletteIdType::Number => Ciboulette2SqlValue::Numeric(None),
-                    CibouletteIdType::Uuid => Ciboulette2SqlValue::Uuid(None),
+                    CibouletteIdType::Text => Ciboulette2PgValue::Text(None),
+                    CibouletteIdType::Number => Ciboulette2PgValue::Numeric(None),
+                    CibouletteIdType::Uuid => Ciboulette2PgValue::Uuid(None),
                 },
             )],
-            single_relationships: vec![Ciboulette2PostgresResourceSingleRelationships {
+            single_relationships: vec![Ciboulette2PgResourceSingleRelationships {
                 type_: rel_opt.one_resource().clone(),
                 key: rel_opt.many_resource_key().clone(),
                 rel_details,
             }],
-            single_relationships_additional_fields: vec![Ciboulette2SqlAdditionalField::new(
-                Ciboulette2PostgresTableField::new(
-                    Ciboulette2PostgresSafeIdent::try_from(rel_opt.many_resource_key().clone())?,
+            single_relationships_additional_fields: vec![Ciboulette2PgAdditionalField::new(
+                Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key().clone())?,
                     None,
                     None,
                 ),
-                Ciboulette2SqlAdditionalFieldType::Relationship,
+                Ciboulette2PgAdditionalFieldType::Relationship,
                 rel_opt.one_resource().clone(),
             )],
             multi_relationships: BTreeMap::default(),
         }),
-        CibouletteOptionalData::Null(_) => Ok(Ciboulette2PostgresResourceInformations::default()),
+        CibouletteOptionalData::Null(_) => Ok(Ciboulette2PgResourceInformations::default()),
     }
 }
 
 /// Extract many-to-one relationships id from requests
 pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
-    acc: &mut Ciboulette2PostgresResourceInformations<'request>,
+    acc: &mut Ciboulette2PgResourceInformations<'request>,
     main_type: &Arc<CibouletteResourceType>,
     relationship_data: &'request CibouletteRelationshipObject,
     opt: Arc<CibouletteRelationshipOneToManyOption>,
     rel_details: CibouletteResourceRelationshipDetails,
-) -> Result<(), Ciboulette2SqlError> {
+) -> Result<(), Ciboulette2PgError> {
     match relationship_data.data() {
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
             acc.values_mut().push((
                 opt.many_resource_key().clone(),
-                Ciboulette2SqlValue::from(rel_id.id()),
+                Ciboulette2PgValue::from(rel_id.id()),
             ));
         }
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::Many(_)) => {
-            return Err(Ciboulette2SqlError::RequiredSingleRelationship(
+            return Err(Ciboulette2PgError::RequiredSingleRelationship(
                 rel_details.relation_alias().to_string(),
             ));
         }
         CibouletteOptionalData::Null(x) if *x => {
             if !opt.optional() {
-                return Err(Ciboulette2SqlError::MissingRelationship(
+                return Err(Ciboulette2PgError::MissingRelationship(
                     main_type.name().to_string(),
                     rel_details.relation_alias().to_string(),
                 ));
@@ -94,21 +92,21 @@ pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
             match opt.one_resource().id_type() {
                 CibouletteIdType::Number => acc.values_mut().push((
                     opt.many_resource_key().clone(),
-                    Ciboulette2SqlValue::Numeric(None),
+                    Ciboulette2PgValue::Numeric(None),
                 )),
                 CibouletteIdType::Uuid => acc.values_mut().push((
                     opt.many_resource_key().clone(),
-                    Ciboulette2SqlValue::Uuid(None),
+                    Ciboulette2PgValue::Uuid(None),
                 )),
                 CibouletteIdType::Text => acc.values_mut().push((
                     opt.many_resource_key().clone(),
-                    Ciboulette2SqlValue::Text(None),
+                    Ciboulette2PgValue::Text(None),
                 )),
             }
         }
         CibouletteOptionalData::Null(_) => {
             if !opt.optional() {
-                return Err(Ciboulette2SqlError::MissingRelationship(
+                return Err(Ciboulette2PgError::MissingRelationship(
                     main_type.name().to_string(),
                     rel_details.relation_alias().to_string(),
                 ));
@@ -116,19 +114,19 @@ pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
         }
     }
     acc.single_relationships_mut()
-        .push(Ciboulette2PostgresResourceSingleRelationships {
+        .push(Ciboulette2PgResourceSingleRelationships {
             type_: opt.one_resource().clone(),
             key: opt.many_resource_key().clone(),
             rel_details,
         });
     acc.single_relationships_additional_fields_mut()
-        .push(Ciboulette2SqlAdditionalField::new(
-            Ciboulette2PostgresTableField::new(
-                Ciboulette2PostgresSafeIdent::try_from(opt.many_resource_key().clone())?,
+        .push(Ciboulette2PgAdditionalField::new(
+            Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdent::try_from(opt.many_resource_key().clone())?,
                 None,
                 None,
             ),
-            Ciboulette2SqlAdditionalFieldType::Relationship,
+            Ciboulette2PgAdditionalFieldType::Relationship,
             opt.one_resource().clone(),
         ));
     Ok(())

@@ -14,12 +14,9 @@ async fn test_insert<'store>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_insert(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_insert(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
@@ -50,7 +47,7 @@ async fn insert_main_all_fields(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut pool,
         "insert_main_all_fields",
@@ -77,7 +74,7 @@ async fn insert_main_required_only(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut pool,
         "insert_main_required_fields",
@@ -103,8 +100,8 @@ async fn insert_main_with_favorite_color(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    let color_rows = Ciboulette2PostgresRow::from_raw(&raw_rows_color)
-        .expect("to deserialize the returned rows");
+    let color_rows =
+        Ciboulette2PgRow::from_raw(&raw_rows_color).expect("to deserialize the returned rows");
     let raw_rows_main = test_insert(
         &mut pool,
         "/peoples",
@@ -129,7 +126,7 @@ async fn insert_main_with_favorite_color(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows_main).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows_main).expect("to deserialize the returned rows");
     snapshot_table(
         &mut pool,
         "insert_main_with_color",

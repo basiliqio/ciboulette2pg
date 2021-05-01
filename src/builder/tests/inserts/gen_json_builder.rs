@@ -2,12 +2,12 @@ use super::*;
 
 #[test]
 fn no_sparse_fields() {
-    let mut builder = Ciboulette2PostgresBuilder::default();
+    let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTable::new(
-        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
-        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
-        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
+    let dest_table = Ciboulette2PgTable::new(
+        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples").unwrap();
@@ -27,12 +27,12 @@ fn no_sparse_fields() {
 
 #[test]
 fn sparse_field() {
-    let mut builder = Ciboulette2PostgresBuilder::default();
+    let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTable::new(
-        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
-        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
-        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
+    let dest_table = Ciboulette2PgTable::new(
+        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples?fields[peoples]=first-name,last-name").unwrap();
@@ -52,12 +52,12 @@ fn sparse_field() {
 
 #[test]
 fn sparse_field_empty() {
-    let mut builder = Ciboulette2PostgresBuilder::default();
+    let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTable::new(
-        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
-        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
-        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
+    let dest_table = Ciboulette2PgTable::new(
+        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples?fields[peoples]=").unwrap();
@@ -77,12 +77,12 @@ fn sparse_field_empty() {
 
 #[test]
 fn not_included() {
-    let mut builder = Ciboulette2PostgresBuilder::default();
+    let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
-    let dest_table = Ciboulette2PostgresTable::new(
-        Ciboulette2PostgresId::Uuid(Ciboulette2PostgresSafeIdent::try_from("id").unwrap()),
-        Some(Ciboulette2PostgresSafeIdent::try_from("public").unwrap()),
-        Ciboulette2PostgresSafeIdent::try_from("peoples").unwrap(),
+    let dest_table = Ciboulette2PgTable::new(
+        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
+        Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
     );
     let url = Url::parse("http://localhost/peoples").unwrap();

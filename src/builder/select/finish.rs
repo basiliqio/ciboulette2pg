@@ -2,16 +2,16 @@ use itertools::Itertools;
 
 use super::*;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Finish an SQL query, selecting every working table in the state.
     ///
     /// If the `skip_main` parameter is used, the main table table is not handled
     pub(crate) fn finish_request<'store>(
         &mut self,
-        state: Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_table: Ciboulette2PostgresTable,
+        state: Ciboulette2PgBuilderState<'store, 'request>,
+        main_table: Ciboulette2PgTable,
         skip_main: bool,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         if !skip_main {
             match state.query().sorting().is_empty() {
                 false => {
@@ -25,7 +25,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         }
 
         for (table, is_needed) in std::mem::take(&mut self.working_tables).values() {
-            if matches!(is_needed, Ciboulette2PostgresResponseType::None) {
+            if matches!(is_needed, Ciboulette2PgResponseType::None) {
                 // if the table is not needed, skip it
                 continue;
             } else {
@@ -42,9 +42,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Handle the main table sorting, create a new cte just for sorting
     pub(crate) fn gen_cte_main_final_sorting<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         // Select the final main data, removing duplicates
         let (final_data_table, sorting_field_map) =
             self.gen_select_cte_final(&state, main_table)?;
@@ -57,12 +57,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             let field_name = sorting_field_map
                 .get(sorting_el)
                 .cloned()
-                .ok_or(Ciboulette2SqlError::UnknownError)?;
+                .ok_or(Ciboulette2PgError::UnknownError)?;
             if idx != 0 {
                 self.buf.write_all(b", ")?;
             }
             self.insert_ident(
-                &Ciboulette2PostgresTableField::new(field_name, None, None),
+                &Ciboulette2PgTableField::new(field_name, None, None),
                 &final_data_table,
             )?;
             match sorting_el.direction() {
@@ -80,40 +80,40 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// parenthesis
     pub(crate) fn write_table_final_select(
         &mut self,
-        table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         self.buf.write_all(b"(SELECT ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PostgresTableField::new(CIBOULETTE_ID_IDENT, None, None),
+            &Ciboulette2PgTableField::new(CIBOULETTE_ID_IDENT, None, None),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PostgresTableField::new(CIBOULETTE_TYPE_IDENT, None, None),
+            &Ciboulette2PgTableField::new(CIBOULETTE_TYPE_IDENT, None, None),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PostgresTableField::new(CIBOULETTE_DATA_IDENT, None, None),
+            &Ciboulette2PgTableField::new(CIBOULETTE_DATA_IDENT, None, None),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PostgresTableField::new(CIBOULETTE_RELATED_TYPE_IDENT, None, None),
+            &Ciboulette2PgTableField::new(CIBOULETTE_RELATED_TYPE_IDENT, None, None),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PostgresTableField::new(CIBOULETTE_RELATED_ID_IDENT, None, None),
+            &Ciboulette2PgTableField::new(CIBOULETTE_RELATED_ID_IDENT, None, None),
             &table,
             None,
         )?;
@@ -132,19 +132,19 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// - related_id
     pub(crate) fn gen_select_cte<'store, 'b, I>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        table: &Ciboulette2PostgresTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        table: &Ciboulette2PgTable,
         type_: Arc<CibouletteResourceType>,
-        relating_field: Option<Ciboulette2PostgresRelatingField>,
+        relating_field: Option<Ciboulette2PgRelatingField>,
         additional_fields: I,
         include: bool,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
-        I: Iterator<Item = &'b Ciboulette2SqlAdditionalField>,
+        I: Iterator<Item = &'b Ciboulette2PgAdditionalField>,
     {
         self.buf.write_all(b"SELECT ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(
+            &Ciboulette2PgTableField::new(
                 table.id().get_ident().clone(),
                 Some(CIBOULETTE_ID_IDENT),
                 Some(TEXT_IDENT),
@@ -153,7 +153,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         )?;
         self.buf.write_all(b", ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(
+            &Ciboulette2PgTableField::new(
                 table.id().get_ident().clone(),
                 Some(CIBOULETTE_MAIN_IDENTIFIER),
                 None,
@@ -166,14 +166,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 self.insert_ident(relating_field.field(), relating_field.table())?;
                 self.buf.write_all(b"::TEXT AS \"related_id\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::ArcStr(Some(
+                    Ciboulette2PgValue::ArcStr(Some(
                         relating_field.table().ciboulette_type().name().clone(),
                     )),
                     relating_field.table(),
                 )?;
                 self.buf.write_all(b"::TEXT AS \"related_type\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::Text(Some(Cow::Owned(
+                    Ciboulette2PgValue::Text(Some(Cow::Owned(
                         relating_field
                             .rel_chain()
                             .iter()
@@ -187,7 +187,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 self.buf
                     .write_all(b"NULL::TEXT AS \"related_id\", NULL::TEXT AS \"related_type\", ")?;
                 self.insert_params(
-                    Ciboulette2SqlValue::ArcStr(Some(type_.name().clone())),
+                    Ciboulette2PgValue::ArcStr(Some(type_.name().clone())),
                     table,
                 )?;
             }
@@ -207,18 +207,18 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// and joining the sort keys that can be used later to sort the main data
     pub(crate) fn gen_select_cte_final<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        table: &Ciboulette2PostgresTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        table: &Ciboulette2PgTable,
     ) -> Result<
         (
-            Ciboulette2PostgresTable,
-            BTreeMap<CibouletteSortingElement, Ciboulette2PostgresSafeIdent>,
+            Ciboulette2PgTable,
+            BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent>,
         ),
-        Ciboulette2SqlError,
+        Ciboulette2PgError,
     > {
-        let mut sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PostgresSafeIdent> =
+        let mut sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent> =
             BTreeMap::new();
-        let res_table = Ciboulette2PostgresTable::new(
+        let res_table = Ciboulette2PgTable::new(
             table.id().clone(),
             table.schema().clone(),
             CIBOULETTE_CTE_FINAL_MAIN_DATA,
@@ -234,10 +234,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         self.write_table_info(&table)?;
         self.buf.write_all(b".* ")?;
         for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
-            let rel_chain_str = Ciboulette2PostgresSafeIdent::try_from(
+            let rel_chain_str = Ciboulette2PgSafeIdent::try_from(
                 rel_chain.iter().map(|x| x.relation_alias()).join("_"),
             )?
-            .add_modifier(Ciboulette2PostgresSafeIdentModifier::Prefix(
+            .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
                 CIBOULETTE_SORT_PREFIX,
             ));
             let current_table = self
@@ -247,16 +247,19 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 .cloned()
                 .unwrap_or_else(|| table.clone());
             for sorting_el in sorting_elements {
-                let new_sorting_field = Ciboulette2PostgresSafeIdent::try_from(sorting_el.field())?;
-                let old_sorting_field = new_sorting_field.clone().add_modifier(
-                    Ciboulette2PostgresSafeIdentModifier::Prefix(CIBOULETTE_SORT_PREFIX),
-                );
-                let new_sorting_handle = rel_chain_str.clone().add_modifier(
-                    Ciboulette2PostgresSafeIdentModifier::Suffix(new_sorting_field),
-                );
+                let new_sorting_field = Ciboulette2PgSafeIdent::try_from(sorting_el.field())?;
+                let old_sorting_field =
+                    new_sorting_field
+                        .clone()
+                        .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
+                            CIBOULETTE_SORT_PREFIX,
+                        ));
+                let new_sorting_handle = rel_chain_str
+                    .clone()
+                    .add_modifier(Ciboulette2PgSafeIdentModifier::Suffix(new_sorting_field));
                 self.buf.write_all(b", ")?;
                 self.insert_ident(
-                    &Ciboulette2PostgresTableField::new(
+                    &Ciboulette2PgTableField::new(
                         old_sorting_field,
                         Some(new_sorting_handle.clone()),
                         None,
@@ -277,7 +280,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     .get(current_rel_chain)
                     .cloned()
                     .map(|(x, _)| x)
-                    .ok_or(Ciboulette2SqlError::UnknownError)?;
+                    .ok_or(Ciboulette2PgError::UnknownError)?;
                 Self::gen_left_join(&mut self.buf, &left_table, rel, &current_table)?;
                 current_table = left_table;
             }

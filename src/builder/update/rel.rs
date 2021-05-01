@@ -3,22 +3,22 @@ use super::*;
 //// Extract the relationships object from a request, fails if the request contains a main type
 fn extract_rels<'request>(
     request: &'request CibouletteUpdateRequest<'request>
-) -> Result<&'request CibouletteUpdateRelationshipBody<'request>, Ciboulette2SqlError> {
+) -> Result<&'request CibouletteUpdateRelationshipBody<'request>, Ciboulette2PgError> {
     match request.data() {
-        CibouletteUpdateRequestType::MainType(_) => Err(Ciboulette2SqlError::UpdatingMainObject),
+        CibouletteUpdateRequestType::MainType(_) => Err(Ciboulette2PgError::UpdatingMainObject),
         CibouletteUpdateRequestType::Relationship(rels) => Ok(rels),
     }
 }
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Generate the relationship update CTE
     pub fn gen_update_rel_update(
         &mut self,
         request: &'request CibouletteUpdateRequest<'request>,
-        main_table: &Ciboulette2PostgresTable,
-        main_cte_update: &Ciboulette2PostgresTable,
-        values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_table: &Ciboulette2PgTable,
+        main_cte_update: &Ciboulette2PgTable,
+        values: Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
+    ) -> Result<(), Ciboulette2PgError> {
         self.write_table_info(&main_cte_update)?;
         self.buf.write_all(b" AS (")?;
         self.gen_update_normal(&main_table, values, &request, true)?;
@@ -29,12 +29,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate the relationship data select from the relationship update CTE
     pub(crate) fn gen_update_rel_data<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
         type_: Arc<CibouletteResourceType>,
-        main_cte_update: &Ciboulette2PostgresTable,
-        main_cte_data: &Ciboulette2PostgresTable,
-        rels: &[Ciboulette2SqlAdditionalField],
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_cte_update: &Ciboulette2PgTable,
+        main_cte_data: &Ciboulette2PgTable,
+        rels: &[Ciboulette2PgAdditionalField],
+    ) -> Result<(), Ciboulette2PgError> {
         self.write_table_info(&main_cte_data)?;
         self.buf.write_all(b" AS (")?;
         self.gen_select_cte(&state, &main_cte_update, type_, None, rels.iter(), true)?;
@@ -48,11 +48,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Fails if trying to update one-to-many relationships
     pub(crate) fn gen_update_rel<'store>(
         ciboulette_store: &'store CibouletteStore,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        ciboulette_table_store: &'store Ciboulette2PgTableStore,
         request: &'request CibouletteUpdateRequest<'request>,
         main_type: Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
-    ) -> Result<Self, Ciboulette2SqlError>
+    ) -> Result<Self, Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -61,7 +61,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let rels: &'request CibouletteUpdateRelationshipBody<'request> = extract_rels(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&mut se, &main_table)?;
-        let Ciboulette2PostgresResourceInformations {
+        let Ciboulette2PgResourceInformations {
             values,
             single_relationships: _, //TODO
             single_relationships_additional_fields,
@@ -83,17 +83,14 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         )?;
         let mut inclusion_map: BTreeMap<
             Vec<CibouletteResourceRelationshipDetails>,
-            (
-                Ciboulette2PostgresResponseType,
-                Vec<CibouletteSortingElement>,
-            ),
+            (Ciboulette2PgResponseType, Vec<CibouletteSortingElement>),
         > = BTreeMap::default();
         // Little hack, making the root inclusion map appear as the inclusing map of the
         // related type.
         inclusion_map.insert(
             vec![rel_details.clone()],
             (
-                Ciboulette2PostgresResponseType::Id,
+                Ciboulette2PgResponseType::Id,
                 state
                     .inclusion_map()
                     .get(&vec![])
@@ -108,10 +105,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
             .add_working_table(
                 vec![rel_details.clone()],
                 main_cte_data.clone(),
-                Ciboulette2PostgresResponseType::Id,
+                Ciboulette2PgResponseType::Id,
             )
             .map(|(x, _)| x)
-            .ok_or(Ciboulette2SqlError::UnknownError)?;
+            .ok_or(Ciboulette2PgError::UnknownError)?;
         match state.query().sorting().is_empty() {
             true => {
                 se.write_table_final_select(&rel_table)?;

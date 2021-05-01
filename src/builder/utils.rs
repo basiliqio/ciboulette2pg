@@ -1,12 +1,12 @@
 use super::*;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Finish building the query, setting the last ';' and then converting the
     /// final query to UTF-8
     #[inline]
     pub fn build(
         mut self
-    ) -> Result<(String, Ciboulette2SqlArguments<'request>), Ciboulette2SqlError> {
+    ) -> Result<(String, Ciboulette2PgArguments<'request>), Ciboulette2PgError> {
         self.buf.write_all(b";")?;
         Ok((
             String::from_utf8(self.buf.into_inner()?.into_inner())?, // TODO Is it the best way to handle that ?
@@ -19,11 +19,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// In the form `"schema"."table"."ident"[::CAST] [AS "ALIAS"]`
     #[inline]
     pub(crate) fn insert_ident_inner(
-        buf: &mut Ciboulette2PostgresBuf,
-        field: &Ciboulette2PostgresTableField,
-        table: &Ciboulette2PostgresTable,
+        buf: &mut Ciboulette2PgBuf,
+        field: &Ciboulette2PgTableField,
+        table: &Ciboulette2PgTable,
         force_cast: Option<&'static str>,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         Self::write_table_info_inner(buf, table)?;
         buf.write_all(b".")?;
         buf.write_all(POSTGRES_QUOTE)?;
@@ -57,9 +57,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     #[inline]
     pub(crate) fn insert_ident(
         &mut self,
-        field: &Ciboulette2PostgresTableField,
-        table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        field: &Ciboulette2PgTableField,
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         Self::insert_ident_inner(&mut self.buf, &field, table, None)
     }
 
@@ -69,9 +69,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     #[inline]
     pub(crate) fn insert_ident_name(
         &mut self,
-        field: &Ciboulette2PostgresTableField,
-        _table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        field: &Ciboulette2PgTableField,
+        _table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         self.buf.write_all(POSTGRES_QUOTE)?;
         field.name().to_writer(&mut self.buf)?;
         self.buf.write_all(POSTGRES_QUOTE)?;
@@ -99,9 +99,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     #[inline]
     pub(crate) fn insert_params(
         &mut self,
-        param: Ciboulette2SqlValue<'request>,
-        _table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        param: Ciboulette2PgValue<'request>,
+        _table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         let mut buffer = [0u8; 20];
         self.params.push(param);
         let len = self.params.len();
@@ -116,9 +116,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// In the form of `"schema"."table"`
     #[inline]
     pub(crate) fn write_table_info_inner(
-        buf: &mut Ciboulette2PostgresBuf,
-        table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        buf: &mut Ciboulette2PgBuf,
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         buf.write_all(POSTGRES_QUOTE)?;
         match table.schema() {
             Some(x) => {
@@ -136,8 +136,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     #[inline]
     pub(crate) fn write_table_info(
         &mut self,
-        table: &Ciboulette2PostgresTable,
-    ) -> Result<(), Ciboulette2SqlError> {
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
         Self::write_table_info_inner(&mut self.buf, table)
     }
 
@@ -147,17 +147,17 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     pub(crate) fn write_list<I, F>(
         &mut self,
         arr: I,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PgTable,
         wrap_in_parenthesis: bool,
         f: F,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
         I: std::iter::IntoIterator,
         F: for<'r> Fn(
-            &'r mut Ciboulette2PostgresBuilder<'request>,
+            &'r mut Ciboulette2PgBuilder<'request>,
             I::Item,
-            &Ciboulette2PostgresTable,
-        ) -> Result<(), Ciboulette2SqlError>,
+            &Ciboulette2PgTable,
+        ) -> Result<(), Ciboulette2PgError>,
     {
         let mut iter = arr.into_iter().peekable();
         if wrap_in_parenthesis {

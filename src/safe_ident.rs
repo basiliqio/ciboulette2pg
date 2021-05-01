@@ -2,8 +2,8 @@ use super::*;
 
 macro_rules! safe_ident {
     ($name:ident, $text:literal) => {
-        pub const $name: Ciboulette2PostgresSafeIdent = {
-            Ciboulette2PostgresSafeIdent {
+        pub const $name: Ciboulette2PgSafeIdent = {
+            Ciboulette2PgSafeIdent {
                 inner: arcstr::literal!($text),
                 prefix: arcstr::literal!(""),
                 suffix: arcstr::literal!(""),
@@ -30,27 +30,27 @@ safe_ident!(CIBOULETTE_DATA_IDENT, "data");
 safe_ident!(CIBOULETTE_RELATED_ID_IDENT, "related_id");
 safe_ident!(CIBOULETTE_RELATED_TYPE_IDENT, "related_type");
 
-/// An modifier for [Ciboulette2PostgresSafeIdent](Ciboulette2PostgresSafeIdent)
+/// An modifier for [Ciboulette2PgSafeIdent](Ciboulette2PgSafeIdent)
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
-pub(crate) enum Ciboulette2PostgresSafeIdentModifier {
+pub(crate) enum Ciboulette2PgSafeIdentModifier {
     /// A prefix identifier
-    Prefix(Ciboulette2PostgresSafeIdent),
+    Prefix(Ciboulette2PgSafeIdent),
     /// A suffix identifier
-    Suffix(Ciboulette2PostgresSafeIdent),
+    Suffix(Ciboulette2PgSafeIdent),
     /// An index to add to the ident
     Index(Option<usize>),
 }
 
 /// An identifier that is safe to be wrapped in quote
 #[derive(Clone, Debug, PartialEq, Eq, Ord, Default, PartialOrd)]
-pub struct Ciboulette2PostgresSafeIdent {
+pub struct Ciboulette2PgSafeIdent {
     pub prefix: ArcStr,
     pub inner: ArcStr,
     pub suffix: ArcStr,
     pub index: Option<usize>,
 }
 
-impl std::fmt::Display for Ciboulette2PostgresSafeIdent {
+impl std::fmt::Display for Ciboulette2PgSafeIdent {
     fn fmt(
         &self,
         f: &mut std::fmt::Formatter<'_>,
@@ -70,14 +70,14 @@ impl std::fmt::Display for Ciboulette2PostgresSafeIdent {
     }
 }
 
-impl Ciboulette2PostgresSafeIdent {
+impl Ciboulette2PgSafeIdent {
     /// Check that the identifier is safe
-    fn check_routine(val: ArcStr) -> Result<ArcStr, Ciboulette2SqlError> {
+    fn check_routine(val: ArcStr) -> Result<ArcStr, Ciboulette2PgError> {
         if (*val).find('\0').is_some() {
-            return Err(Ciboulette2SqlError::NullCharIdent(val.to_string()));
+            return Err(Ciboulette2PgError::NullCharIdent(val.to_string()));
         }
         if !(*val).chars().all(|x| x.is_ascii()) {
-            return Err(Ciboulette2SqlError::NonAsciiCharInIdent(val.to_string()));
+            return Err(Ciboulette2PgError::NonAsciiCharInIdent(val.to_string()));
         }
         if (*val).find('"').is_some() {
             return Ok(ArcStr::from((*val).replace('"', "\"\"")));
@@ -88,8 +88,8 @@ impl Ciboulette2PostgresSafeIdent {
     fn take(self) -> ArcStr {
         self.inner
     }
-    pub fn check(val: ArcStr) -> Result<Self, Ciboulette2SqlError> {
-        Ok(Ciboulette2PostgresSafeIdent {
+    pub fn check(val: ArcStr) -> Result<Self, Ciboulette2PgError> {
+        Ok(Ciboulette2PgSafeIdent {
             inner: Self::check_routine(val)?,
             ..Default::default()
         })
@@ -97,12 +97,12 @@ impl Ciboulette2PostgresSafeIdent {
 
     pub(crate) fn add_modifier(
         mut self,
-        modifier: Ciboulette2PostgresSafeIdentModifier,
+        modifier: Ciboulette2PgSafeIdentModifier,
     ) -> Self {
         match modifier {
-            Ciboulette2PostgresSafeIdentModifier::Prefix(prefix) => self.prefix = prefix.take(),
-            Ciboulette2PostgresSafeIdentModifier::Suffix(suffix) => self.suffix = suffix.take(),
-            Ciboulette2PostgresSafeIdentModifier::Index(index) => self.index = index,
+            Ciboulette2PgSafeIdentModifier::Prefix(prefix) => self.prefix = prefix.take(),
+            Ciboulette2PgSafeIdentModifier::Suffix(suffix) => self.suffix = suffix.take(),
+            Ciboulette2PgSafeIdentModifier::Index(index) => self.index = index,
         };
         self
     }
@@ -110,7 +110,7 @@ impl Ciboulette2PostgresSafeIdent {
     pub(crate) fn to_writer(
         &self,
         writer: &mut dyn std::io::Write,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         match (self.prefix.is_empty(), self.suffix.is_empty(), self.index) {
             (false, false, Some(i)) => write!(
                 writer,
@@ -131,41 +131,41 @@ impl Ciboulette2PostgresSafeIdent {
     }
 }
 
-impl std::convert::TryFrom<ArcStr> for Ciboulette2PostgresSafeIdent {
-    type Error = Ciboulette2SqlError;
+impl std::convert::TryFrom<ArcStr> for Ciboulette2PgSafeIdent {
+    type Error = Ciboulette2PgError;
 
     fn try_from(value: ArcStr) -> Result<Self, Self::Error> {
-        Ciboulette2PostgresSafeIdent::check(value)
+        Ciboulette2PgSafeIdent::check(value)
     }
 }
 
-impl std::convert::TryFrom<&ArcStr> for Ciboulette2PostgresSafeIdent {
-    type Error = Ciboulette2SqlError;
+impl std::convert::TryFrom<&ArcStr> for Ciboulette2PgSafeIdent {
+    type Error = Ciboulette2PgError;
 
     fn try_from(value: &ArcStr) -> Result<Self, Self::Error> {
-        Ciboulette2PostgresSafeIdent::check(value.clone())
+        Ciboulette2PgSafeIdent::check(value.clone())
     }
 }
 
-impl std::convert::TryFrom<&'static str> for Ciboulette2PostgresSafeIdent {
-    type Error = Ciboulette2SqlError;
+impl std::convert::TryFrom<&'static str> for Ciboulette2PgSafeIdent {
+    type Error = Ciboulette2PgError;
 
     fn try_from(value: &'static str) -> Result<Self, Self::Error> {
-        Ciboulette2PostgresSafeIdent::check(ArcStr::from(value))
+        Ciboulette2PgSafeIdent::check(ArcStr::from(value))
     }
 }
 
-impl std::convert::TryFrom<String> for Ciboulette2PostgresSafeIdent {
-    type Error = Ciboulette2SqlError;
+impl std::convert::TryFrom<String> for Ciboulette2PgSafeIdent {
+    type Error = Ciboulette2PgError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        Ciboulette2PostgresSafeIdent::check(ArcStr::from(value))
+        Ciboulette2PgSafeIdent::check(ArcStr::from(value))
     }
 }
 
-impl From<&Ciboulette2PostgresSafeIdent> for Ciboulette2PostgresSafeIdent {
-    fn from(value: &Ciboulette2PostgresSafeIdent) -> Self {
-        Ciboulette2PostgresSafeIdent {
+impl From<&Ciboulette2PgSafeIdent> for Ciboulette2PgSafeIdent {
+    fn from(value: &Ciboulette2PgSafeIdent) -> Self {
+        Ciboulette2PgSafeIdent {
             inner: value.inner.clone(),
             ..Default::default()
         }

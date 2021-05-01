@@ -4,26 +4,26 @@ pub mod main;
 pub mod rel;
 pub mod utils;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Generate a normal update with a simple `WHERE` selecting a single id
     pub(crate) fn gen_update_normal(
         &mut self,
-        table: &Ciboulette2PostgresTable,
-        params: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
+        table: &Ciboulette2PgTable,
+        params: Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
         query: &'request CibouletteUpdateRequest<'request>,
         returning: bool,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         self.buf.write_all(b"UPDATE ")?;
         self.write_table_info(table)?;
         self.buf.write_all(b" SET ")?;
         self.gen_update_params(table, params)?;
         self.buf.write_all(b" WHERE ")?;
         self.insert_ident(
-            &Ciboulette2PostgresTableField::new(table.id().get_ident().clone(), None, None),
+            &Ciboulette2PgTableField::new(table.id().get_ident().clone(), None, None),
             &table,
         )?;
         self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2SqlValue::from(query.resource_id()), &table)?;
+        self.insert_params(Ciboulette2PgValue::from(query.resource_id()), &table)?;
         if returning {
             self.buf.write_all(b" RETURNING *")?;
         }
@@ -33,8 +33,8 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate the CTE table for updating an object
     fn gen_update_cte_tables(
         &mut self,
-        main_type: &Ciboulette2PostgresTable,
-    ) -> Result<(Ciboulette2PostgresTable, Ciboulette2PostgresTable), Ciboulette2SqlError> {
+        main_type: &Ciboulette2PgTable,
+    ) -> Result<(Ciboulette2PgTable, Ciboulette2PgTable), Ciboulette2PgError> {
         let main_cte_update =
             main_type.to_cte(&mut *self, CIBOULETTE_EMPTY_IDENT, CIBOULETTE_UPDATE_SUFFIX)?;
         let main_cte_data =
@@ -47,9 +47,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Fails if the relationships is Many-to-Many or One-to-Many
     pub fn gen_update<'store>(
         ciboulette_store: &'store CibouletteStore,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        ciboulette_table_store: &'store Ciboulette2PgTableStore,
         request: &'request CibouletteUpdateRequest<'request>,
-    ) -> Result<Self, Ciboulette2SqlError>
+    ) -> Result<Self, Ciboulette2PgError>
     where
         'store: 'request,
     {

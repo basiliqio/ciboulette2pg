@@ -6,12 +6,12 @@ use std::io::Write;
 
 macro_rules! get_state {
     ($ciboulette_store:expr, $ciboulette_table_store:expr, $req:expr) => {
-        Ciboulette2PostgresBuilderState::new(
+        Ciboulette2PgBuilderState::new(
             $ciboulette_store,
             $ciboulette_table_store,
             $req.path(),
             $req.query(),
-            Ciboulette2PostgresResponseType::from(*$req.expected_response_type()),
+            Ciboulette2PgResponseType::from(*$req.expected_response_type()),
         )
     };
 }
@@ -27,46 +27,46 @@ mod select;
 mod update;
 mod utils;
 
-use relating_field::Ciboulette2PostgresRelatingField;
+use relating_field::Ciboulette2PgRelatingField;
 
 #[cfg(test)]
 pub mod tests;
 
-use additional_fields::{Ciboulette2SqlAdditionalField, Ciboulette2SqlAdditionalFieldType};
-use builder_state::Ciboulette2PostgresBuilderState;
+use additional_fields::{Ciboulette2PgAdditionalField, Ciboulette2PgAdditionalFieldType};
+use builder_state::Ciboulette2PgBuilderState;
 use extracting_data::*;
-use field_name::Ciboulette2PostgresTableField;
+use field_name::Ciboulette2PgTableField;
 
-type Ciboulette2PostgresBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
+type Ciboulette2PgBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 
 /// A list of parameters to send along side the query to database
 #[derive(Clone, Debug, Default, Getters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2SqlArguments<'request> {
-    inner: Vec<Ciboulette2SqlValue<'request>>,
+pub struct Ciboulette2PgArguments<'request> {
+    inner: Vec<Ciboulette2PgValue<'request>>,
 }
 
-impl<'request> Ciboulette2SqlArguments<'request> {
+impl<'request> Ciboulette2PgArguments<'request> {
     pub fn with_capacity(cap: usize) -> Self {
-        Ciboulette2SqlArguments {
+        Ciboulette2PgArguments {
             inner: Vec::with_capacity(cap),
         }
     }
 
-    pub fn take(self) -> Vec<Ciboulette2SqlValue<'request>> {
+    pub fn take(self) -> Vec<Ciboulette2PgValue<'request>> {
         self.inner
     }
 }
 
-impl<'request> std::ops::Deref for Ciboulette2SqlArguments<'request> {
-    type Target = Vec<Ciboulette2SqlValue<'request>>;
+impl<'request> std::ops::Deref for Ciboulette2PgArguments<'request> {
+    type Target = Vec<Ciboulette2PgValue<'request>>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
     }
 }
 
-impl<'request> std::ops::DerefMut for Ciboulette2SqlArguments<'request> {
+impl<'request> std::ops::DerefMut for Ciboulette2PgArguments<'request> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
@@ -75,37 +75,35 @@ impl<'request> std::ops::DerefMut for Ciboulette2SqlArguments<'request> {
 /// Ciboulette to Postgres Query builder
 #[derive(Debug, Getters, MutGetters)]
 #[getset(get = "pub")]
-pub struct Ciboulette2PostgresBuilder<'request> {
-    buf: Ciboulette2PostgresBuf,
-    params: Ciboulette2SqlArguments<'request>,
+pub struct Ciboulette2PgBuilder<'request> {
+    buf: Ciboulette2PgBuf,
+    params: Ciboulette2PgArguments<'request>,
     #[getset(get_mut = "pub")]
     working_tables: BTreeMap<
         Vec<CibouletteResourceRelationshipDetails>,
-        (Ciboulette2PostgresTable, Ciboulette2PostgresResponseType),
+        (Ciboulette2PgTable, Ciboulette2PgResponseType),
     >,
     cte_index: usize,
 }
 
-impl<'request> Default for Ciboulette2PostgresBuilder<'request> {
+impl<'request> Default for Ciboulette2PgBuilder<'request> {
     fn default() -> Self {
-        Ciboulette2PostgresBuilder {
-            buf: Ciboulette2PostgresBuf::new_ringbuf(std::io::Cursor::new(Vec::with_capacity(
-                4096,
-            ))),
-            params: Ciboulette2SqlArguments::with_capacity(128),
+        Ciboulette2PgBuilder {
+            buf: Ciboulette2PgBuf::new_ringbuf(std::io::Cursor::new(Vec::with_capacity(4096))),
+            params: Ciboulette2PgArguments::with_capacity(128),
             working_tables: BTreeMap::default(),
             cte_index: 0,
         }
     }
 }
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     pub(crate) fn add_working_table(
         &mut self,
         rel_chain: Vec<CibouletteResourceRelationshipDetails>,
-        table: Ciboulette2PostgresTable,
-        response_type: Ciboulette2PostgresResponseType,
-    ) -> Option<(Ciboulette2PostgresTable, Ciboulette2PostgresResponseType)> {
+        table: Ciboulette2PgTable,
+        response_type: Ciboulette2PgResponseType,
+    ) -> Option<(Ciboulette2PgTable, Ciboulette2PgResponseType)> {
         self.working_tables
             .insert(rel_chain, (table, response_type))
     }

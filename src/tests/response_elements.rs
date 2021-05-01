@@ -6,10 +6,9 @@ async fn convert_multiple_field_without_related(mut pool: sqlx::PgPool) {
     let store = gen_bag();
     let data = init_values::init_values(&mut pool).await;
     let raw_rows = test_select(&mut pool, "/peoples", "", &data).await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     let hint_size = res.len();
-    let res_built = Ciboulette2PostgresRow::build_response_elements(
+    let res_built = Ciboulette2PgRow::build_response_elements(
         res,
         &store,
         store.get_type("peoples").unwrap(),
@@ -31,10 +30,9 @@ async fn convert_multiple_field_with_related(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     let hint_size = res.len();
-    let res_built = Ciboulette2PostgresRow::build_response_elements(
+    let res_built = Ciboulette2PgRow::build_response_elements(
         res,
         &store,
         store.get_type("articles").unwrap(),

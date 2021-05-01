@@ -3,7 +3,7 @@ use super::*;
 async fn test_update_fails<'store>(
     query_end: &str,
     body: &str,
-) -> Ciboulette2SqlError {
+) -> Ciboulette2PgError {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse(format!("http://localhost{}", query_end).as_str()).unwrap();
@@ -13,7 +13,7 @@ async fn test_update_fails<'store>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    Ciboulette2PostgresBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+    Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
         .unwrap_err()
 }
 
@@ -29,7 +29,7 @@ async fn updating_many_to_many_rels(mut pool: sqlx::PgPool) {
     )
     .await;
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
+        matches!(err, Ciboulette2PgError::ManyRelationshipDirectWrite),
         true
     );
 }
@@ -46,7 +46,7 @@ async fn updating_one_to_many_rels(mut pool: sqlx::PgPool) {
     )
     .await;
     assert_eq!(
-        matches!(err, Ciboulette2SqlError::ManyRelationshipDirectWrite),
+        matches!(err, Ciboulette2PgError::ManyRelationshipDirectWrite),
         true
     );
 }

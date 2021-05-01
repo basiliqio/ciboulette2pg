@@ -1,6 +1,6 @@
 use super::*;
 
-fn test_insert_failing(body: String) -> Ciboulette2SqlError {
+fn test_insert_failing(body: String) -> Ciboulette2PgError {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
     let parsed_url = Url::parse("http://localhost/peoples").unwrap();
@@ -10,7 +10,7 @@ fn test_insert_failing(body: String) -> Ciboulette2SqlError {
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
-    Ciboulette2PostgresBuilder::gen_insert(&ciboulette_store, &table_store, &ciboulette_request)
+    Ciboulette2PgBuilder::gen_insert(&ciboulette_store, &table_store, &ciboulette_request)
         .unwrap_err()
 }
 
@@ -32,10 +32,7 @@ async fn providing_id(_pool: sqlx::PgPool) {
         })
         .to_string(),
     );
-    assert_eq!(
-        matches!(err, Ciboulette2SqlError::ProvidedIdOnInserts),
-        true
-    );
+    assert_eq!(matches!(err, Ciboulette2PgError::ProvidedIdOnInserts), true);
 }
 
 #[basiliq_test(run_migrations)]
@@ -48,5 +45,5 @@ async fn missing_attributes(_pool: sqlx::PgPool) {
         })
         .to_string(),
     );
-    assert_eq!(matches!(err, Ciboulette2SqlError::MissingAttributes), true);
+    assert_eq!(matches!(err, Ciboulette2PgError::MissingAttributes), true);
 }

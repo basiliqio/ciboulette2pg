@@ -3,9 +3,9 @@ use super::*;
 /// Extract attributes from the request and push them to an arguments vector
 /// compatible with SQLx for later execution
 pub fn attributes_to_sql_params<'store, 'request>(
-    args: &mut Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
+    args: &mut Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
     obj: &'request Option<MessyJsonObjectValue<'store>>,
-) -> Result<(), Ciboulette2SqlError> {
+) -> Result<(), Ciboulette2PgError> {
     if let Some(obj) = obj {
         // Iterate over every attribute
         for (k, v) in obj.iter() {
@@ -14,7 +14,7 @@ pub fn attributes_to_sql_params<'store, 'request>(
             if matches!(v, MessyJsonValue::Null(MessyJsonNullType::Absent, _)) {
                 continue;
             }
-            args.push((k.clone(), Ciboulette2SqlValue::try_from(v)?));
+            args.push((k.clone(), Ciboulette2PgValue::try_from(v)?));
         }
     }
     Ok(())

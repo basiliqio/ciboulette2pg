@@ -12,12 +12,9 @@ async fn test_delete<'store>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &None);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteDeleteRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_delete(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_delete(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
@@ -44,7 +41,7 @@ async fn main(mut pool: sqlx::PgPool) {
     baseline!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_delete(&mut pool, format!("/peoples/{}", people_id).as_str()).await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "delete_main", &["peoples", "people-article"]).await;
 }
 
@@ -58,7 +55,7 @@ async fn one_to_one(mut pool: sqlx::PgPool) {
         format!("/peoples/{}/relationships/favorite_color", people_id).as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut pool,
         "delete_one_to_one",

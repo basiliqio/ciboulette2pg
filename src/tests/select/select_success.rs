@@ -3,8 +3,7 @@ use super::*;
 async fn select_all_fields(mut pool: sqlx::PgPool) {
     let data = init_values::init_values(&mut pool).await;
     let raw_rows = test_select(&mut pool, "/peoples", "", &data).await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -19,8 +18,7 @@ async fn select_a_single_record(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -35,8 +33,7 @@ async fn select_related_record_single_rels(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -51,8 +48,7 @@ async fn select_related_record_multi_rels(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -67,8 +63,7 @@ async fn select_related_record_multi_rels_reverse(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -83,8 +78,7 @@ async fn select_one_to_many_rels(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -99,8 +93,7 @@ async fn select_many_to_one_rels(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -115,8 +108,7 @@ async fn select_one_to_one_relationships(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -131,8 +123,7 @@ async fn select_one_to_many_relationships(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -147,8 +138,7 @@ async fn select_many_to_one_relationships(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }
 
@@ -163,7 +153,6 @@ async fn select_many_to_many_relationships(mut pool: sqlx::PgPool) {
         &data,
     )
     .await;
-    let res =
-        Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     check_rows!(res);
 }

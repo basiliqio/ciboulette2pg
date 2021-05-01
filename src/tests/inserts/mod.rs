@@ -32,12 +32,9 @@ async fn test_insert<'store>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body_opt);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteCreateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_insert(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_insert(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let (query, args) = builder.build().unwrap();
 
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)

@@ -14,12 +14,9 @@ async fn test_update<'store>(
     let req_builder = CibouletteRequestBuilder::new(INTENTION, &parsed_url, &body);
     let request = req_builder.build(&ciboulette_store).unwrap();
     let ciboulette_request = CibouletteUpdateRequest::try_from(request).unwrap();
-    let builder = Ciboulette2PostgresBuilder::gen_update(
-        &ciboulette_store,
-        &table_store,
-        &ciboulette_request,
-    )
-    .unwrap();
+    let builder =
+        Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
+            .unwrap();
     let (query, args) = builder.build().unwrap();
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut pool.acquire().await.unwrap())
@@ -52,7 +49,7 @@ async fn empty(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_empty", &["peoples"]).await;
 }
 
@@ -78,7 +75,7 @@ async fn main_fields(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_main_fields", &["peoples"]).await;
 }
 
@@ -112,7 +109,7 @@ async fn single_rel(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "update_single_rel_with_fields", &["peoples"]).await;
 }
 
@@ -143,7 +140,7 @@ async fn single_rel_unset(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(
         &mut pool,
         "update_single_rel_unset_with_fields",
@@ -173,6 +170,6 @@ async fn unsetting_a_field(mut pool: sqlx::PgPool) {
         .as_str(),
     )
     .await;
-    Ciboulette2PostgresRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
+    Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     snapshot_table(&mut pool, "unsetting_main_field", &["peoples"]).await;
 }

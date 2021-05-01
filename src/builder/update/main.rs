@@ -10,26 +10,26 @@ fn extract_data_object_from_update_request<'request>(
         MessyJsonObjectValue<'request>,
         CibouletteResourceIdentifier<'request>,
     >,
-    Ciboulette2SqlError,
+    Ciboulette2PgError,
 > {
     match request.data() {
         CibouletteUpdateRequestType::MainType(attr) => Ok(attr),
         CibouletteUpdateRequestType::Relationship(_) => {
-            Err(Ciboulette2SqlError::ManyRelationshipDirectWrite)
+            Err(Ciboulette2PgError::ManyRelationshipDirectWrite)
         }
     }
 }
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Generate the main type update CTE
     #[inline]
     fn gen_update_main_update(
         &mut self,
         request: &'request CibouletteUpdateRequest<'request>,
-        main_table: &Ciboulette2PostgresTable,
-        main_update_cte: &Ciboulette2PostgresTable,
-        values: Vec<(ArcStr, Ciboulette2SqlValue<'request>)>,
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_table: &Ciboulette2PgTable,
+        main_update_cte: &Ciboulette2PgTable,
+        values: Vec<(ArcStr, Ciboulette2PgValue<'request>)>,
+    ) -> Result<(), Ciboulette2PgError> {
         self.write_table_info(&main_update_cte)?;
         self.buf.write_all(b" AS (")?;
         self.gen_update_normal(&main_table, values, &request, true)?;
@@ -41,12 +41,12 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     #[inline]
     fn gen_update_main_update_data<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
         request: &'request CibouletteUpdateRequest<'request>,
-        main_update_cte: &Ciboulette2PostgresTable,
-        main_data_cte: &Ciboulette2PostgresTable,
-        rels: &[Ciboulette2SqlAdditionalField],
-    ) -> Result<(), Ciboulette2SqlError> {
+        main_update_cte: &Ciboulette2PgTable,
+        main_data_cte: &Ciboulette2PgTable,
+        rels: &[Ciboulette2PgAdditionalField],
+    ) -> Result<(), Ciboulette2PgError> {
         let sort_keys_mains = Self::gen_sort_key_for_main(state, main_data_cte)?;
         self.write_table_info(&main_data_cte)?;
         self.buf.write_all(b" AS (")?;
@@ -68,9 +68,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Fails if trying to update one-to-many relationships
     pub(crate) fn gen_update_main<'store>(
         ciboulette_store: &'store CibouletteStore,
-        ciboulette_table_store: &'store Ciboulette2PostgresTableStore,
+        ciboulette_table_store: &'store Ciboulette2PgTableStore,
         request: &'request CibouletteUpdateRequest<'request>,
-    ) -> Result<Self, Ciboulette2SqlError>
+    ) -> Result<Self, Ciboulette2PgError>
     where
         'store: 'request,
     {
@@ -79,7 +79,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
         let main_data = extract_data_object_from_update_request(&request)?;
         let (main_cte_update, main_cte_data) =
             Self::gen_update_cte_tables(&mut se, &state.main_table())?;
-        let Ciboulette2PostgresResourceInformations {
+        let Ciboulette2PgResourceInformations {
             values,
             single_relationships: _, // TODO
             single_relationships_additional_fields,
@@ -116,10 +116,10 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// with no provided values to update
     fn gen_update_select_if_empty_value<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_update: &Ciboulette2PostgresTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_cte_update: &Ciboulette2PgTable,
         request: &'request CibouletteUpdateRequest<'request>,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
     {

@@ -1,16 +1,16 @@
 use super::*;
 use std::ops::Deref;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Recursive function that walks a [MessyJsonObject](messy_json::MessyJsonObject) and create the final
     /// `JSON_BUILD_OBJECT` in the query
     pub(crate) fn gen_json_builder_routine<I>(
         &mut self,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PgTable,
         obj: MessyJsonObject,
         obj_name: ArcStr,
         mut fields: std::iter::Peekable<I>,
-    ) -> Result<(), Ciboulette2SqlError>
+    ) -> Result<(), Ciboulette2PgError>
     where
         I: std::iter::Iterator<Item = ArcStr>,
     {
@@ -36,11 +36,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                     )?;
                 }
                 _ => {
-                    self.insert_params(Ciboulette2SqlValue::ArcStr(Some(el.clone())), &table)?;
+                    self.insert_params(Ciboulette2PgValue::ArcStr(Some(el.clone())), &table)?;
                     self.buf.write_all(b", ")?;
                     self.insert_ident(
-                        &Ciboulette2PostgresTableField::new(
-                            Ciboulette2PostgresSafeIdent::try_from(el)?,
+                        &Ciboulette2PgTableField::new(
+                            Ciboulette2PgSafeIdent::try_from(el)?,
                             None,
                             None,
                         ),
@@ -59,11 +59,11 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
     /// Generate the function that'll create the final object JSON returned by the database
     pub(crate) fn gen_json_builder(
         &mut self,
-        table: &Ciboulette2PostgresTable,
+        table: &Ciboulette2PgTable,
         type_: Arc<CibouletteResourceType>,
         query: &'request CibouletteQueryParameters<'request>,
         include: bool,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         match (query.sparse().get(&*type_), include) {
             (Some(fields), true) => {
                 // If there is no sparse field, nothing will be returned

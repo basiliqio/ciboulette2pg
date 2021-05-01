@@ -1,21 +1,18 @@
 use super::*;
 
-impl<'request> Ciboulette2PostgresBuilder<'request> {
+impl<'request> Ciboulette2PgBuilder<'request> {
     /// Select the relationships of the main data, including every included relationships.
     ///
     /// It can include nested include, including every intermediate tables
     pub(crate) fn select_rels<'store>(
         &mut self,
-        state: &Ciboulette2PostgresBuilderState<'store, 'request>,
-        main_cte_data: &Ciboulette2PostgresTable,
+        state: &Ciboulette2PgBuilderState<'store, 'request>,
+        main_cte_data: &Ciboulette2PgTable,
         inclusion_map: &BTreeMap<
             Vec<CibouletteResourceRelationshipDetails>,
-            (
-                Ciboulette2PostgresResponseType,
-                Vec<CibouletteSortingElement>,
-            ),
+            (Ciboulette2PgResponseType, Vec<CibouletteSortingElement>),
         >,
-    ) -> Result<(), Ciboulette2SqlError> {
+    ) -> Result<(), Ciboulette2PgError> {
         for (included_list, (response_type, sort_fields_el)) in inclusion_map {
             let mut current_table = main_cte_data.clone();
             let mut current_type = main_cte_data.ciboulette_type().clone();
@@ -33,9 +30,9 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 self.write_table_info(&next_table_cte)?;
                 self.buf.write_all(b" AS (")?;
                 let current_rel_chain = &included_list[0..=include_el_index];
-                let relating_field = Ciboulette2PostgresRelatingField::new(
-                    Ciboulette2PostgresTableField {
-                        name: Ciboulette2PostgresSafeIdent::from(current_table.id().get_ident()),
+                let relating_field = Ciboulette2PgRelatingField::new(
+                    Ciboulette2PgTableField {
+                        name: Ciboulette2PgSafeIdent::from(current_table.id().get_ident()),
                         alias: None,
                         cast: None,
                     },
@@ -45,7 +42,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
                 );
                 let mut sort_additional_fields = Vec::with_capacity(sort_fields_el.len());
                 for sorting_element in sort_fields_el {
-                    sort_additional_fields.push(Ciboulette2SqlAdditionalField::from_sorting_field(
+                    sort_additional_fields.push(Ciboulette2PgAdditionalField::from_sorting_field(
                         sorting_element,
                         next_table.ciboulette_type().clone(),
                     )?);
@@ -58,7 +55,7 @@ impl<'request> Ciboulette2PostgresBuilder<'request> {
 					working_table.ciboulette_type().clone(),
 					Some(relating_field),
 					rels.single_relationships_additional_fields().iter().chain(sort_additional_fields.iter()),
-					!matches!(include_el.relation_option(), CibouletteRelationshipOption::ManyToOne(x) if x.part_of_many_to_many().is_some()) && matches!(response_type, Ciboulette2PostgresResponseType::Object),
+					!matches!(include_el.relation_option(), CibouletteRelationshipOption::ManyToOne(x) if x.part_of_many_to_many().is_some()) && matches!(response_type, Ciboulette2PgResponseType::Object),
 				)?;
                 Self::gen_inner_join(
                     &mut self.buf,
