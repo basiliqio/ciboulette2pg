@@ -1,8 +1,7 @@
-<center><h1> Ciboulette<b>2</b>Pg </h1>
+<h1 align="center"> Ciboulette<b>2</b>Pg </h1>
 
-<h4><b><em>Ciboulette</em> requests to Postgres queries and back</b></h4>
+<h4 align="center"><b><em>Ciboulette</em> requests to Postgres queries and back</b></h4>
 
-</center>
 <a href="https://gitlab.com/basiliqio/ciboulette2pg/-/pipelines" alt="Gitlab pipeline status">
   <img src="https://img.shields.io/gitlab/pipeline/basiliqio/ciboulette2pg/main">
 </a>

@@ -40,7 +40,7 @@
 //! some have additional columns for sorting or linking but these won't be included in the response.
 //!
 //! One can think of the response like the following schema in which different [CTE](https://www.postgresql.org/docs/13/queries-with.html)
-//! contributes to the final reponse beeing built.
+//! contributing to the final reponse beeing built.
 //!
 //! ```ascii
 //!                                                    ┌────────┐
