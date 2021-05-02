@@ -271,7 +271,12 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         }
         self.buf.write_all(b" FROM ")?;
         self.write_table_info(table)?;
-        for rel_chain in state.inclusion_map().keys() {
+        for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
+            if sorting_elements.is_empty()
+            // Skip table with no sorting element
+            {
+                continue;
+            }
             let mut current_table = table.clone();
             for (idx, rel) in rel_chain.iter().enumerate() {
                 let current_rel_chain = &rel_chain[0..=idx];

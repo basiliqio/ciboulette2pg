@@ -1,0 +1,80 @@
+---
+source: src/tests/select/query_params.rs
+expression: value
+
+---
+[
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "age": 22,
+      "first-name": "Francis",
+      "gender": "M",
+      "last-name": "Le Roy",
+      "twitter": null
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "age": 34,
+      "first-name": "Somebody",
+      "gender": "F",
+      "last-name": "Wuhu",
+      "twitter": "@randomhandle"
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type": "peoples",
+    "data": {
+      "age": null,
+      "first-name": "AAAAAAAA",
+      "gender": null,
+      "last-name": "BBBBBBBBB",
+      "twitter": null
+    }
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": {
+      "body": "Yes",
+      "title": "How to dead"
+    },
+    "related_type": "peoples",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": {
+      "body": "They feast on the blood of the departed draw their powers",
+      "title": "Why devs require sacrifices"
+    },
+    "related_type": "peoples",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": {
+      "body": "Yeah I know ! Right ?!",
+      "title": "Oh my g**"
+    },
+    "related_type": "peoples",
+    "related_id": "[uuid]"
+  },
+  {
+    "id": "[uuid]",
+    "type": "articles",
+    "data": {
+      "body": "Yes",
+      "title": "How to dead"
+    },
+    "related_type": "peoples",
+    "related_id": "[uuid]"
+  }
+]

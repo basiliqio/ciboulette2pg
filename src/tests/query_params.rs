@@ -34,7 +34,7 @@ macro_rules! ciboulette_query_test_routine {
 #[macro_export]
 macro_rules! ciboulette_query_test_multi {
     ($transform_function:ident) => {
-        ciboulette_query_test_routine!(sorting, $transform_function, "/peoples?&sort=first-name");
+        ciboulette_query_test_routine!(sorting, $transform_function, "/peoples?sort=first-name");
         ciboulette_query_test_routine!(sorting_desc, $transform_function, "/peoples?sort=-age");
         ciboulette_query_test_routine!(
             sorting_multiple_fields,
@@ -45,6 +45,16 @@ macro_rules! ciboulette_query_test_multi {
             sorting_by_one_to_one_rel,
             $transform_function,
             "/peoples?sort=-favorite_color.color,first-name"
+        );
+        ciboulette_query_test_routine!(
+            include_multi,
+            $transform_function,
+            "/peoples?include=articles"
+        );
+        ciboulette_query_test_routine!(
+            include_multi_and_sort,
+            $transform_function,
+            "/peoples?include=articles&sort=first-name"
         );
     };
 }

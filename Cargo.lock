@@ -258,7 +258,7 @@ dependencies = [
 
 [[package]]
 name = "ciboulette2pg"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "arcstr",
  "basiliq_db_test_proc_macro",
