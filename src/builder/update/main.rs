@@ -79,18 +79,14 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         let main_data = extract_data_object_from_update_request(&request)?;
         let (main_cte_update, main_cte_data) =
             Self::gen_update_cte_tables(&mut se, &state.main_table())?;
-        let Ciboulette2PgResourceInformations {
-            values,
-            single_relationships: _, // TODO
-            single_relationships_additional_fields,
-            multi_relationships: _, // TODO
-        } = extract_data(
+        let mut request_resource = extract_data_from_ciboulette_request(
             &ciboulette_store,
             request.path().main_type().clone(),
             main_data.attributes(),
             main_data.relationships(),
             true,
         )?;
+        let values = request_resource.take_values();
         se.buf.write_all(b"WITH ")?;
         match values.is_empty() {
             true => se.gen_update_select_if_empty_value(&state, &main_cte_update, request)?,
@@ -103,7 +99,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
             &request,
             &main_cte_update,
             &main_cte_data,
-            &single_relationships_additional_fields,
+            request_resource.single_relationships_additional_fields(),
         )?;
         se.select_rels(&state, &main_cte_data, state.inclusion_map())?;
         se.buf.write_all(b" ")?;

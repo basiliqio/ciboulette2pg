@@ -16,12 +16,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let (main_cte_insert, main_cte_data) = se.gen_insert_cte_tables(&state)?;
 
-        let Ciboulette2PgResourceInformations {
-            values,
-            single_relationships: _, // TODO
-            single_relationships_additional_fields,
-            multi_relationships: _, // TODO
-        } = extract_data(
+        let mut request_resource = extract_data_from_ciboulette_request(
             &ciboulette_store,
             request.path().main_type().clone(),
             request.data().attributes(),
@@ -30,13 +25,13 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         )?;
         se.buf.write_all(b"WITH ")?;
         // Insert the data in the database
-        se.write_main_table_inserts(&main_cte_insert, &state, values)?;
+        se.write_main_table_inserts(&main_cte_insert, &state, request_resource.take_values())?;
         // Return the just inserted data
         se.write_main_table_select(
             &main_cte_data,
             &state,
             main_cte_insert,
-            &single_relationships_additional_fields,
+            request_resource.single_relationships_additional_fields(),
         )?;
         // Select the relationships
         se.select_rels(&state, &main_cte_data, state.inclusion_map())?;

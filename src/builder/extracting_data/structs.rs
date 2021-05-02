@@ -35,3 +35,10 @@ pub(crate) struct Ciboulette2PgResourceInformations<'request> {
     pub single_relationships_additional_fields: Vec<Ciboulette2PgAdditionalField>,
     pub multi_relationships: BTreeMap<ArcStr, Ciboulette2PgMultiRelationships<'request>>,
 }
+
+impl<'request> Ciboulette2PgResourceInformations<'request> {
+    /// Take the values list for this resource, leaving an empty vec in its place
+    pub fn take_values(&mut self) -> Vec<(ArcStr, Ciboulette2PgValue<'request>)> {
+        std::mem::take(&mut self.values)
+    }
+}

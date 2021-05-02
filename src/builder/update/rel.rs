@@ -61,25 +61,25 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         let state = get_state!(&ciboulette_store, &ciboulette_table_store, &request)?;
         let rels: &'request CibouletteUpdateRelationshipBody<'request> = extract_rels(&request)?;
         let (main_cte_update, main_cte_data) = Self::gen_update_cte_tables(&mut se, &main_table)?;
-        let Ciboulette2PgResourceInformations {
-            values,
-            single_relationships: _, //TODO
-            single_relationships_additional_fields,
-            multi_relationships: _, //TODO
-        } = extract_data_rels(
+        let mut rels_resources = extract_rels_data_from_ciboulette_request(
             &ciboulette_store,
             request.path().base_type().clone(),
             rel_details.relation_alias(),
             rels.value(),
         )?;
         se.buf.write_all(b"WITH ")?;
-        se.gen_update_rel_update(&request, &main_table, &main_cte_update, values)?;
+        se.gen_update_rel_update(
+            &request,
+            &main_table,
+            &main_cte_update,
+            rels_resources.take_values(),
+        )?;
         se.gen_update_rel_data(
             &state,
             request.resource_type().clone(),
             &main_cte_update,
             &main_cte_data,
-            &single_relationships_additional_fields,
+            rels_resources.single_relationships_additional_fields(),
         )?;
         let mut inclusion_map: BTreeMap<
             Vec<CibouletteResourceRelationshipDetails>,

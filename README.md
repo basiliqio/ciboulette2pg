@@ -20,3 +20,24 @@
 </a>
 
 See the [documentation](https://docs.rs/ciboulette2pg)
+
+
+## Testing
+
+To test this crate, you need to start a `Postgres` database and export the `DATABASE_URL` environment variable.
+
+You can use the provided `docker-compose` plan
+
+```sh
+# To start the test database
+docker-compose -f docker-compose.testing.yml up -d
+
+# Don't forget to set the environment variable
+export DATABASE_URL="postgres://postgres:postgres@localhost/postgres"
+
+# Run the tests
+cargo test
+
+# To stop the test database
+docker-compose -f docker-compose.testing.yml down -v
+```

@@ -8,7 +8,7 @@ use many_to_one::*;
 
 /// Extract the many-to-one data from the request
 /// Fails if the relation is not many-to-one
-pub(crate) fn extract_data_rels<'store, 'request>(
+pub(crate) fn extract_rels_data_from_ciboulette_request<'store, 'request>(
     store: &'store CibouletteStore,
     main_type: Arc<CibouletteResourceType>,
     rel_alias: &str,

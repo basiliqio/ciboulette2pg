@@ -9,7 +9,7 @@ pub(crate) use structs::*;
 
 /// Extract all the necessary data for build SQL queries from the attributes and
 /// relationships
-pub(crate) fn extract_data<'store, 'request>(
+pub(crate) fn extract_data_from_ciboulette_request<'store, 'request>(
     store: &'store CibouletteStore,
     main_type: Arc<CibouletteResourceType>,
     attributes: &'request Option<MessyJsonObjectValue<'request>>,
