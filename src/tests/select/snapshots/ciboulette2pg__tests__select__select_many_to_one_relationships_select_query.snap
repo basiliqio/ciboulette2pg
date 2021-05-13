@@ -1,0 +1,44 @@
+---
+source: src/tests/select/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_peoples_data_0" AS (
+  SELECT
+    "public"."peoples"."id" :: TEXT AS "id",
+    "public"."peoples"."id" AS "main_id",
+    "public"."comments"."id" :: TEXT AS "related_id",
+    $1 :: TEXT AS "related_type",
+    $2 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."peoples"."favorite_color" AS "rel_favorite_color"
+  FROM
+    "public"."peoples"
+    INNER JOIN "public"."comments" ON "public"."comments"."author" = "public"."peoples"."id"
+  WHERE
+    "public"."comments"."id" = $3
+),
+"cte_rel_comments_data_1" AS (
+  SELECT
+    "public"."comments"."id" :: TEXT AS "id",
+    "public"."comments"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $4 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."comments"."article" AS "rel_article",
+    "public"."comments"."author" AS "rel_author"
+  FROM
+    "public"."comments"
+  WHERE
+    "public"."comments"."id" = $5
+) (
+  SELECT
+    "cte_peoples_data_0"."id",
+    "cte_peoples_data_0"."type",
+    "cte_peoples_data_0"."data",
+    "cte_peoples_data_0"."related_type",
+    "cte_peoples_data_0"."related_id"
+  FROM
+    "cte_peoples_data_0"
+);

@@ -82,6 +82,7 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 [[package]]
 name = "basiliq_db_test_proc_macro"
 version = "0.1.0"
+source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#1c0dcbc27c2d10f8b730dfe08a44f0ba26c03e97"
 dependencies = [
  "basiliq_db_test_utils",
  "proc-macro2",
@@ -92,6 +93,7 @@ dependencies = [
 [[package]]
 name = "basiliq_db_test_utils"
 version = "0.1.0"
+source = "git+https://github.com/basiliqio/basiliq_db_test_utils.git?branch=main#1c0dcbc27c2d10f8b730dfe08a44f0ba26c03e97"
 dependencies = [
  "anyhow",
  "lazy_static",

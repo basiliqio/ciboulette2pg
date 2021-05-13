@@ -1,0 +1,29 @@
+---
+source: src/tests/select/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_articles_data_0" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $1 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($2, "public"."articles"."title") AS "data"
+  FROM
+    "public"."articles"
+    INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
+    INNER JOIN "public"."peoples" ON "public"."peoples"."id" = "public"."people-article"."people_id"
+  WHERE
+    "public"."peoples"."id" = $3
+)(
+  SELECT
+    "cte_articles_data_0"."id",
+    "cte_articles_data_0"."type",
+    "cte_articles_data_0"."data",
+    "cte_articles_data_0"."related_type",
+    "cte_articles_data_0"."related_id"
+  FROM
+    "cte_articles_data_0"
+);

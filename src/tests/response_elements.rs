@@ -5,7 +5,13 @@ use super::*;
 async fn convert_multiple_field_without_related(mut pool: sqlx::PgPool) {
     let store = gen_bag();
     let data = basiliq_db_test_utils::init_values(&mut pool).await;
-    let raw_rows = test_select(&mut pool, "/peoples", "", &data).await;
+    let raw_rows = test_select(
+        &mut pool,
+        "/peoples",
+        "convert_multiple_field_without_related",
+        &data,
+    )
+    .await;
     let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     let hint_size = res.len();
     let res_built = Ciboulette2PgRow::build_response_elements(
@@ -26,7 +32,7 @@ async fn convert_multiple_field_with_related(mut pool: sqlx::PgPool) {
     let raw_rows = test_select(
         &mut pool,
         format!("/peoples/{}/articles?include=author", people_id).as_str(),
-        "",
+        "convert_multiple_field_with_related",
         &data,
     )
     .await;

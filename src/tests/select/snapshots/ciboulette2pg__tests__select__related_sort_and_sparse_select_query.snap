@@ -1,0 +1,41 @@
+---
+source: src/tests/select/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_articles_data_0" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $1 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($2, "public"."articles"."title") AS "data",
+    "public"."articles"."body" AS "sort_body"
+  FROM
+    "public"."articles"
+    INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
+    INNER JOIN "public"."peoples" ON "public"."peoples"."id" = "public"."people-article"."people_id"
+  WHERE
+    "public"."peoples"."id" = $3
+),
+"cte_final_main_data" AS (
+  SELECT
+    DISTINCT ON ("cte_articles_data_0"."main_id") "cte_articles_data_0".*,
+    "cte_articles_data_0"."sort_body" AS "sort__body"
+  FROM
+    "cte_articles_data_0"
+  ORDER BY
+    "cte_articles_data_0"."main_id"
+) (
+  SELECT
+    "cte_final_main_data"."id",
+    "cte_final_main_data"."type",
+    "cte_final_main_data"."data",
+    "cte_final_main_data"."related_type",
+    "cte_final_main_data"."related_id"
+  FROM
+    "cte_final_main_data"
+  ORDER BY
+    "cte_final_main_data"."sort__body" ASC
+);

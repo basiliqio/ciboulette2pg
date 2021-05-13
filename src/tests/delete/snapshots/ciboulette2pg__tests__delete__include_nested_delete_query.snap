@@ -1,0 +1,9 @@
+---
+source: src/tests/delete/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+DELETE FROM
+  "public"."peoples"
+WHERE
+  "public"."peoples"."id" = $1;

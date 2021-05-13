@@ -7,7 +7,7 @@ mod query_params;
 async fn test_delete<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
-    _test_name: &str,
+    name: &str,
     _data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
@@ -27,6 +27,14 @@ async fn test_delete<'store>(
         .fetch_all(&mut pool.acquire().await.unwrap())
         .await
         .unwrap();
+    insta::assert_snapshot!(
+        format!("{}_delete_query", name),
+        sqlformat::format(
+            query.as_str(),
+            &sqlformat::QueryParams::None,
+            sqlformat::FormatOptions::default()
+        )
+    );
     snapshot_table(
         &mut *pool,
         "db_snapshot_delete_while_testing_query_params",

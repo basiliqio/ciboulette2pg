@@ -7,7 +7,7 @@ mod query_params;
 async fn test_insert<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
-    _test_name: &str,
+    name: &str,
     _data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
@@ -36,7 +36,14 @@ async fn test_insert<'store>(
         Ciboulette2PgBuilder::gen_insert(&ciboulette_store, &table_store, &ciboulette_request)
             .unwrap();
     let (query, args) = builder.build().unwrap();
-
+    insta::assert_snapshot!(
+        format!("{}_insert_query", name),
+        sqlformat::format(
+            query.as_str(),
+            &sqlformat::QueryParams::None,
+            sqlformat::FormatOptions::default()
+        )
+    );
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut pool.acquire().await.unwrap())
         .await
