@@ -139,24 +139,6 @@ impl Ciboulette2PgSafeIdent {
 }
 
 impl Ciboulette2PgSafeIdentSelector {
-    pub(crate) fn add_modifier(
-        mut self,
-        modifier: Ciboulette2PgSafeIdentModifier,
-    ) -> Self {
-        match self {
-            Ciboulette2PgSafeIdentSelector::Single(x) => {
-                Ciboulette2PgSafeIdentSelector::Single(x.add_modifier(modifier))
-            }
-            Ciboulette2PgSafeIdentSelector::Multi(mut x) => {
-                for ident in x.iter_mut() {
-                    let ident_val = std::mem::take(ident);
-                    *ident = ident_val.add_modifier(modifier.clone());
-                }
-                Ciboulette2PgSafeIdentSelector::Multi(x)
-            }
-        }
-    }
-
     pub(crate) fn to_writer(
         &self,
         writer: &mut dyn std::io::Write,

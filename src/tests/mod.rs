@@ -7,7 +7,6 @@ use ciboulette_test_helper::*;
 use serde_json::json;
 use std::convert::TryFrom;
 use url::Url;
-use uuid::Uuid;
 mod delete;
 mod inserts;
 mod query_params;

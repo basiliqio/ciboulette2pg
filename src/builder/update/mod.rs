@@ -59,7 +59,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 type_.clone(),
                 rel_details,
             ),
-            _ => unreachable!(), // FIXME
+            _ => unreachable!(), // TODO Document
         }
     }
 }

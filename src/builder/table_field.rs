@@ -8,7 +8,7 @@ use std::convert::TryFrom;
 #[derive(Debug, Clone, Getters, Setters)]
 #[getset(get = "pub", set = "pub")]
 pub(crate) struct Ciboulette2PgTableField {
-    /// The name of the field
+    /// The field or fields
     pub(crate) name: Ciboulette2PgSafeIdentSelector,
     /// The new alias of the field, if any
     pub(crate) alias: Option<Ciboulette2PgSafeIdent>,
@@ -23,16 +23,6 @@ impl Ciboulette2PgTableField {
         cast: Option<Ciboulette2PgSafeIdent>,
     ) -> Self {
         Ciboulette2PgTableField { name, alias, cast }
-    }
-
-    pub fn clear_alias(mut self) -> Self {
-        self.cast = None;
-        self
-    }
-
-    pub fn clear_cast(mut self) -> Self {
-        self.cast = None;
-        self
     }
 }
 

@@ -226,8 +226,8 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         ),
         Ciboulette2PgError,
     > {
-        let mut sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent> =
-            BTreeMap::new();
+        let sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent>;
+
         let res_table = Ciboulette2PgTable::new(
             table.id().clone(),
             table.schema().clone(),
@@ -243,6 +243,45 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.buf.write_all(b"\") ")?;
         self.write_table_info(&table)?;
         self.buf.write_all(b".* ")?;
+        sort_fields = self.gen_select_cte_final_rel_inclusion(state, table)?;
+        self.buf.write_all(b" FROM ")?;
+        self.write_table_info(table)?;
+        for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
+            if sorting_elements.is_empty()
+            // Skip table with no sorting element
+            {
+                continue;
+            }
+            let mut current_table = table.clone();
+            for (idx, rel) in rel_chain.iter().enumerate() {
+                let current_rel_chain = &rel_chain[0..=idx];
+                let left_table = self
+                    .working_tables()
+                    .get(current_rel_chain)
+                    .cloned()
+                    .map(|(x, _)| x)
+                    .ok_or(Ciboulette2PgError::UnknownError)?;
+                Self::gen_left_join(&mut self.buf, &left_table, rel, &current_table)?;
+                current_table = left_table;
+            }
+        }
+        self.buf.write_all(b" ORDER BY ")?;
+        self.write_table_info(table)?;
+        self.buf.write_all(b".\"")?;
+        CIBOULETTE_MAIN_IDENTIFIER.to_writer(&mut self.buf)?;
+        self.buf.write_all(b"\") ")?;
+        Ok((res_table, sort_fields))
+    }
+
+    /// Generate the final CTE Sorting map, mapping sorting element to the identifier used
+    fn gen_select_cte_final_rel_inclusion(
+        &mut self,
+        state: &Ciboulette2PgBuilderState,
+        table: &Ciboulette2PgTable,
+    ) -> Result<BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent>, Ciboulette2PgError>
+    {
+        let mut sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent> =
+            BTreeMap::new();
         for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
             let rel_chain_str = Ciboulette2PgSafeIdent::try_from(
                 rel_chain.iter().map(|x| x.relation_alias()).join("_"),
@@ -279,32 +318,6 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 sort_fields.insert(sorting_el.clone(), new_sorting_handle);
             }
         }
-        self.buf.write_all(b" FROM ")?;
-        self.write_table_info(table)?;
-        for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
-            if sorting_elements.is_empty()
-            // Skip table with no sorting element
-            {
-                continue;
-            }
-            let mut current_table = table.clone();
-            for (idx, rel) in rel_chain.iter().enumerate() {
-                let current_rel_chain = &rel_chain[0..=idx];
-                let left_table = self
-                    .working_tables()
-                    .get(current_rel_chain)
-                    .cloned()
-                    .map(|(x, _)| x)
-                    .ok_or(Ciboulette2PgError::UnknownError)?;
-                Self::gen_left_join(&mut self.buf, &left_table, rel, &current_table)?;
-                current_table = left_table;
-            }
-        }
-        self.buf.write_all(b" ORDER BY ")?;
-        self.write_table_info(table)?;
-        self.buf.write_all(b".\"")?;
-        CIBOULETTE_MAIN_IDENTIFIER.to_writer(&mut self.buf)?;
-        self.buf.write_all(b"\") ")?;
-        Ok((res_table, sort_fields))
+        Ok(sort_fields)
     }
 }
