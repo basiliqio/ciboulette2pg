@@ -14,31 +14,42 @@ mod update;
 pub fn gen_table_store(store: &CibouletteStore) -> Ciboulette2PgTableStore {
     vec![
         Ciboulette2PgTable::new(
-            Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+            vec![
+                Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("people_id").unwrap()),
+                Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("article_id").unwrap()),
+            ],
             Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
             Ciboulette2PgSafeIdent::try_from("people-article").unwrap(),
             store.get_type("people-article").unwrap().clone(),
         ),
         Ciboulette2PgTable::new(
-            Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+            vec![Ciboulette2PgId::Uuid(
+                Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+            )],
             Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
             Ciboulette2PgSafeIdent::try_from("articles").unwrap(),
             store.get_type("articles").unwrap().clone(),
         ),
         Ciboulette2PgTable::new(
-            Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+            vec![Ciboulette2PgId::Uuid(
+                Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+            )],
             Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
             Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
             store.get_type("peoples").unwrap().clone(),
         ),
         Ciboulette2PgTable::new(
-            Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+            vec![Ciboulette2PgId::Uuid(
+                Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+            )],
             Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
             Ciboulette2PgSafeIdent::try_from("comments").unwrap(),
             store.get_type("comments").unwrap().clone(),
         ),
         Ciboulette2PgTable::new(
-            Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+            vec![Ciboulette2PgId::Uuid(
+                Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+            )],
             Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
             Ciboulette2PgSafeIdent::try_from("favorite_color").unwrap(),
             store.get_type("favorite_color").unwrap().clone(),

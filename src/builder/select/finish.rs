@@ -62,7 +62,11 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 self.buf.write_all(b", ")?;
             }
             self.insert_ident(
-                &Ciboulette2PgTableField::new(field_name, None, None),
+                &Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(field_name),
+                    None,
+                    None,
+                ),
                 &final_data_table,
             )?;
             match sorting_el.direction() {
@@ -85,35 +89,55 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.buf.write_all(b"(SELECT ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_ID_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_ID_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_TYPE_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_TYPE_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_DATA_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_DATA_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_RELATED_TYPE_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_RELATED_TYPE_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_RELATED_ID_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_RELATED_ID_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
@@ -143,23 +167,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         I: Iterator<Item = &'b Ciboulette2PgAdditionalField>,
     {
         self.buf.write_all(b"SELECT ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(
-                table.id().get_ident().clone(),
-                Some(CIBOULETTE_ID_IDENT),
-                Some(TEXT_IDENT),
-            ),
-            table,
-        )?;
+        self.select_main_id_pretty(&table)?;
         self.buf.write_all(b", ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(
-                table.id().get_ident().clone(),
-                Some(CIBOULETTE_MAIN_IDENTIFIER),
-                None,
-            ),
-            table,
-        )?;
+        self.select_main_id_raw(&table)?;
         self.buf.write_all(b", ")?;
         match relating_field {
             Some(relating_field) => {
@@ -260,7 +270,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 self.buf.write_all(b", ")?;
                 self.insert_ident(
                     &Ciboulette2PgTableField::new(
-                        old_sorting_field,
+                        Ciboulette2PgSafeIdentSelector::Single(old_sorting_field),
                         Some(new_sorting_handle.clone()),
                         None,
                     ),

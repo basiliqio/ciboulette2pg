@@ -14,7 +14,7 @@ async fn test_delete_fails<'store>(query_end: &str) -> Ciboulette2PgError {
 }
 #[basiliq_test(run_migrations)]
 async fn one_to_many(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let err =
         test_delete_fails(format!("/peoples/{}/relationships/articles", people_id).as_str()).await;

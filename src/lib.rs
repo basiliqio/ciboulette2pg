@@ -102,8 +102,8 @@ use messy_json::{
     MessyJsonValue,
 };
 use response_type::Ciboulette2PgResponseType;
-pub use safe_ident::Ciboulette2PgSafeIdent;
 use safe_ident::Ciboulette2PgSafeIdentModifier;
+pub use safe_ident::{Ciboulette2PgSafeIdent, Ciboulette2PgSafeIdentSelector};
 use safe_ident::{
     CIBOULETTE_CTE_FINAL_MAIN_DATA, CIBOULETTE_DATA_IDENT, CIBOULETTE_DATA_SUFFIX,
     CIBOULETTE_EMPTY_IDENT, CIBOULETTE_ID_IDENT, CIBOULETTE_INSERT_SUFFIX,

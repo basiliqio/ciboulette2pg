@@ -85,7 +85,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             &mut *buf,
             &Ciboulette2PgTableField::new(
-                Ciboulette2PgSafeIdent::try_from(opt.keys_for_type(&right_type)?)?,
+                Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(
+                    opt.keys_for_type(&right_type)?,
+                )?),
                 None,
                 None,
             ),
@@ -96,10 +98,12 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             &mut *buf,
             &match right_table.is_cte() {
-                true => Ciboulette2PgTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
-                false => {
-                    Ciboulette2PgTableField::new(right_table.id().get_ident().clone(), None, None)
-                }
+                true => Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_MAIN_IDENTIFIER),
+                    None,
+                    None,
+                ),
+                false => Ciboulette2PgTableField::from(right_table.id()),
             },
             right_table,
             None,
@@ -121,10 +125,12 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &match left_table.is_cte() {
-                true => Ciboulette2PgTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
-                false => {
-                    Ciboulette2PgTableField::new(left_table.id().get_ident().clone(), None, None)
-                }
+                true => Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_MAIN_IDENTIFIER),
+                    None,
+                    None,
+                ),
+                false => Ciboulette2PgTableField::from(left_table.id()),
             },
             left_table,
             None,
@@ -133,7 +139,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &Ciboulette2PgTableField::new(
-                Ciboulette2PgSafeIdent::try_from(opt.keys_for_type(&left_type)?)?,
+                Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(
+                    opt.keys_for_type(&left_type)?,
+                )?),
                 None,
                 None,
             ),
@@ -159,10 +167,12 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &match left_table.is_cte() {
-                true => Ciboulette2PgTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
-                false => {
-                    Ciboulette2PgTableField::new(left_table.id().get_ident().clone(), None, None)
-                }
+                true => Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_MAIN_IDENTIFIER),
+                    None,
+                    None,
+                ),
+                false => Ciboulette2PgTableField::from(left_table.id()),
             },
             left_table,
             None,
@@ -171,7 +181,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &Ciboulette2PgTableField::new(
-                Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?,
+                Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(
+                    opt.many_resource_key(),
+                )?),
                 None,
                 None,
             ),
@@ -195,11 +207,14 @@ impl<'request> Ciboulette2PgBuilder<'request> {
             buf,
             &Ciboulette2PgTableField::new(
                 match left_table.is_cte() {
-                    true => Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?
-                        .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
-                            CIBOULETTE_REL_PREFIX,
-                        )),
-                    false => Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?,
+                    true => Ciboulette2PgSafeIdentSelector::Single(
+                        Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?.add_modifier(
+                            Ciboulette2PgSafeIdentModifier::Prefix(CIBOULETTE_REL_PREFIX),
+                        ),
+                    ),
+                    false => Ciboulette2PgSafeIdentSelector::Single(
+                        Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?,
+                    ),
                 },
                 None,
                 None,
@@ -211,10 +226,12 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &match right_table.is_cte() {
-                true => Ciboulette2PgTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
-                false => {
-                    Ciboulette2PgTableField::new(right_table.id().get_ident().clone(), None, None)
-                }
+                true => Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_MAIN_IDENTIFIER),
+                    None,
+                    None,
+                ),
+                false => Ciboulette2PgTableField::from(right_table.id()),
             },
             right_table,
             None,

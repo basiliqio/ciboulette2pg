@@ -3,7 +3,7 @@ macro_rules! ciboulette_query_test_routine {
     ($name:ident, $transform_function:ident, $query_string:literal) => {
         #[basiliq_test(run_migrations)]
         async fn $name(mut pool: sqlx::PgPool) {
-            let data = init_values::init_values(&mut pool).await;
+            let data = basiliq_db_test_utils::init_values(&mut pool).await;
             let raw_rows =
                 $transform_function(&mut pool, $query_string, stringify!($name), &data).await;
             let res =
@@ -15,7 +15,7 @@ macro_rules! ciboulette_query_test_routine {
     ($name:ident, $transform_function:ident, $query_string:literal, $type_to_join:literal) => {
         #[basiliq_test(run_migrations)]
         async fn $name(mut pool: sqlx::PgPool) {
-            let data = init_values::init_values(&mut pool).await;
+            let data = basiliq_db_test_utils::init_values(&mut pool).await;
             let obj_id = data.get($type_to_join).unwrap().first().unwrap();
             let raw_rows = $transform_function(
                 &mut pool,

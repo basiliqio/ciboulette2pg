@@ -18,12 +18,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.buf.write_all(b" SET ")?;
         self.gen_update_params(table, params)?;
         self.buf.write_all(b" WHERE ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(table.id().get_ident().clone(), None, None),
-            &table,
-        )?;
-        self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2PgValue::from(query.resource_id()), &table)?;
+        self.compare_pkey(&table, query.resource_id())?;
         if returning {
             self.buf.write_all(b" RETURNING *")?;
         }

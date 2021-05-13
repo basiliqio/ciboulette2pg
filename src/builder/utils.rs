@@ -63,6 +63,72 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(&mut self.buf, &field, table, None)
     }
 
+    #[inline]
+    pub(crate) fn select_main_id_raw(
+        &mut self,
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
+        match table.id().len() {
+            1 => {
+                let mut table_field = Ciboulette2PgTableField::from(table.id());
+
+                table_field.set_alias(Some(CIBOULETTE_MAIN_IDENTIFIER));
+
+                Self::insert_ident_inner(&mut self.buf, &table_field, table, None)?;
+            }
+            _ => {
+                self.buf.write_all(b"(")?;
+                let mut id_iter = table.id().iter().peekable();
+                while let Some(id) = id_iter.next() {
+                    Self::write_table_info_inner(&mut self.buf, table)?;
+                    self.buf.write_all(b".")?;
+                    self.buf.write_all(POSTGRES_QUOTE)?;
+                    id.get_ident().to_writer(&mut self.buf)?;
+                    self.buf.write_all(POSTGRES_QUOTE)?;
+                    if id_iter.peek().is_some() {
+                        self.buf.write_all(b", ")?;
+                    }
+                }
+                self.buf.write_all(b") AS ")?;
+                CIBOULETTE_MAIN_IDENTIFIER.to_writer(&mut self.buf)?;
+            }
+        };
+        Ok(())
+    }
+
+    #[inline]
+    pub(crate) fn select_main_id_pretty(
+        &mut self,
+        table: &Ciboulette2PgTable,
+    ) -> Result<(), Ciboulette2PgError> {
+        match table.id().len() {
+            1 => {
+                let mut table_field = Ciboulette2PgTableField::from(table.id());
+
+                table_field.set_alias(Some(CIBOULETTE_ID_IDENT));
+
+                Self::insert_ident_inner(&mut self.buf, &table_field, table, Some("TEXT"))?;
+            }
+            _ => {
+                self.buf.write_all(b"CONCAT_WS(',', ")?;
+                let mut id_iter = table.id().iter().peekable();
+                while let Some(id) = id_iter.next() {
+                    Self::write_table_info_inner(&mut self.buf, table)?;
+                    self.buf.write_all(b".")?;
+                    self.buf.write_all(POSTGRES_QUOTE)?;
+                    id.get_ident().to_writer(&mut self.buf)?;
+                    self.buf.write_all(POSTGRES_QUOTE)?;
+                    if id_iter.peek().is_some() {
+                        self.buf.write_all(b", ")?;
+                    }
+                }
+                self.buf.write_all(b") :: TEXT AS ")?;
+                CIBOULETTE_ID_IDENT.to_writer(&mut self.buf)?;
+            }
+        }
+        Ok(())
+    }
+
     /// Inserts an identifier name to the query.
     ///
     /// In the form `"ident"`[::CAST] [AS "ALIAS"]
@@ -172,6 +238,36 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         }
         if wrap_in_parenthesis {
             self.buf.write_all(b")")?;
+        }
+        Ok(())
+    }
+
+    /// Compare the primary key(s) of a table to the provided CibouletteId
+    pub(crate) fn compare_pkey(
+        &mut self,
+        table: &Ciboulette2PgTable,
+        id_val: &'request CibouletteIdSelector<'request>,
+    ) -> Result<(), Ciboulette2PgError> {
+        match table.ciboulette_type().ids() {
+            CibouletteIdTypeSelector::Single(id_type) => {
+                let mut id_field =
+                    Ciboulette2PgTableField::from(&Ciboulette2PgId::try_from(id_type)?);
+                id_field.cast = None;
+                self.insert_ident(&id_field, &table)?;
+                self.buf.write_all(b" = ")?;
+                self.insert_params(Ciboulette2PgValue::from(id_val.get(0)?), &table)?
+            }
+            CibouletteIdTypeSelector::Multi(id_types) => {
+                let piter = id_types.iter().peekable().enumerate();
+                for (i, id_type) in piter {
+                    let mut id_field =
+                        Ciboulette2PgTableField::from(&Ciboulette2PgId::try_from(id_type)?);
+                    id_field.cast = None;
+                    self.insert_ident(&id_field, &table)?;
+                    self.buf.write_all(b" = ")?;
+                    self.insert_params(Ciboulette2PgValue::from(id_val.get(i)?), &table)?
+                }
+            }
         }
         Ok(())
     }

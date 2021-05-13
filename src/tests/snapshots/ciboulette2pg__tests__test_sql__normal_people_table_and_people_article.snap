@@ -35,22 +35,18 @@ expression: "serde_json::Value::Object(map)"
   ],
   "people-article": [
     {
-      "id": "[uuid]",
       "people_id": "[uuid]",
       "article_id": "[uuid]"
     },
     {
-      "id": "[uuid]",
       "people_id": "[uuid]",
       "article_id": "[uuid]"
     },
     {
-      "id": "[uuid]",
       "people_id": "[uuid]",
       "article_id": "[uuid]"
     },
     {
-      "id": "[uuid]",
       "people_id": "[uuid]",
       "article_id": "[uuid]"
     }

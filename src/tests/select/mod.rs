@@ -7,7 +7,7 @@ pub(crate) async fn test_select<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
     _name: &str,
-    _data: &BTreeMap<String, Vec<Uuid>>,
+    _data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);

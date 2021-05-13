@@ -37,7 +37,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         left_type: Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
         state: &Ciboulette2PgBuilderState<'store, 'request>,
-        id: &CibouletteId<'request>,
+        id: &'request CibouletteIdSelector<'request>,
     ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
@@ -45,50 +45,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         let left_table = ciboulette_table_store.get(left_type.name().as_str())?;
         Self::gen_inner_join(&mut self.buf, state, &left_table, &rel_details, None)?;
         self.buf.write_all(b" WHERE ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(left_table.id().get_ident().clone(), None, None),
-            &left_table,
-        )?;
-        self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2PgValue::from(id), &left_table)?;
-        Ok(())
-    }
-
-    /// Insert `WHERE` close into the query for selecting main object or relationships
-    pub(crate) fn gen_matcher_for_normal_select_inner<'store>(
-        &mut self,
-        id: &CibouletteId<'request>,
-        main_table: &Ciboulette2PgTable,
-    ) -> Result<(), Ciboulette2PgError>
-    where
-        'store: 'request,
-    {
-        self.buf.write_all(b" WHERE ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(main_table.id().get_ident().clone(), None, None),
-            &main_table,
-        )?;
-        self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2PgValue::from(id), &main_table)?;
-        Ok(())
-    }
-
-    /// Insert `WHERE` close into the query for selecting main object or relationships
-    pub(crate) fn gen_matcher_for_normal_select<'store>(
-        &mut self,
-        state: &Ciboulette2PgBuilderState<'store, 'request>,
-        id: &CibouletteId<'request>,
-    ) -> Result<(), Ciboulette2PgError>
-    where
-        'store: 'request,
-    {
-        self.buf.write_all(b" WHERE ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(state.main_table().id().get_ident().clone(), None, None),
-            &state.main_table(),
-        )?;
-        self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2PgValue::from(id), &state.main_table())?;
+        self.compare_pkey(&left_table, id)?;
         Ok(())
     }
 
@@ -147,7 +104,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         left_type: &Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
         rels: &[Ciboulette2PgAdditionalField],
-        id: &'store CibouletteId,
+        id: &'store CibouletteIdSelector,
     ) -> Result<(), Ciboulette2PgError>
     where
         'store: 'request,
@@ -162,11 +119,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
             &state.main_table(),
             state.main_type().clone(),
             Some(Ciboulette2PgRelatingField::new(
-                Ciboulette2PgTableField {
-                    name: Ciboulette2PgSafeIdent::from(main_type_table.id().get_ident()),
-                    alias: None,
-                    cast: None,
-                },
+                Ciboulette2PgTableField::from(main_type_table.id()),
                 (&*main_type_table).clone(),
                 &[rel_details.clone()],
                 rel_details.related_type().clone(),
@@ -194,7 +147,8 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 .iter(),
             false,
         )?;
-        self.gen_matcher_for_normal_select_inner(id, &*main_type_table)?;
+        self.buf.write_all(b" WHERE ")?;
+        self.compare_pkey(&*main_type_table, id)?;
         self.buf.write_all(b") ")?;
         // Kind of hack, but replace the including, marking every working table as unneeded
         // TODO find a better way
@@ -223,7 +177,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         rels: &[Ciboulette2PgAdditionalField],
         left_type: &Arc<CibouletteResourceType>,
         rel_details: &CibouletteResourceRelationshipDetails,
-        id: &'store CibouletteId,
+        id: &'store CibouletteIdSelector,
         main_cte_data: &Ciboulette2PgTable,
     ) -> Result<(), Ciboulette2PgError>
     where
@@ -277,7 +231,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         &mut self,
         state: &Ciboulette2PgBuilderState<'store, 'request>,
         rels: &[Ciboulette2PgAdditionalField],
-        id: &'store CibouletteId,
+        id: &'store CibouletteIdSelector,
         main_cte_data: &Ciboulette2PgTable,
     ) -> Result<(), Ciboulette2PgError>
     where
@@ -292,7 +246,8 @@ impl<'request> Ciboulette2PgBuilder<'request> {
             rels.iter().chain(sort_keys_mains.iter()),
             true,
         )?;
-        self.gen_matcher_for_normal_select(state, id)?;
+        self.buf.write_all(b" WHERE ")?;
+        self.compare_pkey(state.main_table(), id)?;
         self.buf.write_all(b") ")?;
         self.select_rels(&state, &main_cte_data, state.inclusion_map())?;
         Ok(())

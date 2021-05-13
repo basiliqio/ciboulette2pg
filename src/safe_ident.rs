@@ -41,6 +41,13 @@ pub(crate) enum Ciboulette2PgSafeIdentModifier {
     Index(Option<usize>),
 }
 
+/// An selector for [Ciboulette2PgSafeIdent](Ciboulette2PgSafeIdent)
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
+pub enum Ciboulette2PgSafeIdentSelector {
+    Single(Ciboulette2PgSafeIdent),
+    Multi(Vec<Ciboulette2PgSafeIdent>),
+}
+
 /// An identifier that is safe to be wrapped in quote
 #[derive(Clone, Debug, PartialEq, Eq, Ord, Default, PartialOrd)]
 pub struct Ciboulette2PgSafeIdent {
@@ -131,11 +138,74 @@ impl Ciboulette2PgSafeIdent {
     }
 }
 
+impl Ciboulette2PgSafeIdentSelector {
+    pub(crate) fn add_modifier(
+        mut self,
+        modifier: Ciboulette2PgSafeIdentModifier,
+    ) -> Self {
+        match self {
+            Ciboulette2PgSafeIdentSelector::Single(x) => {
+                Ciboulette2PgSafeIdentSelector::Single(x.add_modifier(modifier))
+            }
+            Ciboulette2PgSafeIdentSelector::Multi(mut x) => {
+                for ident in x.iter_mut() {
+                    let ident_val = std::mem::take(ident);
+                    *ident = ident_val.add_modifier(modifier.clone());
+                }
+                Ciboulette2PgSafeIdentSelector::Multi(x)
+            }
+        }
+    }
+
+    pub(crate) fn to_writer(
+        &self,
+        writer: &mut dyn std::io::Write,
+    ) -> Result<(), Ciboulette2PgError> {
+        match self {
+            Ciboulette2PgSafeIdentSelector::Single(ident) => ident.to_writer(&mut *writer),
+            Ciboulette2PgSafeIdentSelector::Multi(idents) => {
+                let mut idents_iter = idents.iter().peekable();
+                while let Some(ident) = idents_iter.next() {
+                    ident.to_writer(&mut *writer)?;
+                    if idents_iter.peek().is_some() {
+                        writer.write_all(b", ")?;
+                    }
+                }
+                Ok(())
+            }
+        }
+    }
+}
+
 impl std::convert::TryFrom<ArcStr> for Ciboulette2PgSafeIdent {
     type Error = Ciboulette2PgError;
 
     fn try_from(value: ArcStr) -> Result<Self, Self::Error> {
         Ciboulette2PgSafeIdent::check(value)
+    }
+}
+
+impl std::convert::TryFrom<CibouletteIdType> for Ciboulette2PgSafeIdent {
+    type Error = Ciboulette2PgError;
+
+    fn try_from(value: CibouletteIdType) -> Result<Self, Self::Error> {
+        match value {
+            CibouletteIdType::Number(x) => Ciboulette2PgSafeIdent::check(x),
+            CibouletteIdType::Text(x) => Ciboulette2PgSafeIdent::check(x),
+            CibouletteIdType::Uuid(x) => Ciboulette2PgSafeIdent::check(x),
+        }
+    }
+}
+
+impl std::convert::TryFrom<&CibouletteIdType> for Ciboulette2PgSafeIdent {
+    type Error = Ciboulette2PgError;
+
+    fn try_from(value: &CibouletteIdType) -> Result<Self, Self::Error> {
+        match value.clone() {
+            CibouletteIdType::Number(x) => Ciboulette2PgSafeIdent::check(x),
+            CibouletteIdType::Text(x) => Ciboulette2PgSafeIdent::check(x),
+            CibouletteIdType::Uuid(x) => Ciboulette2PgSafeIdent::check(x),
+        }
     }
 }
 

@@ -10,7 +10,7 @@ async fn test_update<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
     _test_name: &str,
-    data: &BTreeMap<String, Vec<Uuid>>,
+    data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
@@ -55,7 +55,7 @@ async fn test_update_many_to_one<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
     _test_name: &str,
-    data: &BTreeMap<String, Vec<Uuid>>,
+    data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);

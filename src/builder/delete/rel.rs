@@ -17,19 +17,16 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.buf.write_all(b" SET ")?;
         self.insert_ident_name(
             &Ciboulette2PgTableField::new(
-                Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key())?,
+                Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(
+                    rel_opt.many_resource_key(),
+                )?),
                 None,
                 None,
             ),
             &many_table,
         )?;
         self.buf.write_all(b" = NULL WHERE ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(many_table.id().get_ident().clone(), None, None),
-            &many_table,
-        )?;
-        self.buf.write_all(b" = ")?;
-        self.insert_params(Ciboulette2PgValue::from(query.resource_id()), &many_table)?;
+        self.compare_pkey(&many_table, query.resource_id())?;
         Ok(())
     }
 }

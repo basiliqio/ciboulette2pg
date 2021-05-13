@@ -15,7 +15,7 @@ pub(super) fn extract_data_from_relationship_details_many<'request>(
                     type_: rel_details.related_type().clone(),
                     rel_opt,
                     rel_details,
-                    values: Some(vec![Ciboulette2PgValue::from(rel_id.id())]),
+                    values: Some(Ciboulette2PgValue::from_id_selector(rel_id.id())),
                 },
             );
         }
@@ -29,7 +29,8 @@ pub(super) fn extract_data_from_relationship_details_many<'request>(
                     values: Some(
                         rels_id
                             .iter()
-                            .map(|x| Ciboulette2PgValue::from(x.id()))
+                            .map(|x| Ciboulette2PgValue::from_id_selector(x.id()))
+                            .flatten()
                             .collect(),
                     ),
                 },
@@ -41,9 +42,9 @@ pub(super) fn extract_data_from_relationship_details_many<'request>(
                 Ciboulette2PgMultiRelationships {
                     type_: rel_details.related_type().clone(),
                     rel_opt,
-                    values: Some(vec![Ciboulette2PgValue::from(
-                        *rel_details.related_type().id_type(),
-                    )]),
+                    values: Some(Ciboulette2PgValue::from_id_type_selector(
+                        rel_details.related_type().ids(),
+                    )),
                     rel_details,
                 },
             );

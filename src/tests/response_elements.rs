@@ -4,7 +4,7 @@ use super::*;
 #[basiliq_test(run_migrations)]
 async fn convert_multiple_field_without_related(mut pool: sqlx::PgPool) {
     let store = gen_bag();
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     let raw_rows = test_select(&mut pool, "/peoples", "", &data).await;
     let res = Ciboulette2PgRow::from_raw(&raw_rows).expect("to deserialize the returned rows");
     let hint_size = res.len();
@@ -21,7 +21,7 @@ async fn convert_multiple_field_without_related(mut pool: sqlx::PgPool) {
 #[basiliq_test(run_migrations)]
 async fn convert_multiple_field_with_related(mut pool: sqlx::PgPool) {
     let store = gen_bag();
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_select(
         &mut pool,

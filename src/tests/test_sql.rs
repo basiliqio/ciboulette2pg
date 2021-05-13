@@ -26,12 +26,12 @@ pub async fn snapshot_table(
     insta::assert_json_snapshot!(name,
         serde_json::Value::Object(map),
     {
-        ".*.*.id" => insta::dynamic_redaction(check_uuid),
-        ".*.*.related_id" => insta::dynamic_redaction(check_uuid),
-        ".*.*.people_id" => insta::dynamic_redaction(check_uuid),
-        ".*.*.article_id" => insta::dynamic_redaction(check_uuid),
-        ".*.*.article" => insta::dynamic_redaction(check_uuid),
-        ".*.*.author" => insta::dynamic_redaction(check_uuid),
+        ".*.*.id" => insta::dynamic_redaction(check_uuid_list),
+        ".*.*.related_id" => insta::dynamic_redaction(check_uuid_list),
+        ".*.*.people_id" => insta::dynamic_redaction(check_uuid_list),
+        ".*.*.article_id" => insta::dynamic_redaction(check_uuid_list),
+        ".*.*.article" => insta::dynamic_redaction(check_uuid_list),
+        ".*.*.author" => insta::dynamic_redaction(check_uuid_list),
         ".*.*.favorite_color" => insta::dynamic_redaction(|value, _path| {
             match value
             .as_str()

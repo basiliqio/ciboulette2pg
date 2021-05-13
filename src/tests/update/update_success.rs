@@ -33,7 +33,7 @@ macro_rules! baseline_for_people {
 
 #[basiliq_test(run_migrations)]
 async fn empty(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_update(
@@ -55,7 +55,7 @@ async fn empty(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn main_fields(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_update(
@@ -81,7 +81,7 @@ async fn main_fields(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn single_rel(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_update(
@@ -115,7 +115,7 @@ async fn single_rel(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn single_rel_unset(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_update(
@@ -151,7 +151,7 @@ async fn single_rel_unset(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn unsetting_a_field(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_update(

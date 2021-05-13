@@ -78,8 +78,15 @@ WITH "cte_peoples_insert_0" AS (
 ),
 "cte_rel_people-article_data_5" AS (
   SELECT
-    "public"."people-article"."id" :: TEXT AS "id",
-    "public"."people-article"."id" AS "main_id",
+    CONCAT_WS(
+      ',',
+      "public"."people-article"."people_id",
+      "public"."people-article"."article_id"
+    ) :: TEXT AS id,
+    (
+      "public"."people-article"."people_id",
+      "public"."people-article"."article_id"
+    ) AS main_id,
     "cte_peoples_data_1"."id" :: TEXT AS "related_id",
     $20 :: TEXT AS "related_type",
     $21 :: TEXT AS "type",

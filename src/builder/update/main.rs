@@ -122,7 +122,8 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.write_table_info(main_cte_update)?;
         self.buf.write_all(b" AS (SELECT * FROM ")?;
         self.write_table_info(state.main_table())?;
-        self.gen_matcher_for_normal_select(state, request.resource_id())?;
+        self.buf.write_all(b" WHERE ")?;
+        self.compare_pkey(state.main_table(), request.resource_id())?;
         self.buf.write_all(b"), ")?;
         Ok(())
     }

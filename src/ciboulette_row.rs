@@ -66,12 +66,12 @@ impl<'rows> Ciboulette2PgRow<'rows> {
             Vec::with_capacity(hint_size.unwrap_or_default());
 
         for row in rows.into_iter() {
-            let id = CibouletteIdBuilder::Text(Cow::Borrowed(row.id));
+            let id = Cow::Borrowed(row.id);
             let identifier =
                 CibouletteResourceIdentifierBuilder::new(Some(id), Cow::Borrowed(row.type_));
             let related_identifier = match (row.related_type, row.related_id) {
                 (Some(type_), Some(id)) => {
-                    let related_id = CibouletteIdBuilder::Text(Cow::Borrowed(id));
+                    let related_id = Cow::Borrowed(id);
                     let related_identifier = CibouletteResourceIdentifierBuilder::new(
                         Some(related_id),
                         Cow::Borrowed(type_),

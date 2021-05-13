@@ -40,12 +40,13 @@ pub(crate) struct Ciboulette2PgAdditionalField {
 
 impl Ciboulette2PgAdditionalField {
     pub fn new(
+        name: Ciboulette2PgSafeIdent,
         ident: Ciboulette2PgTableField,
         type_: Ciboulette2PgAdditionalFieldType,
         ciboulette_type: Arc<CibouletteResourceType>,
     ) -> Self {
         Ciboulette2PgAdditionalField {
-            name: ident.name().clone().add_modifier(type_.to_safe_modifier()),
+            name: name.add_modifier(type_.to_safe_modifier()),
             ident,
             type_,
             ciboulette_type,
@@ -56,12 +57,14 @@ impl Ciboulette2PgAdditionalField {
         el: &CibouletteSortingElement,
         main_type: Arc<CibouletteResourceType>,
     ) -> Result<Self, Ciboulette2PgError> {
+        let talbe_field_inner = Ciboulette2PgSafeIdent::try_from(el.field().clone())?;
         let table_field = Ciboulette2PgTableField::new(
-            Ciboulette2PgSafeIdent::try_from(el.field().clone())?,
+            Ciboulette2PgSafeIdentSelector::Single(talbe_field_inner.clone()),
             None,
             None,
         );
         Ok(Ciboulette2PgAdditionalField::new(
+            talbe_field_inner,
             table_field,
             Ciboulette2PgAdditionalFieldType::Sorting,
             main_type,

@@ -40,7 +40,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                     self.buf.write_all(b", ")?;
                     self.insert_ident(
                         &Ciboulette2PgTableField::new(
-                            Ciboulette2PgSafeIdent::try_from(el)?,
+                            Ciboulette2PgSafeIdentSelector::Single(
+                                Ciboulette2PgSafeIdent::try_from(el)?,
+                            ),
                             None,
                             None,
                         ),

@@ -64,19 +64,38 @@ impl Ciboulette2PgId {
             Ciboulette2PgId::Text(_) => safe_ident::TEXT_IDENT,
         }
     }
+}
 
-    pub fn new_from_ciboulette_id_type(
-        type_: CibouletteIdType,
-        name: &ArcStr,
-    ) -> Result<Self, Ciboulette2PgError> {
-        Ok(match type_ {
-            CibouletteIdType::Number => {
+impl std::convert::TryFrom<CibouletteIdType> for Ciboulette2PgId {
+    type Error = Ciboulette2PgError;
+
+    fn try_from(value: CibouletteIdType) -> Result<Self, Self::Error> {
+        Ok(match value {
+            CibouletteIdType::Number(name) => {
+                Ciboulette2PgId::Number(Ciboulette2PgSafeIdent::try_from(name)?)
+            }
+            CibouletteIdType::Text(name) => {
+                Ciboulette2PgId::Text(Ciboulette2PgSafeIdent::try_from(name)?)
+            }
+            CibouletteIdType::Uuid(name) => {
+                Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from(name)?)
+            }
+        })
+    }
+}
+
+impl std::convert::TryFrom<&CibouletteIdType> for Ciboulette2PgId {
+    type Error = Ciboulette2PgError;
+
+    fn try_from(value: &CibouletteIdType) -> Result<Self, Self::Error> {
+        Ok(match value {
+            CibouletteIdType::Number(name) => {
                 Ciboulette2PgId::Number(Ciboulette2PgSafeIdent::try_from(name.clone())?)
             }
-            CibouletteIdType::Text => {
+            CibouletteIdType::Text(name) => {
                 Ciboulette2PgId::Text(Ciboulette2PgSafeIdent::try_from(name.clone())?)
             }
-            CibouletteIdType::Uuid => {
+            CibouletteIdType::Uuid(name) => {
                 Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from(name.clone())?)
             }
         })
@@ -87,7 +106,7 @@ impl Ciboulette2PgId {
 #[derive(Getters, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 #[getset(get = "pub")]
 pub struct Ciboulette2PgTable {
-    id: Ciboulette2PgId,
+    id: Vec<Ciboulette2PgId>,
     schema: Option<Ciboulette2PgSafeIdent>,
     ciboulette_type: Arc<CibouletteResourceType>,
     name: Ciboulette2PgSafeIdent,
@@ -97,7 +116,7 @@ pub struct Ciboulette2PgTable {
 impl Ciboulette2PgTable {
     /// Create a new table
     pub fn new(
-        id: Ciboulette2PgId,
+        id: Vec<Ciboulette2PgId>,
         schema: Option<Ciboulette2PgSafeIdent>,
         name: Ciboulette2PgSafeIdent,
         ciboulette_type: Arc<CibouletteResourceType>,
@@ -136,7 +155,7 @@ impl Ciboulette2PgTable {
 
     /// Create a new CTE
     pub fn new_cte(
-        id: Ciboulette2PgId,
+        id: Vec<Ciboulette2PgId>,
         name: Ciboulette2PgSafeIdent,
         ciboulette_type: Arc<CibouletteResourceType>,
     ) -> Result<Self, Ciboulette2PgError> {
