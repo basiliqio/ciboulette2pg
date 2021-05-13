@@ -40,6 +40,8 @@ impl<'request> Ciboulette2PgBuilder<'request> {
     /// Handle a `PATCH` request, updating resource or Many-to-One relationships
     ///
     /// Fails if the relationships is Many-to-Many or One-to-Many
+    ///
+    /// Panics if the type of the request
     pub fn gen_update<'store>(
         ciboulette_store: &'store CibouletteStore,
         ciboulette_table_store: &'store Ciboulette2PgTableStore,
@@ -59,7 +61,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 type_.clone(),
                 rel_details,
             ),
-            _ => unreachable!(), // TODO Document
+            _ => unreachable!(),
         }
     }
 }
