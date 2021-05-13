@@ -1,6 +1,6 @@
 [package]
 name = "ciboulette2pg"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Francis Le Roy <francis.leroy@protonmail.ch>"]
 edition = "2018"
 repository = "https://github.com/basiliqio/ciboulette2pg"
