@@ -1,0 +1,96 @@
+---
+source: src/tests/update/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_peoples_update_0" AS (
+  UPDATE
+    "public"."peoples"
+  SET
+    "first-name" = $1,
+    "last-name" = $2
+  WHERE
+    "public"."peoples"."id" = $3 RETURNING *
+),
+"cte_peoples_data_1" AS (
+  SELECT
+    "cte_peoples_update_0"."id" :: TEXT AS "id",
+    "cte_peoples_update_0"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $4 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($5, "cte_peoples_update_0"."last-name") AS "data",
+    "cte_peoples_update_0"."favorite_color" AS "rel_favorite_color"
+  FROM
+    "cte_peoples_update_0"
+),
+"cte_rel_articles_data_2" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
+    "cte_peoples_data_1"."id" :: TEXT AS "related_id",
+    $6 :: TEXT AS "related_type",
+    $7 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($8, "public"."articles"."title") AS "data"
+  FROM
+    "public"."articles"
+    INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
+    INNER JOIN "cte_peoples_data_1" ON "cte_peoples_data_1"."main_id" = "public"."people-article"."people_id"
+),
+"cte_rel_people-article_data_3" AS (
+  SELECT
+    CONCAT_WS(
+      ',',
+      "public"."people-article"."people_id",
+      "public"."people-article"."article_id"
+    ) :: TEXT AS id,
+    (
+      "public"."people-article"."people_id",
+      "public"."people-article"."article_id"
+    ) AS main_id,
+    "cte_peoples_data_1"."id" :: TEXT AS "related_id",
+    $9 :: TEXT AS "related_type",
+    $10 :: TEXT AS "type",
+    JSON_BUILD_OBJECT(
+      $11,
+      "public"."people-article"."article_id",
+      $12,
+      "public"."people-article"."people_id"
+    ) AS "data",
+    "public"."people-article"."article_id" AS "rel_article_id",
+    "public"."people-article"."people_id" AS "rel_people_id"
+  FROM
+    "public"."people-article"
+    INNER JOIN "cte_peoples_data_1" ON "cte_peoples_data_1"."main_id" = "public"."people-article"."people_id"
+) (
+  SELECT
+    "cte_peoples_data_1"."id",
+    "cte_peoples_data_1"."type",
+    "cte_peoples_data_1"."data",
+    "cte_peoples_data_1"."related_type",
+    "cte_peoples_data_1"."related_id"
+  FROM
+    "cte_peoples_data_1"
+)
+UNION
+ALL (
+  SELECT
+    "cte_rel_articles_data_2"."id",
+    "cte_rel_articles_data_2"."type",
+    "cte_rel_articles_data_2"."data",
+    "cte_rel_articles_data_2"."related_type",
+    "cte_rel_articles_data_2"."related_id"
+  FROM
+    "cte_rel_articles_data_2"
+)
+UNION
+ALL (
+  SELECT
+    "cte_rel_people-article_data_3"."id",
+    "cte_rel_people-article_data_3"."type",
+    "cte_rel_people-article_data_3"."data",
+    "cte_rel_people-article_data_3"."related_type",
+    "cte_rel_people-article_data_3"."related_id"
+  FROM
+    "cte_rel_people-article_data_3"
+);

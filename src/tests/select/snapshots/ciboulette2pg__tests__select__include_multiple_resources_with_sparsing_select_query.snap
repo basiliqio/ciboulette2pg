@@ -1,0 +1,89 @@
+---
+source: src/tests/select/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_peoples_data_0" AS (
+  SELECT
+    "public"."peoples"."id" :: TEXT AS "id",
+    "public"."peoples"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $1 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($2, "public"."peoples"."last-name") AS "data",
+    "public"."peoples"."favorite_color" AS "rel_favorite_color"
+  FROM
+    "public"."peoples"
+  WHERE
+    "public"."peoples"."id" = $3
+),
+"cte_rel_articles_data_1" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
+    "cte_peoples_data_0"."id" :: TEXT AS "related_id",
+    $4 :: TEXT AS "related_type",
+    $5 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($6, "public"."articles"."title") AS "data"
+  FROM
+    "public"."articles"
+    INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
+    INNER JOIN "cte_peoples_data_0" ON "cte_peoples_data_0"."main_id" = "public"."people-article"."people_id"
+),
+"cte_rel_people-article_data_2" AS (
+  SELECT
+    CONCAT_WS(
+      ',',
+      "public"."people-article"."people_id",
+      "public"."people-article"."article_id"
+    ) :: TEXT AS id,
+    (
+      "public"."people-article"."people_id",
+      "public"."people-article"."article_id"
+    ) AS main_id,
+    "cte_peoples_data_0"."id" :: TEXT AS "related_id",
+    $7 :: TEXT AS "related_type",
+    $8 :: TEXT AS "type",
+    JSON_BUILD_OBJECT(
+      $9,
+      "public"."people-article"."article_id",
+      $10,
+      "public"."people-article"."people_id"
+    ) AS "data",
+    "public"."people-article"."article_id" AS "rel_article_id",
+    "public"."people-article"."people_id" AS "rel_people_id"
+  FROM
+    "public"."people-article"
+    INNER JOIN "cte_peoples_data_0" ON "cte_peoples_data_0"."main_id" = "public"."people-article"."people_id"
+) (
+  SELECT
+    "cte_peoples_data_0"."id",
+    "cte_peoples_data_0"."type",
+    "cte_peoples_data_0"."data",
+    "cte_peoples_data_0"."related_type",
+    "cte_peoples_data_0"."related_id"
+  FROM
+    "cte_peoples_data_0"
+)
+UNION
+ALL (
+  SELECT
+    "cte_rel_articles_data_1"."id",
+    "cte_rel_articles_data_1"."type",
+    "cte_rel_articles_data_1"."data",
+    "cte_rel_articles_data_1"."related_type",
+    "cte_rel_articles_data_1"."related_id"
+  FROM
+    "cte_rel_articles_data_1"
+)
+UNION
+ALL (
+  SELECT
+    "cte_rel_people-article_data_2"."id",
+    "cte_rel_people-article_data_2"."type",
+    "cte_rel_people-article_data_2"."data",
+    "cte_rel_people-article_data_2"."related_type",
+    "cte_rel_people-article_data_2"."related_id"
+  FROM
+    "cte_rel_people-article_data_2"
+);

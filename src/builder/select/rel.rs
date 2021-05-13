@@ -31,11 +31,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 self.buf.write_all(b" AS (")?;
                 let current_rel_chain = &included_list[0..=include_el_index];
                 let relating_field = Ciboulette2PgRelatingField::new(
-                    Ciboulette2PgTableField {
-                        name: Ciboulette2PgSafeIdent::from(current_table.id().get_ident()),
-                        alias: None,
-                        cast: None,
-                    },
+                    Ciboulette2PgTableField::from(current_table.id()),
                     current_table.clone(),
                     &current_rel_chain,
                     current_type,

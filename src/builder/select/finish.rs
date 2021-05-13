@@ -62,7 +62,11 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 self.buf.write_all(b", ")?;
             }
             self.insert_ident(
-                &Ciboulette2PgTableField::new(field_name, None, None),
+                &Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(field_name),
+                    None,
+                    None,
+                ),
                 &final_data_table,
             )?;
             match sorting_el.direction() {
@@ -85,35 +89,55 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.buf.write_all(b"(SELECT ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_ID_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_ID_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_TYPE_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_TYPE_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_DATA_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_DATA_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_RELATED_TYPE_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_RELATED_TYPE_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
         self.buf.write_all(b", ")?;
         Self::insert_ident_inner(
             &mut self.buf,
-            &Ciboulette2PgTableField::new(CIBOULETTE_RELATED_ID_IDENT, None, None),
+            &Ciboulette2PgTableField::new(
+                Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_RELATED_ID_IDENT),
+                None,
+                None,
+            ),
             &table,
             None,
         )?;
@@ -143,23 +167,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         I: Iterator<Item = &'b Ciboulette2PgAdditionalField>,
     {
         self.buf.write_all(b"SELECT ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(
-                table.id().get_ident().clone(),
-                Some(CIBOULETTE_ID_IDENT),
-                Some(TEXT_IDENT),
-            ),
-            table,
-        )?;
+        self.select_main_id_pretty(&table)?;
         self.buf.write_all(b", ")?;
-        self.insert_ident(
-            &Ciboulette2PgTableField::new(
-                table.id().get_ident().clone(),
-                Some(CIBOULETTE_MAIN_IDENTIFIER),
-                None,
-            ),
-            table,
-        )?;
+        self.select_main_id_raw(&table)?;
         self.buf.write_all(b", ")?;
         match relating_field {
             Some(relating_field) => {
@@ -216,8 +226,8 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         ),
         Ciboulette2PgError,
     > {
-        let mut sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent> =
-            BTreeMap::new();
+        let sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent>;
+
         let res_table = Ciboulette2PgTable::new(
             table.id().clone(),
             table.schema().clone(),
@@ -233,42 +243,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         self.buf.write_all(b"\") ")?;
         self.write_table_info(&table)?;
         self.buf.write_all(b".* ")?;
-        for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
-            let rel_chain_str = Ciboulette2PgSafeIdent::try_from(
-                rel_chain.iter().map(|x| x.relation_alias()).join("_"),
-            )?
-            .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
-                CIBOULETTE_SORT_PREFIX,
-            ));
-            let current_table = self
-                .working_tables()
-                .get(rel_chain)
-                .map(|(k, _)| k)
-                .cloned()
-                .unwrap_or_else(|| table.clone());
-            for sorting_el in sorting_elements {
-                let new_sorting_field = Ciboulette2PgSafeIdent::try_from(sorting_el.field())?;
-                let old_sorting_field =
-                    new_sorting_field
-                        .clone()
-                        .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
-                            CIBOULETTE_SORT_PREFIX,
-                        ));
-                let new_sorting_handle = rel_chain_str
-                    .clone()
-                    .add_modifier(Ciboulette2PgSafeIdentModifier::Suffix(new_sorting_field));
-                self.buf.write_all(b", ")?;
-                self.insert_ident(
-                    &Ciboulette2PgTableField::new(
-                        old_sorting_field,
-                        Some(new_sorting_handle.clone()),
-                        None,
-                    ),
-                    &current_table,
-                )?;
-                sort_fields.insert(sorting_el.clone(), new_sorting_handle);
-            }
-        }
+        sort_fields = self.gen_select_cte_final_rel_inclusion(state, table)?;
         self.buf.write_all(b" FROM ")?;
         self.write_table_info(table)?;
         for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
@@ -296,5 +271,53 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         CIBOULETTE_MAIN_IDENTIFIER.to_writer(&mut self.buf)?;
         self.buf.write_all(b"\") ")?;
         Ok((res_table, sort_fields))
+    }
+
+    /// Generate the final CTE Sorting map, mapping sorting element to the identifier used
+    fn gen_select_cte_final_rel_inclusion(
+        &mut self,
+        state: &Ciboulette2PgBuilderState,
+        table: &Ciboulette2PgTable,
+    ) -> Result<BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent>, Ciboulette2PgError>
+    {
+        let mut sort_fields: BTreeMap<CibouletteSortingElement, Ciboulette2PgSafeIdent> =
+            BTreeMap::new();
+        for (rel_chain, (_, sorting_elements)) in state.inclusion_map() {
+            let rel_chain_str = Ciboulette2PgSafeIdent::try_from(
+                rel_chain.iter().map(|x| x.relation_alias()).join("_"),
+            )?
+            .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
+                CIBOULETTE_SORT_PREFIX,
+            ));
+            let current_table = self
+                .working_tables()
+                .get(rel_chain)
+                .map(|(k, _)| k)
+                .cloned()
+                .unwrap_or_else(|| table.clone());
+            for sorting_el in sorting_elements {
+                let new_sorting_field = Ciboulette2PgSafeIdent::try_from(sorting_el.field())?;
+                let old_sorting_field =
+                    new_sorting_field
+                        .clone()
+                        .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
+                            CIBOULETTE_SORT_PREFIX,
+                        ));
+                let new_sorting_handle = rel_chain_str
+                    .clone()
+                    .add_modifier(Ciboulette2PgSafeIdentModifier::Suffix(new_sorting_field));
+                self.buf.write_all(b", ")?;
+                self.insert_ident(
+                    &Ciboulette2PgTableField::new(
+                        Ciboulette2PgSafeIdentSelector::Single(old_sorting_field),
+                        Some(new_sorting_handle.clone()),
+                        None,
+                    ),
+                    &current_table,
+                )?;
+                sort_fields.insert(sorting_el.clone(), new_sorting_handle);
+            }
+        }
+        Ok(sort_fields)
     }
 }

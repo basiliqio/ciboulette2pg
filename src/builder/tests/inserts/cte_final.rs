@@ -6,7 +6,9 @@ fn simple() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -42,7 +44,9 @@ fn sparse() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -79,7 +83,9 @@ fn empty_sparse() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -115,7 +121,9 @@ fn non_included() {
     let store = gen_bag();
     let table_store = gen_table_store(&store);
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),

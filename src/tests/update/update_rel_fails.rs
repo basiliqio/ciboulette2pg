@@ -19,7 +19,7 @@ async fn test_update_fails<'store>(
 
 #[basiliq_test(run_migrations)]
 async fn updating_many_to_many_rels(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let err = test_update_fails(
         format!("/peoples/{}/relationships/articles", people_id).as_str(),
@@ -36,7 +36,7 @@ async fn updating_many_to_many_rels(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn updating_one_to_many_rels(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let err = test_update_fails(
         format!("/peoples/{}/relationships/comments", people_id).as_str(),

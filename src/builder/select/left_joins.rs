@@ -35,10 +35,18 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         Self::insert_ident_inner(
             buf,
             &match left_table.is_cte() {
-                true => Ciboulette2PgTableField::new(CIBOULETTE_MAIN_IDENTIFIER, None, None),
-                false => {
-                    Ciboulette2PgTableField::new(left_table.id().get_ident().clone(), None, None)
-                }
+                true => Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(CIBOULETTE_MAIN_IDENTIFIER),
+                    None,
+                    None,
+                ),
+                false => Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(
+                        opt.one_resource_key(),
+                    )?),
+                    None,
+                    None,
+                ),
             },
             left_table,
             None,
@@ -48,11 +56,14 @@ impl<'request> Ciboulette2PgBuilder<'request> {
             buf,
             &Ciboulette2PgTableField::new(
                 match right_table.is_cte() {
-                    true => Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?
-                        .add_modifier(Ciboulette2PgSafeIdentModifier::Prefix(
-                            CIBOULETTE_REL_PREFIX,
-                        )),
-                    false => Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?,
+                    true => Ciboulette2PgSafeIdentSelector::Single(
+                        Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?.add_modifier(
+                            Ciboulette2PgSafeIdentModifier::Prefix(CIBOULETTE_REL_PREFIX),
+                        ),
+                    ),
+                    false => Ciboulette2PgSafeIdentSelector::Single(
+                        Ciboulette2PgSafeIdent::try_from(opt.many_resource_key())?,
+                    ),
                 },
                 None,
                 None,

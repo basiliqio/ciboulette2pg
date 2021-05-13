@@ -1,0 +1,55 @@
+---
+source: src/tests/select/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_articles_data_0" AS (
+  SELECT
+    "public"."articles"."id" :: TEXT AS "id",
+    "public"."articles"."id" AS "main_id",
+    "public"."peoples"."id" :: TEXT AS "related_id",
+    $1 :: TEXT AS "related_type",
+    $2 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."articles"."title" AS "sort_title"
+  FROM
+    "public"."articles"
+    INNER JOIN "public"."people-article" ON "public"."people-article"."article_id" = "public"."articles"."id"
+    INNER JOIN "public"."peoples" ON "public"."peoples"."id" = "public"."people-article"."people_id"
+  WHERE
+    "public"."peoples"."id" = $3
+),
+"cte_rel_peoples_data_1" AS (
+  SELECT
+    "public"."peoples"."id" :: TEXT AS "id",
+    "public"."peoples"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $4 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."peoples"."favorite_color" AS "rel_favorite_color"
+  FROM
+    "public"."peoples"
+  WHERE
+    "public"."peoples"."id" = $5
+),
+"cte_final_main_data" AS (
+  SELECT
+    DISTINCT ON ("cte_articles_data_0"."main_id") "cte_articles_data_0".*,
+    "cte_articles_data_0"."sort_title" AS "sort__title"
+  FROM
+    "cte_articles_data_0"
+  ORDER BY
+    "cte_articles_data_0"."main_id"
+) (
+  SELECT
+    "cte_final_main_data"."id",
+    "cte_final_main_data"."type",
+    "cte_final_main_data"."data",
+    "cte_final_main_data"."related_type",
+    "cte_final_main_data"."related_id"
+  FROM
+    "cte_final_main_data"
+  ORDER BY
+    "cte_final_main_data"."sort__title" ASC
+);

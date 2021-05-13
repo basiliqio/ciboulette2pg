@@ -1,0 +1,58 @@
+---
+source: src/tests/update/mod.rs
+expression: "sqlformat::format(query.as_str(), &sqlformat::QueryParams::None,\n                  sqlformat::FormatOptions::default())"
+
+---
+WITH "cte_comments_update_0" AS (
+  UPDATE
+    "public"."comments"
+  SET
+    "author" = $1
+  WHERE
+    "public"."comments"."id" = $2 RETURNING *
+),
+"cte_comments_data_1" AS (
+  SELECT
+    "cte_comments_update_0"."id" :: TEXT AS "id",
+    "cte_comments_update_0"."id" AS "main_id",
+    NULL :: TEXT AS "related_id",
+    NULL :: TEXT AS "related_type",
+    $3 :: TEXT AS "type",
+    JSON_BUILD_OBJECT($4, "cte_comments_update_0"."body") AS "data",
+    "cte_comments_update_0"."author" AS "rel_author"
+  FROM
+    "cte_comments_update_0"
+),
+"cte_rel_peoples_data_2" AS (
+  SELECT
+    "public"."peoples"."id" :: TEXT AS "id",
+    "public"."peoples"."id" AS "main_id",
+    "cte_comments_data_1"."id" :: TEXT AS "related_id",
+    $5 :: TEXT AS "related_type",
+    $6 :: TEXT AS "type",
+    NULL :: json AS "data",
+    "public"."peoples"."favorite_color" AS "rel_favorite_color"
+  FROM
+    "public"."peoples"
+    INNER JOIN "cte_comments_data_1" ON "cte_comments_data_1"."rel_author" = "public"."peoples"."id"
+) (
+  SELECT
+    "cte_rel_peoples_data_2"."id",
+    "cte_rel_peoples_data_2"."type",
+    "cte_rel_peoples_data_2"."data",
+    "cte_rel_peoples_data_2"."related_type",
+    "cte_rel_peoples_data_2"."related_id"
+  FROM
+    "cte_rel_peoples_data_2"
+)
+UNION
+ALL (
+  SELECT
+    "cte_comments_data_1"."id",
+    "cte_comments_data_1"."type",
+    "cte_comments_data_1"."data",
+    "cte_comments_data_1"."related_type",
+    "cte_comments_data_1"."related_id"
+  FROM
+    "cte_comments_data_1"
+);

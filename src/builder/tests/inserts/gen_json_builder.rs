@@ -5,7 +5,9 @@ fn no_sparse_fields() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -30,7 +32,9 @@ fn sparse_field() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -55,7 +59,9 @@ fn sparse_field_empty() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -80,7 +86,9 @@ fn not_included() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let dest_table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("peoples").unwrap(),
         store.get_type("peoples").unwrap().clone(),

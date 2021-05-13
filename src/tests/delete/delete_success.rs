@@ -37,7 +37,7 @@ macro_rules! baseline {
 
 #[basiliq_test(run_migrations)]
 async fn main(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_delete(&mut pool, format!("/peoples/{}", people_id).as_str()).await;
@@ -47,7 +47,7 @@ async fn main(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn one_to_one(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_delete(

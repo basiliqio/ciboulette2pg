@@ -5,7 +5,9 @@ fn simple() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("mysimpletable").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -31,7 +33,9 @@ fn no_returning() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("mysimpletable").unwrap(),
         store.get_type("peoples").unwrap().clone(),
@@ -57,7 +61,9 @@ fn no_params() {
     let mut builder = Ciboulette2PgBuilder::default();
     let store = gen_bag();
     let table = Ciboulette2PgTable::new(
-        Ciboulette2PgId::Uuid(Ciboulette2PgSafeIdent::try_from("id").unwrap()),
+        vec![Ciboulette2PgId::Uuid(
+            Ciboulette2PgSafeIdent::try_from("id").unwrap(),
+        )],
         Some(Ciboulette2PgSafeIdent::try_from("public").unwrap()),
         Ciboulette2PgSafeIdent::try_from("mysimpletable").unwrap(),
         store.get_type("peoples").unwrap().clone(),

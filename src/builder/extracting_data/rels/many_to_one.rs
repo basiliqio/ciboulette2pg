@@ -8,10 +8,13 @@ pub(super) fn extract_many_to_one_relationships_from_ressource_identifiers<'requ
 ) -> Result<Ciboulette2PgResourceInformations<'request>, Ciboulette2PgError> {
     match attributes {
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
+            let many_resource_key_safe_ident =
+                Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key().clone())?;
+
             Ok(Ciboulette2PgResourceInformations {
                 values: vec![(
                     rel_opt.many_resource_key().clone(),
-                    Ciboulette2PgValue::from(rel_id.id()),
+                    Ciboulette2PgValue::from(rel_id.id().get(0)?), // There can only be one id
                 )],
                 single_relationships: vec![Ciboulette2PgResourceSingleRelationships {
                     type_: rel_opt.one_resource().clone(),
@@ -19,8 +22,9 @@ pub(super) fn extract_many_to_one_relationships_from_ressource_identifiers<'requ
                     rel_details,
                 }],
                 single_relationships_additional_fields: vec![Ciboulette2PgAdditionalField::new(
+                    many_resource_key_safe_ident.clone(),
                     Ciboulette2PgTableField::new(
-                        Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key().clone())?,
+                        Ciboulette2PgSafeIdentSelector::Single(many_resource_key_safe_ident),
                         None,
                         None,
                     ),
@@ -33,31 +37,38 @@ pub(super) fn extract_many_to_one_relationships_from_ressource_identifiers<'requ
         CibouletteOptionalData::Object(_) => {
             Err(Ciboulette2PgError::MultiIdsForSingleRelationships)
         }
-        CibouletteOptionalData::Null(x) if *x => Ok(Ciboulette2PgResourceInformations {
-            values: vec![(
-                rel_opt.many_resource_key().clone(),
-                match rel_opt.one_resource().id_type() {
-                    CibouletteIdType::Text => Ciboulette2PgValue::Text(None),
-                    CibouletteIdType::Number => Ciboulette2PgValue::Numeric(None),
-                    CibouletteIdType::Uuid => Ciboulette2PgValue::Uuid(None),
-                },
-            )],
-            single_relationships: vec![Ciboulette2PgResourceSingleRelationships {
-                type_: rel_opt.one_resource().clone(),
-                key: rel_opt.many_resource_key().clone(),
-                rel_details,
-            }],
-            single_relationships_additional_fields: vec![Ciboulette2PgAdditionalField::new(
-                Ciboulette2PgTableField::new(
-                    Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key().clone())?,
-                    None,
-                    None,
-                ),
-                Ciboulette2PgAdditionalFieldType::Relationship,
-                rel_opt.one_resource().clone(),
-            )],
-            multi_relationships: BTreeMap::default(),
-        }),
+        CibouletteOptionalData::Null(x) if *x => {
+            let one_resource_key_safe_ident =
+                Ciboulette2PgSafeIdent::try_from(rel_opt.many_resource_key().clone())?;
+
+            Ok(Ciboulette2PgResourceInformations {
+                values: vec![(
+                    rel_opt.many_resource_key().clone(),
+                    // There can only be one id
+                    match rel_opt.one_resource().ids().get(0)? {
+                        CibouletteIdType::Text(_) => Ciboulette2PgValue::Text(None),
+                        CibouletteIdType::Number(_) => Ciboulette2PgValue::Numeric(None),
+                        CibouletteIdType::Uuid(_) => Ciboulette2PgValue::Uuid(None),
+                    },
+                )],
+                single_relationships: vec![Ciboulette2PgResourceSingleRelationships {
+                    type_: rel_opt.one_resource().clone(),
+                    key: rel_opt.many_resource_key().clone(),
+                    rel_details,
+                }],
+                single_relationships_additional_fields: vec![Ciboulette2PgAdditionalField::new(
+                    one_resource_key_safe_ident.clone(),
+                    Ciboulette2PgTableField::new(
+                        Ciboulette2PgSafeIdentSelector::Single(one_resource_key_safe_ident),
+                        None,
+                        None,
+                    ),
+                    Ciboulette2PgAdditionalFieldType::Relationship,
+                    rel_opt.one_resource().clone(),
+                )],
+                multi_relationships: BTreeMap::default(),
+            })
+        }
         CibouletteOptionalData::Null(_) => Ok(Ciboulette2PgResourceInformations::default()),
     }
 }
@@ -74,7 +85,7 @@ pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::One(rel_id)) => {
             acc.values_mut().push((
                 opt.many_resource_key().clone(),
-                Ciboulette2PgValue::from(rel_id.id()),
+                Ciboulette2PgValue::from(rel_id.id().get(0)?),
             ));
         }
         CibouletteOptionalData::Object(CibouletteResourceIdentifierSelector::Many(_)) => {
@@ -89,16 +100,16 @@ pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
                     rel_details.relation_alias().to_string(),
                 ));
             }
-            match opt.one_resource().id_type() {
-                CibouletteIdType::Number => acc.values_mut().push((
+            match opt.one_resource().ids().get(0)? {
+                CibouletteIdType::Number(_) => acc.values_mut().push((
                     opt.many_resource_key().clone(),
                     Ciboulette2PgValue::Numeric(None),
                 )),
-                CibouletteIdType::Uuid => acc.values_mut().push((
+                CibouletteIdType::Uuid(_) => acc.values_mut().push((
                     opt.many_resource_key().clone(),
                     Ciboulette2PgValue::Uuid(None),
                 )),
-                CibouletteIdType::Text => acc.values_mut().push((
+                CibouletteIdType::Text(_) => acc.values_mut().push((
                     opt.many_resource_key().clone(),
                     Ciboulette2PgValue::Text(None),
                 )),
@@ -113,6 +124,9 @@ pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
             }
         }
     }
+    let many_resource_key_safe_ident =
+        Ciboulette2PgSafeIdent::try_from(opt.many_resource_key().clone())?;
+
     acc.single_relationships_mut()
         .push(Ciboulette2PgResourceSingleRelationships {
             type_: opt.one_resource().clone(),
@@ -121,8 +135,9 @@ pub(super) fn extract_data_from_relationship_details_many_to_one<'request>(
         });
     acc.single_relationships_additional_fields_mut()
         .push(Ciboulette2PgAdditionalField::new(
+            many_resource_key_safe_ident.clone(),
             Ciboulette2PgTableField::new(
-                Ciboulette2PgSafeIdent::try_from(opt.many_resource_key().clone())?,
+                Ciboulette2PgSafeIdentSelector::Single(many_resource_key_safe_ident),
                 None,
                 None,
             ),

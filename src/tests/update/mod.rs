@@ -9,8 +9,8 @@ mod update_success;
 async fn test_update<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
-    _test_name: &str,
-    data: &BTreeMap<String, Vec<Uuid>>,
+    name: &str,
+    data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
@@ -37,7 +37,14 @@ async fn test_update<'store>(
         Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
             .unwrap();
     let (query, args) = builder.build().unwrap();
-
+    insta::assert_snapshot!(
+        format!("{}_update_query", name),
+        sqlformat::format(
+            query.as_str(),
+            &sqlformat::QueryParams::None,
+            sqlformat::FormatOptions::default()
+        )
+    );
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut pool.acquire().await.unwrap())
         .await
@@ -54,8 +61,8 @@ async fn test_update<'store>(
 async fn test_update_many_to_one<'store>(
     pool: &mut sqlx::PgPool,
     query_end: &str,
-    _test_name: &str,
-    data: &BTreeMap<String, Vec<Uuid>>,
+    name: &str,
+    data: &BTreeMap<String, Vec<String>>,
 ) -> Vec<sqlx::postgres::PgRow> {
     let ciboulette_store = gen_bag();
     let table_store = gen_table_store(&ciboulette_store);
@@ -78,7 +85,14 @@ async fn test_update_many_to_one<'store>(
         Ciboulette2PgBuilder::gen_update(&ciboulette_store, &table_store, &ciboulette_request)
             .unwrap();
     let (query, args) = builder.build().unwrap();
-
+    insta::assert_snapshot!(
+        format!("{}_rel_update_query", name),
+        sqlformat::format(
+            query.as_str(),
+            &sqlformat::QueryParams::None,
+            sqlformat::FormatOptions::default()
+        )
+    );
     let raw_rows: Vec<sqlx::postgres::PgRow> = sqlx::query_with(&query, args)
         .fetch_all(&mut pool.acquire().await.unwrap())
         .await

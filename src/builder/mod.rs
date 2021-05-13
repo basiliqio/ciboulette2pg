@@ -20,10 +20,10 @@ mod additional_fields;
 mod builder_state;
 mod delete;
 mod extracting_data;
-mod field_name;
 mod insert;
 mod relating_field;
 mod select;
+mod table_field;
 mod update;
 mod utils;
 
@@ -35,7 +35,7 @@ pub mod tests;
 use additional_fields::{Ciboulette2PgAdditionalField, Ciboulette2PgAdditionalFieldType};
 use builder_state::Ciboulette2PgBuilderState;
 use extracting_data::*;
-use field_name::Ciboulette2PgTableField;
+use table_field::Ciboulette2PgTableField;
 
 type Ciboulette2PgBuf = buf_redux::BufWriter<std::io::Cursor<Vec<u8>>>;
 

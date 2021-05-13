@@ -7,9 +7,7 @@ use ciboulette_test_helper::*;
 use serde_json::json;
 use std::convert::TryFrom;
 use url::Url;
-use uuid::Uuid;
 mod delete;
-mod init_values;
 mod inserts;
 mod query_params;
 mod response_elements;
@@ -21,19 +19,13 @@ mod update;
 
 use test_sql::snapshot_table;
 
-fn check_uuid<'store, 'b>(
+fn check_uuid_list<'store, 'b>(
     value: insta::internals::Content,
     _path: insta::internals::ContentPath<'store>,
 ) -> &'b str {
-    assert_eq!(
-        value
-            .as_str()
-            .unwrap()
-            .chars()
-            .filter(|&c| c == '-')
-            .count(),
-        4
-    );
+    for parts in value.as_str().unwrap().split(",") {
+        assert_eq!(parts.chars().filter(|&c| c == '-').count(), 4);
+    }
     "[uuid]"
 }
 
@@ -44,10 +36,10 @@ macro_rules! check_rows {
 
     	insta::assert_json_snapshot!(value,
     	{
-    	    "[].id" => insta::dynamic_redaction(check_uuid),
-    	    "[].related_id" => insta::dynamic_redaction(check_uuid),
-    	    "[].data.article_id" => insta::dynamic_redaction(check_uuid),
-    	    "[].data.people_id" => insta::dynamic_redaction(check_uuid)
+    	    "[].id" => insta::dynamic_redaction(check_uuid_list),
+    	    "[].related_id" => insta::dynamic_redaction(check_uuid_list),
+    	    "[].data.article_id" => insta::dynamic_redaction(check_uuid_list),
+    	    "[].data.people_id" => insta::dynamic_redaction(check_uuid_list)
     	});
 	};
 }
@@ -59,10 +51,10 @@ macro_rules! check_response_elements {
 
     	insta::assert_json_snapshot!(value,
     	{
-    	    "[].identifier.id" => insta::dynamic_redaction(check_uuid),
-    	    "[].related.id" => insta::dynamic_redaction(check_uuid),
-    	    "[].data.article_id" => insta::dynamic_redaction(check_uuid),
-    	    "[].data.people_id" => insta::dynamic_redaction(check_uuid)
+    	    "[].identifier.id" => insta::dynamic_redaction(check_uuid_list),
+    	    "[].related.id" => insta::dynamic_redaction(check_uuid_list),
+    	    "[].data.article_id" => insta::dynamic_redaction(check_uuid_list),
+    	    "[].data.people_id" => insta::dynamic_redaction(check_uuid_list)
     	});
 	};
 }

@@ -10,7 +10,11 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         let mut iter = params.into_iter().peekable();
         while let Some((n, v)) = iter.next() {
             self.insert_ident_name(
-                &Ciboulette2PgTableField::new(Ciboulette2PgSafeIdent::try_from(n)?, None, None),
+                &Ciboulette2PgTableField::new(
+                    Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(n)?),
+                    None,
+                    None,
+                ),
                 &table,
             )?;
             self.buf.write_all(b" = ")?;

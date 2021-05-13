@@ -27,7 +27,6 @@ uuid = { version = "0.8", features = ["v4"] }
 arcstr = { version = "1.0.0", features = [ "std" ] }
 
 [dev-dependencies]
-# ciboulette_test_helper = { path = "../ciboulette/ciboulette_test_helper",  package = "ciboulette_test_helper" }
 ciboulette_test_helper = { git = "https://github.com/basiliqio/ciboulette.git",  branch = "main", package = "ciboulette_test_helper" }
 basiliq_db_test_utils = { git = "https://github.com/basiliqio/basiliq_db_test_utils.git",  branch = "main", package = "basiliq_db_test_utils" }
 basiliq_db_test_proc_macro = { git = "https://github.com/basiliqio/basiliq_db_test_utils.git",  branch = "main", package = "basiliq_db_test_proc_macro" }

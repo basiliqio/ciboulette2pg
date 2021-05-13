@@ -38,10 +38,14 @@ pub(crate) fn fill_relationships_without_data(
 ) -> Result<(), Ciboulette2PgError> {
     match rel_details.relation_option() {
         CibouletteRelationshipOption::ManyToOne(opt) => {
+            let many_resource_key_safe_ident =
+                Ciboulette2PgSafeIdent::try_from(opt.many_resource_key().clone())?;
+
             acc.single_relationships_additional_fields_mut().push(
                 Ciboulette2PgAdditionalField::new(
+                    many_resource_key_safe_ident.clone(),
                     Ciboulette2PgTableField::new(
-                        Ciboulette2PgSafeIdent::try_from(opt.many_resource_key().clone())?,
+                        Ciboulette2PgSafeIdentSelector::Single(many_resource_key_safe_ident),
                         None,
                         None,
                     ),

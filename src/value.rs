@@ -31,6 +31,26 @@ pub enum Ciboulette2PgValue<'request> {
     ArcStr(Option<ArcStr>),
 }
 
+impl<'request> Ciboulette2PgValue<'request> {
+    pub fn from_id_selector(
+        id_selector: &CibouletteIdSelector<'request>
+    ) -> Vec<Ciboulette2PgValue<'request>> {
+        match id_selector {
+            CibouletteIdSelector::Single(x) => vec![Ciboulette2PgValue::from(x)],
+            CibouletteIdSelector::Multi(x) => x.iter().map(Ciboulette2PgValue::from).collect(),
+        }
+    }
+
+    pub fn from_id_type_selector(
+        id_type_selector: &CibouletteIdTypeSelector
+    ) -> Vec<Ciboulette2PgValue<'request>> {
+        match id_type_selector {
+            CibouletteIdTypeSelector::Single(x) => vec![Ciboulette2PgValue::from(x)],
+            CibouletteIdTypeSelector::Multi(x) => x.iter().map(Ciboulette2PgValue::from).collect(),
+        }
+    }
+}
+
 impl<'store> TryFrom<&MessyJsonValue<'store>> for Ciboulette2PgValue<'store> {
     type Error = Ciboulette2PgError;
 
@@ -84,9 +104,19 @@ impl<'request> From<&CibouletteId<'request>> for Ciboulette2PgValue<'request> {
 impl<'request> From<CibouletteIdType> for Ciboulette2PgValue<'request> {
     fn from(val: CibouletteIdType) -> Ciboulette2PgValue<'request> {
         match val {
-            CibouletteIdType::Number => Ciboulette2PgValue::Numeric(None),
-            CibouletteIdType::Text => Ciboulette2PgValue::Text(None),
-            CibouletteIdType::Uuid => Ciboulette2PgValue::Uuid(None),
+            CibouletteIdType::Number(_) => Ciboulette2PgValue::Numeric(None),
+            CibouletteIdType::Text(_) => Ciboulette2PgValue::Text(None),
+            CibouletteIdType::Uuid(_) => Ciboulette2PgValue::Uuid(None),
+        }
+    }
+}
+
+impl<'request> From<&CibouletteIdType> for Ciboulette2PgValue<'request> {
+    fn from(val: &CibouletteIdType) -> Ciboulette2PgValue<'request> {
+        match val {
+            CibouletteIdType::Number(_) => Ciboulette2PgValue::Numeric(None),
+            CibouletteIdType::Text(_) => Ciboulette2PgValue::Text(None),
+            CibouletteIdType::Uuid(_) => Ciboulette2PgValue::Uuid(None),
         }
     }
 }

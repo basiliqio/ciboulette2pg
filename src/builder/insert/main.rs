@@ -35,7 +35,7 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         let mut param_value: Vec<Ciboulette2PgValue<'request>> = Vec::with_capacity(params.len());
         for (n, v) in params.into_iter() {
             param_ident.push(Ciboulette2PgTableField::new(
-                Ciboulette2PgSafeIdent::try_from(n)?,
+                Ciboulette2PgSafeIdentSelector::Single(Ciboulette2PgSafeIdent::try_from(n)?),
                 None,
                 None,
             ));

@@ -102,14 +102,13 @@ use messy_json::{
     MessyJsonValue,
 };
 use response_type::Ciboulette2PgResponseType;
-pub use safe_ident::Ciboulette2PgSafeIdent;
 use safe_ident::Ciboulette2PgSafeIdentModifier;
+pub use safe_ident::{Ciboulette2PgSafeIdent, Ciboulette2PgSafeIdentSelector};
 use safe_ident::{
     CIBOULETTE_CTE_FINAL_MAIN_DATA, CIBOULETTE_DATA_IDENT, CIBOULETTE_DATA_SUFFIX,
     CIBOULETTE_EMPTY_IDENT, CIBOULETTE_ID_IDENT, CIBOULETTE_INSERT_SUFFIX,
     CIBOULETTE_MAIN_IDENTIFIER, CIBOULETTE_RELATED_ID_IDENT, CIBOULETTE_RELATED_TYPE_IDENT,
     CIBOULETTE_REL_PREFIX, CIBOULETTE_SORT_PREFIX, CIBOULETTE_TYPE_IDENT, CIBOULETTE_UPDATE_SUFFIX,
-    TEXT_IDENT,
 };
 use std::borrow::Cow;
 use std::collections::BTreeMap;

@@ -34,7 +34,7 @@ macro_rules! baseline_for_people {
 
 #[basiliq_test(run_migrations)]
 async fn set_one_to_one(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let favorite_color = data.get("favorite_color").unwrap().last().unwrap();
@@ -65,7 +65,7 @@ async fn set_one_to_one(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn set_many_to_one(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().last().unwrap();
     let comment_id = data.get("comments").unwrap().first().unwrap();
@@ -96,7 +96,7 @@ async fn set_many_to_one(mut pool: sqlx::PgPool) {
 
 #[basiliq_test(run_migrations)]
 async fn unset_one_to_one(mut pool: sqlx::PgPool) {
-    let data = init_values::init_values(&mut pool).await;
+    let data = basiliq_db_test_utils::init_values(&mut pool).await;
     baseline_for_people!(pool);
     let people_id = data.get("peoples").unwrap().first().unwrap();
     let raw_rows = test_update(
