@@ -80,7 +80,7 @@ impl<'rows> Ciboulette2PgRow<'rows> {
                 }
                 _ => None,
             };
-            res.push(CibouletteResponseElement::new(
+            res.push(CibouletteResponseElement::build(
                 &store,
                 main_type,
                 identifier,
