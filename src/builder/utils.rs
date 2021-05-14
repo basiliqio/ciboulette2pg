@@ -104,20 +104,38 @@ impl<'request> Ciboulette2PgBuilder<'request> {
         match table.id().len() {
             1 => {
                 let mut table_field = Ciboulette2PgTableField::from(table.id());
+                let id_type = table.id().first().unwrap();
 
                 table_field.set_alias(Some(CIBOULETTE_ID_IDENT));
-
-                Self::insert_ident_inner(&mut self.buf, &table_field, table, Some("TEXT"))?;
+                if let Ciboulette2PgId::Text(_) = id_type {
+                    self.buf.write_all(b"REPLACE(REPLACE(REPLACE(ENCODE(")?;
+                    table_field.name().to_writer(&mut self.buf)?;
+                    self.buf
+                        .write_all(b":: BYTEA, 'base64'), '/', '_'), '+', '-'), '\n', '')")?;
+                    if let Some(alias) = table_field.alias() {
+                        self.buf.write_all(b" AS ")?;
+                        alias.to_writer(&mut self.buf)?;
+                    }
+                } else {
+                    Self::insert_ident_inner(&mut self.buf, &table_field, table, Some("TEXT"))?;
+                }
             }
             _ => {
                 self.buf.write_all(b"CONCAT_WS(',', ")?;
                 let mut id_iter = table.id().iter().peekable();
                 while let Some(id) = id_iter.next() {
-                    Self::write_table_info_inner(&mut self.buf, table)?;
-                    self.buf.write_all(b".")?;
-                    self.buf.write_all(POSTGRES_QUOTE)?;
-                    id.get_ident().to_writer(&mut self.buf)?;
-                    self.buf.write_all(POSTGRES_QUOTE)?;
+                    match id {
+                        Ciboulette2PgId::Text(_) => {
+                            self.buf.write_all(b"REPLACE(REPLACE(REPLACE(ENCODE(")?;
+                            self.insert_indent_name_only(table, id)?;
+                            self.buf.write_all(
+                                b":: BYTEA, 'base64'), '/', '_'), '+', '-'), '\n', '')",
+                            )?;
+                        }
+                        _ => {
+                            self.insert_indent_name_only(table, id)?;
+                        }
+                    }
                     if id_iter.peek().is_some() {
                         self.buf.write_all(b", ")?;
                     }
@@ -126,6 +144,19 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 CIBOULETTE_ID_IDENT.to_writer(&mut self.buf)?;
             }
         }
+        Ok(())
+    }
+
+    pub(crate) fn insert_indent_name_only(
+        &mut self,
+        table: &Ciboulette2PgTable,
+        id: &Ciboulette2PgId,
+    ) -> Result<(), Ciboulette2PgError> {
+        Self::write_table_info_inner(&mut self.buf, table)?;
+        self.buf.write_all(b".")?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
+        id.get_ident().to_writer(&mut self.buf)?;
+        self.buf.write_all(POSTGRES_QUOTE)?;
         Ok(())
     }
 
