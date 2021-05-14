@@ -23,7 +23,7 @@ fn check_uuid_list<'store, 'b>(
     value: insta::internals::Content,
     _path: insta::internals::ContentPath<'store>,
 ) -> &'b str {
-    for parts in value.as_str().unwrap().split(",") {
+    for parts in value.as_str().unwrap().split(',') {
         assert_eq!(parts.chars().filter(|&c| c == '-').count(), 4);
     }
     "[uuid]"

@@ -66,7 +66,7 @@ impl<'rows> Ciboulette2PgRow<'rows> {
             Vec::with_capacity(hint_size.unwrap_or_default());
 
         for row in rows.into_iter() {
-            let id = Cow::Borrowed(row.id);
+            let id = Self::check_identifier(row.id);
             let identifier =
                 CibouletteResourceIdentifierBuilder::new(Some(id), Cow::Borrowed(row.type_));
             let related_identifier = match (row.related_type, row.related_id) {
@@ -89,5 +89,47 @@ impl<'rows> Ciboulette2PgRow<'rows> {
             )?);
         }
         Ok(res)
+    }
+
+    /// Replace non-url safe character by their counter part.
+    ///
+    /// It makes the base64 string URL-safe
+    fn check_identifier(id: &str) -> Cow<'_, str> {
+        let mut fchar: Option<usize> = None;
+
+        for (i, c) in id.chars().enumerate() {
+            match c {
+                '/' | '+' | '\n' => {
+                    fchar = Some(i);
+                    break;
+                }
+                _ => (),
+            }
+        }
+        if let Some(fchar) = fchar {
+            Self::check_identifier_routine(fchar, id)
+        } else {
+            Cow::Borrowed(id)
+        }
+    }
+
+    fn check_identifier_routine(
+        begins_at: usize,
+        id: &str,
+    ) -> Cow<'_, str> {
+        let mut new_id = String::with_capacity(id.len());
+
+        if begins_at > 0 {
+            new_id.push_str(&id[0..begins_at]);
+        }
+        for c in id[begins_at..].chars() {
+            match c {
+                '/' => new_id.push('_'),
+                '+' => new_id.push('-'),
+                '\n' | ' ' => (),
+                _ => new_id.push(c),
+            }
+        }
+        Cow::Owned(new_id)
     }
 }

@@ -108,10 +108,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
 
                 table_field.set_alias(Some(CIBOULETTE_ID_IDENT));
                 if let Ciboulette2PgId::Text(_) = id_type {
-                    self.buf.write_all(b"REPLACE(REPLACE(REPLACE(ENCODE(")?;
+                    self.buf.write_all(b"ENCODE(")?;
                     table_field.name().to_writer(&mut self.buf)?;
-                    self.buf
-                        .write_all(b":: BYTEA, 'base64'), '/', '_'), '+', '-'), '\n', '')")?;
+                    self.buf.write_all(b":: BYTEA, 'base64')")?;
                     if let Some(alias) = table_field.alias() {
                         self.buf.write_all(b" AS ")?;
                         alias.to_writer(&mut self.buf)?;
@@ -126,11 +125,9 @@ impl<'request> Ciboulette2PgBuilder<'request> {
                 while let Some(id) = id_iter.next() {
                     match id {
                         Ciboulette2PgId::Text(_) => {
-                            self.buf.write_all(b"REPLACE(REPLACE(REPLACE(ENCODE(")?;
+                            self.buf.write_all(b"ENCODE(")?;
                             self.insert_indent_name_only(table, id)?;
-                            self.buf.write_all(
-                                b":: BYTEA, 'base64'), '/', '_'), '+', '-'), '\n', '')",
-                            )?;
+                            self.buf.write_all(b":: BYTEA, 'base64')")?;
                         }
                         _ => {
                             self.insert_indent_name_only(table, id)?;
